@@ -1,0 +1,252 @@
+[
+  {
+    "id": "531f4146-8f86-4f50-b3ac-a1fc2aa2aca0",
+    "question": "What is the Wi\u2011Fi SSID for visitors?",
+    "answer": "Connect to 'Corp\u2011Guest', then open a browser and sign in with the temporary code."
+  },
+  {
+    "id": "742bd8d5-beb9-4d40-b490-7ee983f84157",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "9bd34eba-5ab2-458a-a7d5-444d96054d97",
+    "question": "What is the Wi\u2011Fi SSID for visitors?",
+    "answer": "Connect to 'Corp\u2011Guest', then open a browser and sign in with the temporary code."
+  },
+  {
+    "id": "3806d88b-87a8-4675-8706-eb3e9db0be95",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "e5984431-6166-4311-be8a-bea2bbf384d1",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "ccda5472-ba37-4bab-a9dc-49e773a3c090",
+    "question": "Teams meeting recordings not appearing.",
+    "answer": "Recording availability can take up to 24\u202fhours while uploaded to Stream."
+  },
+  {
+    "id": "8e747dd4-4640-4eb9-acb4-10bf88f23fd1",
+    "question": "Outlook cannot open shared mailbox.",
+    "answer": "Make sure the mailbox is auto\u2011mapped in Exchange and restart Outlook."
+  },
+  {
+    "id": "338bbabb-2995-400b-bf3f-be81f8fd43aa",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "becf3974-d39e-434e-8e01-60c8fc893b9b",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "da302d92-67aa-48af-bddf-5d4ca095fab4",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "2501da6c-ea8c-49a3-b11d-7bcf740637ac",
+    "question": "Teams meeting recordings not appearing.",
+    "answer": "Recording availability can take up to 24\u202fhours while uploaded to Stream."
+  },
+  {
+    "id": "c0dc8970-ecf9-43df-93b1-ccde253ee968",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "cd7bfcd9-5c64-4e7b-8ec1-d2da2d38ee19",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "ccf9043f-2ac4-4798-9059-e8bfd5bc41e1",
+    "question": "Teams meeting recordings not appearing.",
+    "answer": "Recording availability can take up to 24\u202fhours while uploaded to Stream."
+  },
+  {
+    "id": "5f1598fc-2580-4b0f-8e72-3a8244eb48b1",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "0f3bc3d8-f515-45f4-a2a8-6ef757bd7b1a",
+    "question": "JIRA issue links not visible.",
+    "answer": "Enable 'Link Issues' permission in the project\u2019s permission scheme."
+  },
+  {
+    "id": "135a1414-9c12-4da3-ba66-6cc6d9071226",
+    "question": "JIRA issue links not visible.",
+    "answer": "Enable 'Link Issues' permission in the project\u2019s permission scheme."
+  },
+  {
+    "id": "57795c9d-138c-46fa-96cd-493bd370e264",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "60a53b6b-1b05-4b3a-82a5-4c1eece08464",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "f62a90cd-209e-46f4-813d-b1f85e306a7d",
+    "question": "Outlook cannot open shared mailbox.",
+    "answer": "Make sure the mailbox is auto\u2011mapped in Exchange and restart Outlook."
+  },
+  {
+    "id": "6fedd6ae-b7c3-43b5-ac9d-3b042bf7183b",
+    "question": "How do I reset my Active Directory password?",
+    "answer": "Use the self\u2011service portal at /reset. If locked out, phone Service Desk."
+  },
+  {
+    "id": "3c5ba646-40d5-46db-a2c4-74e8e55033ab",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "9f2c09e8-ee25-4f7c-bffd-845b2c35db37",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "8d1f1cda-4212-4bb5-9594-d0d4019ce8f0",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "63eda5ee-5173-4209-99a2-b97a14bdfb4e",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "da253c8b-dbc7-4001-81b8-d954c09d05c4",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "d3faa9aa-f610-4678-9d7c-385b4ea01c23",
+    "question": "JIRA issue links not visible.",
+    "answer": "Enable 'Link Issues' permission in the project\u2019s permission scheme."
+  },
+  {
+    "id": "79c6efc3-f768-475b-b580-c0afde94960c",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "40de3b05-e65e-4a94-8d4e-901e40dfa05e",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "195a8544-e870-43b1-bcf8-dd20d9be5fb6",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "84c148b5-1323-4e70-b1a6-f229db524280",
+    "question": "How do I reset my Active Directory password?",
+    "answer": "Use the self\u2011service portal at /reset. If locked out, phone Service Desk."
+  },
+  {
+    "id": "52ec7852-1a89-439c-9f88-5146308e09a0",
+    "question": "VPN client fails to connect with error 720.",
+    "answer": "Remove and reinstall the VPN adapter, then retry. See KB\u2011VPN\u2011720 for full steps."
+  },
+  {
+    "id": "3ed510b0-c015-43ea-ab73-493e84771e8b",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "508cb356-e15f-4c0c-8f10-40efc1c4164b",
+    "question": "Outlook cannot open shared mailbox.",
+    "answer": "Make sure the mailbox is auto\u2011mapped in Exchange and restart Outlook."
+  },
+  {
+    "id": "969d1dfa-ae54-4e67-b486-a5fbd55acc01",
+    "question": "What is the Wi\u2011Fi SSID for visitors?",
+    "answer": "Connect to 'Corp\u2011Guest', then open a browser and sign in with the temporary code."
+  },
+  {
+    "id": "b59dd33f-4426-43a7-82f8-a77a2185200b",
+    "question": "How do I reset my Active Directory password?",
+    "answer": "Use the self\u2011service portal at /reset. If locked out, phone Service Desk."
+  },
+  {
+    "id": "52649275-ed63-421d-9bd5-f8851a544c9f",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "fb738bbe-b042-493f-9ad1-7e65549adcdf",
+    "question": "Confluence page edit button missing.",
+    "answer": "Check if you still have edit rights in the space. Contact the space owner."
+  },
+  {
+    "id": "dc68db4e-6607-4e55-8231-f46bffbc706a",
+    "question": "How do I reset my Active Directory password?",
+    "answer": "Use the self\u2011service portal at /reset. If locked out, phone Service Desk."
+  },
+  {
+    "id": "2b76bea9-6ea2-4a3e-8bb9-5090b9798f53",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "95a9a647-8893-404e-8387-245bf03cde33",
+    "question": "Outlook cannot open shared mailbox.",
+    "answer": "Make sure the mailbox is auto\u2011mapped in Exchange and restart Outlook."
+  },
+  {
+    "id": "9509d56d-bc29-41f8-9adf-356bfdf46ac8",
+    "question": "JIRA issue links not visible.",
+    "answer": "Enable 'Link Issues' permission in the project\u2019s permission scheme."
+  },
+  {
+    "id": "a244e15e-e08c-4752-9e7e-b48b66442800",
+    "question": "How do I reset my Active Directory password?",
+    "answer": "Use the self\u2011service portal at /reset. If locked out, phone Service Desk."
+  },
+  {
+    "id": "29b1554f-7017-441f-94a3-f8eeb6754b63",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "2ad38e65-b389-461c-aa91-fe2f73cf0483",
+    "question": "Outlook cannot open shared mailbox.",
+    "answer": "Make sure the mailbox is auto\u2011mapped in Exchange and restart Outlook."
+  },
+  {
+    "id": "c2eadba6-ce87-4c2b-a030-9d529c7590f1",
+    "question": "Zoom licence upgrade needed.",
+    "answer": "Managers can assign \u2018Pro\u2019 licences in the admin portal at zoom.example.com."
+  },
+  {
+    "id": "476334c8-05da-4a5d-972e-268c631c2d65",
+    "question": "Laptop battery health is poor.",
+    "answer": "Raise a hardware replacement ticket; warranty replacements are approved automatically."
+  },
+  {
+    "id": "4c1377db-a199-49bd-81f7-f7c11ad2dab3",
+    "question": "VPN client fails to connect with error 720.",
+    "answer": "Remove and reinstall the VPN adapter, then retry. See KB\u2011VPN\u2011720 for full steps."
+  },
+  {
+    "id": "81bfd3d5-c09e-4723-ad90-d6bae20b42ae",
+    "question": "How do I request new software?",
+    "answer": "Submit a request in ServiceNow under Catalog\u00a0> Software."
+  },
+  {
+    "id": "f83f91a2-0dcf-4409-aee7-312b0b3a284c",
+    "question": "Teams meeting recordings not appearing.",
+    "answer": "Recording availability can take up to 24\u202fhours while uploaded to Stream."
+  }
+]
