@@ -9,7 +9,17 @@
 # Clone and setup
 git clone https://github.com/dextersjab/agentic-course-case-study-0
 cd agentic-course-case-study-0
-# Setup with uv (recommended)\nuv venv\nsource .venv/bin/activate  # On Windows: .venv\\Scripts\\activate\nuv pip install -r requirements.txt\n\n# Alternative: traditional pip\n# pip install -r requirements.txt
+# Setup with uv (recommended)
+
+uv venv
+source .venv/bin/activate
+
+# On Windows: .venv\Scripts\activate
+
+uv pip install -r requirements.txt
+
+# Alternative: traditional pip
+# pip install -r requirements.txt
 
 # Start the mock API
 uvicorn api.main:app --reload
