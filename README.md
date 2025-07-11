@@ -1,6 +1,6 @@
 # 🎯 HelpHub – IT Support Chatbot Case Study
 
-> **Enterprise Agent Development Course by Dexter Awoyemi**  
+> **Enterprise Agent Development Course**  
 > A comprehensive case study for building realistic AI agents using LangGraph in IT support environments
 
 ## 🚀 Quick Start
@@ -41,32 +41,24 @@ pytest -q
 
 ```mermaid
 graph TD
-    A[User Query] --> B[HelpHub Agent]
-    B --> C{Knowledge Base Search}
-    C -->|Found| D[Return KB Answer]
-    C -->|Not Found| E[Question Loop]
-    E --> F{Need More Info?}
-    F -->|Yes| G[Ask Clarifying Questions]
-    G --> H[Process User Response]
-    H --> I{Topic Change/Interruption?}
-    I -->|Yes| J[Handle Context Switch]
-    J --> E
-    I -->|No| F
-    F -->|No| K[NLP Categorization]
-    K --> L[Priority Assessment]
-    L --> M[Queue Assignment]
-    M --> N[ServiceHub Integration]
-    N --> O[Ticket Created]
-    O --> P[User Notification]
+    A[User Query] --> B[KB Search]
+    B -.->|Found| C[Return Answer]
+    B -.->|Not Found| D[Clarification]
+    D -.->|Sufficient Info| E[Categorization]
+    D -.->|Need More Info| D
+    E --> F[Priority Assessment] 
+    F --> G[Queue Assignment]
+    G --> H[ServiceHub Integration]
+    H --> I[Ticket Created]
+    I --> J[User Notification]
     
-    Q[ServiceHub] --> N
-    R[Teams Webhook] --> S[Escalation Alerts]
-    T[Knowledge Base] --> C
+    K[ServiceHub] --> H
+    L[Knowledge Base] --> B
     
-    style B stroke:#0277bd,stroke-width:3px
-    style E stroke:#f57c00,stroke-width:3px
-    style N stroke:#7b1fa2,stroke-width:3px
-    style T stroke:#388e3c,stroke-width:3px
+    style B stroke:#388e3c,stroke-width:3px
+    style D stroke:#f57c00,stroke-width:3px
+    style H stroke:#7b1fa2,stroke-width:3px
+    style L stroke:#388e3c,stroke-width:3px
 ```
 
 ## 3. Core Workflows
@@ -98,32 +90,25 @@ sequenceDiagram
     H->>U: "Ticket #12345 created for laptop repair. Now, what's the email issue?"
 ```
 
-### 3.2 Complex Scenario Handling
+### 3.2 LangGraph Decision Flow
 
 ```mermaid
 flowchart TD
-    A[User Input] --> B{Input Type}
-    B -->|Vague| C[Question Loop]
-    B -->|Multi-Issue| D[Issue Decomposition]
-    B -->|Clear| E[Direct Processing]
+    A[User Input] --> B[Clarification Node]
+    B -.->|Vague| B
+    B -.->|Multi-Issue| C[Issue Decomposition]
+    B -.->|Clear| D[Direct Processing]
     
-    C --> F[Ask Clarifying Questions]
-    F --> G{Response Quality}
-    G -->|Good| H[Continue Processing]
-    G -->|Unclear| I[Rephrase Question]
-    G -->|Topic Change| J[Handle Interruption]
+    C -.->|Primary Issue| D
+    C -.->|Secondary Issues| E[Queue for Later]
     
-    D --> K[Prioritize Issues]
-    K --> L[Address Primary Issue]
-    L --> M[Queue Secondary Issues]
+    D --> F[Categorization]
+    F --> G[Priority Assessment]
+    G --> H[Ticket Creation]
     
-    J --> N[Save Context]
-    N --> O[Process New Topic]
-    O --> P[Return to Original]
-    
-    style C stroke:#ff8f00,stroke-width:3px
-    style J stroke:#d32f2f,stroke-width:3px
-    style D stroke:#1976d2,stroke-width:3px
+    style B stroke:#ff8f00,stroke-width:3px
+    style C stroke:#1976d2,stroke-width:3px
+    style F stroke:#388e3c,stroke-width:3px
 ```
 
 ## 4. Realistic Ticket Scenarios
@@ -163,24 +148,21 @@ The system uses a multi-stage NLP pipeline to categorize incoming tickets:
 | Access | "permissions", "account", "locked out", "can't access", "reset" | 0.85 |
 | Billing | "invoice", "cost", "license", "payment", "subscription" | 0.65 |
 
-### 5.2 Priority Assessment Matrix
+### 5.2 Priority Assessment Logic
 
 ```mermaid
 graph LR
     A[Incident Description] --> B[Keyword Analysis]
-    B --> C{Severity Keywords}
-    C -->|cannot, down, outage, urgent| D[P1 - Critical]
-    C -->|slow, warning, error, intermittent| E[P2 - High]
-    C -->|request, question, when possible| F[P3 - Medium]
+    B -.->|cannot, down, outage, urgent| C[P1 - Critical]
+    B -.->|slow, warning, error, intermittent| D[P2 - High] 
+    B -.->|request, question, when possible| E[P3 - Medium]
     
-    D --> G[Business Impact Assessment]
-    E --> G
-    F --> G
+    C --> F[Final Priority]
+    D --> F
+    E --> F
     
-    G --> H[Final Priority]
-    
-    style D stroke:#d32f2f,stroke-width:3px
-    style E stroke:#f57c00,stroke-width:3px
+    style C stroke:#d32f2f,stroke-width:3px
+    style D stroke:#f57c00,stroke-width:3px
     style F stroke:#388e3c,stroke-width:3px
 ```
 
@@ -189,18 +171,16 @@ graph LR
 ```mermaid
 graph TD
     A[Agent Request] --> B[Rate Limiter]
-    B --> C{Within Limits?}
-    C -->|No| D[Queue Request]
-    C -->|Yes| E[Data Privacy Check]
-    E --> F[PII Detection API]
-    F --> G{PII Found?}
-    G -->|Yes| H[Mask/Anonymize]
-    G -->|No| I[Process Request]
-    H --> I
+    B -.->|Exceeded| C[Queue Request]
+    B -.->|Within Limits| D[Data Privacy Check]
+    D --> E[PII Detection API]
+    E -.->|PII Found| F[Mask/Anonymize]
+    E -.->|No PII| G[Process Request]
+    F --> G
     
     style B stroke:#f57c00,stroke-width:3px
-    style F stroke:#388e3c,stroke-width:3px
-    style H stroke:#d32f2f,stroke-width:3px
+    style E stroke:#388e3c,stroke-width:3px
+    style F stroke:#d32f2f,stroke-width:3px
 ```
 
 ## 6. User Journey Examples
@@ -333,7 +313,7 @@ SERVICEHUB_BASE_URL=http://localhost:8000
 
 ## 10. Success Metrics & KPIs
 
-### 10.1 Student Success Metrics
+### 10.1 Participant Success Metrics
 
 | Metric | Target | Measurement |
 |--------|---------|-------------|
@@ -342,11 +322,11 @@ SERVICEHUB_BASE_URL=http://localhost:8000
 | Multi-turn Conversation Score | ≥75% | Conversation quality rubric |
 | Edge Case Handling | ≥70% | Interruption/topic change scenarios |
 
-### 10.2 Learning Objectives Assessment
+### 10.2 Assessment Flow
 
 ```mermaid
 graph TD
-    A[Student Submission] --> B[Automated Tests]
+    A[Submission] --> B[Automated Tests]
     B --> C[Categorization Accuracy]
     B --> D[Priority Accuracy]
     B --> E[Conversation Quality]
@@ -357,13 +337,12 @@ graph TD
     E --> G
     F --> G
     
-    G --> H{Pass Threshold?}
-    H -->|≥80%| I[Course Complete]
-    H -->|<80%| J[Remediation Required]
+    G -.->|≥80%| H[Requirements Met]
+    G -.->|<80%| I[Additional Work Needed]
     
     style G stroke:#388e3c,stroke-width:3px
-    style I stroke:#4caf50,stroke-width:3px
-    style J stroke:#d32f2f,stroke-width:3px
+    style H stroke:#4caf50,stroke-width:3px
+    style I stroke:#d32f2f,stroke-width:3px
 ```
 
 ## 11. Implementation Roadmap
@@ -390,7 +369,7 @@ graph TD
 - [ ] Comprehensive test dataset
 - [ ] Automated scoring system
 - [ ] Edge case scenarios
-- [ ] Student assessment tools
+- [ ] Participant assessment tools
 
 ## 12. Project Structure
 
@@ -416,11 +395,11 @@ agentic-course-case-study-0/
 │   ├── test_conversation.py
 │   └── test_integration.py
 ├── docs/
-│   └── course_guide.md       # Student instructions
+│   └── course_guide.md       # Participant instructions
 └── requirements.txt
 ```
 
-## 13. Student Learning Path
+## 13. Participant Learning Path
 
 ### 13.1 Prerequisites
 - **Python Proficiency**: Comfortable with Python programming
@@ -436,7 +415,7 @@ agentic-course-case-study-0/
 
 ### 13.3 Success Criteria
 
-Students will demonstrate mastery by:
+Participants will demonstrate mastery by:
 - Building a functional multi-turn conversation agent
 - Achieving ≥80% accuracy on categorization and priority assessment
 - Handling interruptions and topic changes gracefully
@@ -497,7 +476,7 @@ Students will demonstrate mastery by:
 
 ### 16.2 Contributing
 
-Students are encouraged to:
+Participants are encouraged to:
 1. Fork the repository
 2. Implement required features
 3. Add comprehensive tests
@@ -507,7 +486,7 @@ Students are encouraged to:
 
 ## 🎓 About This Course
 
-This case study is part of the **Enterprise Agent Development Course** by **Dexter Awoyemi**, focusing on building practical AI agents that handle real-world business scenarios. This particular case study emphasizes **linear LangGraph workflows** with intelligent conversation handling, distinguishing it from other case studies that focus on ReAct loops and complex workflow orchestration.
+This case study is part of the **Enterprise Agent Development Course**, focusing on building practical AI agents that handle real-world business scenarios. This particular case study emphasizes **linear LangGraph workflows** with intelligent conversation handling, distinguishing it from other case studies that focus on ReAct loops and complex workflow orchestration.
 
 ### 🚀 Next Steps
 
