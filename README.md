@@ -9,7 +9,7 @@
 # Clone and setup
 git clone https://github.com/dextersjab/agentic-course-case-study-0
 cd agentic-course-case-study-0
-pip install -r requirements.txt
+# Setup with uv (recommended)\nuv venv\nsource .venv/bin/activate  # On Windows: .venv\\Scripts\\activate\nuv pip install -r requirements.txt\n\n# Alternative: traditional pip\n# pip install -r requirements.txt
 
 # Start the mock API
 uvicorn api.main:app --reload
@@ -63,10 +63,10 @@ graph TD
     R[Teams Webhook] --> S[Escalation Alerts]
     T[Knowledge Base] --> C
     
-    style B fill:#e1f5fe
-    style E fill:#fff3e0
-    style N fill:#f3e5f5
-    style T fill:#e8f5e8
+    style B stroke:#0277bd,stroke-width:3px
+    style E stroke:#f57c00,stroke-width:3px
+    style N stroke:#7b1fa2,stroke-width:3px
+    style T stroke:#388e3c,stroke-width:3px
 ```
 
 ## 3. Core Workflows
@@ -121,9 +121,9 @@ flowchart TD
     N --> O[Process New Topic]
     O --> P[Return to Original]
     
-    style C fill:#ffecb3
-    style J fill:#ffcdd2
-    style D fill:#e1f5fe
+    style C stroke:#ff8f00,stroke-width:3px
+    style J stroke:#d32f2f,stroke-width:3px
+    style D stroke:#1976d2,stroke-width:3px
 ```
 
 ## 4. Realistic Ticket Scenarios
@@ -169,9 +169,9 @@ The system uses a multi-stage NLP pipeline to categorize incoming tickets:
 graph LR
     A[Incident Description] --> B[Keyword Analysis]
     B --> C{Severity Keywords}
-    C -->|"cannot", "down", "outage", "urgent"| D[P1 - Critical]
-    C -->|"slow", "warning", "error", "intermittent"| E[P2 - High]
-    C -->|"request", "question", "when possible"| F[P3 - Medium]
+    C -->|cannot, down, outage, urgent| D[P1 - Critical]
+    C -->|slow, warning, error, intermittent| E[P2 - High]
+    C -->|request, question, when possible| F[P3 - Medium]
     
     D --> G[Business Impact Assessment]
     E --> G
@@ -179,9 +179,9 @@ graph LR
     
     G --> H[Final Priority]
     
-    style D fill:#ffcdd2
-    style E fill:#ffe0b2
-    style F fill:#dcedc8
+    style D stroke:#d32f2f,stroke-width:3px
+    style E stroke:#f57c00,stroke-width:3px
+    style F stroke:#388e3c,stroke-width:3px
 ```
 
 ### 5.3 Built-in Constraints
@@ -198,9 +198,9 @@ graph TD
     G -->|No| I[Process Request]
     H --> I
     
-    style B fill:#fff3e0
-    style F fill:#e8f5e8
-    style H fill:#ffebee
+    style B stroke:#f57c00,stroke-width:3px
+    style F stroke:#388e3c,stroke-width:3px
+    style H stroke:#d32f2f,stroke-width:3px
 ```
 
 ## 6. User Journey Examples
@@ -255,8 +255,8 @@ graph LR
     B --> F[Assignment Groups]
     B --> G[SLA Rules]
     
-    style B fill:#e3f2fd
-    style C fill:#fff3e0
+    style B stroke:#1976d2,stroke-width:3px
+    style C stroke:#f57c00,stroke-width:3px
 ```
 
 ### 7.2 API Integration Points
@@ -361,9 +361,9 @@ graph TD
     H -->|≥80%| I[Course Complete]
     H -->|<80%| J[Remediation Required]
     
-    style G fill:#e8f5e8
-    style I fill:#c8e6c9
-    style J fill:#ffcdd2
+    style G stroke:#388e3c,stroke-width:3px
+    style I stroke:#4caf50,stroke-width:3px
+    style J stroke:#d32f2f,stroke-width:3px
 ```
 
 ## 11. Implementation Roadmap
