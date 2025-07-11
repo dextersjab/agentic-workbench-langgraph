@@ -37,84 +37,45 @@ pytest -q
 - **Improve** first-contact resolution rates with intelligent KB utilization
 - **Handle** interruptions, topic changes, and escalation requests seamlessly
 
-## 2. LangGraph Workflow Architecture
+## 2. LangGraph Workflow
 
 ```mermaid
 graph TD
-    A[User Query] --> B[Agent Analysis]
-    B -.->|Clear Issue| C[Categorization]
-    B -.->|Needs KB Context| D[KB Search Tool]
-    B -.->|Need Clarification| E[Ask Questions]
+    A[User Input] --> B[Agent Node]
+    B -.->|Need Clarification| B
+    B -.->|Can Answer from KB| C[Provide KB Answer]
+    B -.->|Need Ticket| D[Categorization]
+    B -.->|Multi-Issue| E[Issue Decomposition]
     
-    D --> F[Apply KB Knowledge]
-    F -.->|Resolved| G[Return Answer] 
-    F -.->|Still Need Ticket| C
+    E -.->|Primary Issue| D
+    E -.->|Secondary Issues| F[Queue for Later]
     
-    E -.->|Got Info| B
-    E -.->|Still Unclear| E
+    D --> G[Priority Assessment]
+    G --> H[Queue Assignment]
+    H --> I[ServiceHub Integration]
+    I --> J[Ticket Created]
     
-    C --> H[Priority Assessment]
-    H --> I[Queue Assignment] 
-    I --> J[ServiceHub Integration]
-    J --> K[Ticket Created]
-    K --> L[User Notification]
-    
-    M[ServiceHub] --> J
-    N[Knowledge Base] --> D
+    K[KB Data] --> B
+    L[ServiceHub] --> I
     
     style B stroke:#1976d2,stroke-width:3px
     style D stroke:#388e3c,stroke-width:3px
-    style E stroke:#f57c00,stroke-width:3px
-    style J stroke:#7b1fa2,stroke-width:3px
+    style I stroke:#7b1fa2,stroke-width:3px
 ```
 
-## 3. Core Workflows
+### 3.1 Agent Node Logic
 
-### 3.1 Intelligent Conversation Flow
+The core Agent Node receives:
+- **User input** (current message)
+- **Conversation history** (previous turns)
+- **KB data** (relevant FAQ articles as JSON context)
+- **User context** (role, urgency, etc.)
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant H as HelpHub Agent
-    participant KB as Knowledge Base
-    participant SH as ServiceHub
-    
-    U->>H: "My computer isn't working"
-    Note over H: Agent analyzes - vague issue, needs clarification
-    H->>U: "What happens when you try to turn it on?"
-    U->>H: "The screen stays black"
-    H->>U: "Do you see any lights on the laptop?"
-    U->>H: "No lights at all"
-    Note over H: Clear hardware failure, skip KB - emergency ticket needed
-    H->>U: "Actually, I need to check email first"
-    Note over H: Handle interruption gracefully
-    H->>U: "I understand. Let me quickly create a P1 hardware ticket for your laptop, then help with email"
-    Note over H: Direct categorization: Hardware P1
-    H->>SH: Create ticket: Hardware, P1, "laptop no power"
-    SH->>H: Ticket #HW-12345
-    H->>U: "P1 ticket #HW-12345 created - technician will contact you within 2 hours. Now, what's the email issue?"
-```
-
-### 3.2 LangGraph Decision Flow
-
-```mermaid
-flowchart TD
-    A[User Input] --> B[Clarification Node]
-    B -.->|Vague| B
-    B -.->|Multi-Issue| C[Issue Decomposition]
-    B -.->|Clear| D[Direct Processing]
-    
-    C -.->|Primary Issue| D
-    C -.->|Secondary Issues| E[Queue for Later]
-    
-    D --> F[Categorization]
-    F --> G[Priority Assessment]
-    G --> H[Ticket Creation]
-    
-    style B stroke:#ff8f00,stroke-width:3px
-    style C stroke:#1976d2,stroke-width:3px
-    style F stroke:#388e3c,stroke-width:3px
-```
+The LLM then decides:
+- Return answer using KB data
+- Ask clarifying questions  
+- Proceed to ticket creation
+- Handle multiple issues
 
 ## 4. Realistic Ticket Scenarios
 
@@ -188,37 +149,28 @@ graph TD
     style F stroke:#d32f2f,stroke-width:3px
 ```
 
-## 6. Intelligent KB Tool Usage
+## 6. Knowledge Base Integration
 
-### 6.1 When the Agent Uses KB
+The agent receives relevant KB articles as JSON context. Sample KB data structure:
 
-The LLM agent intelligently decides when to leverage the knowledge base:
-
-| Scenario | Agent Decision | Reasoning |
-|----------|---------------|-----------|
-| "Server room flooding!" | Skip KB, immediate P1 ticket | Emergency - no time for KB search |
-| "How do I reset my password?" | Search KB first | Common question likely in KB |
-| "Email is slow sometimes" | Check KB for email troubleshooting | KB might have diagnostic steps |
-| "My laptop won't start, no lights" | Skip KB, direct to hardware ticket | Clear hardware failure symptoms |
-| "I can't access the thing" | Ask clarification first | Too vague for effective KB search |
-
-### 6.2 KB Search Strategies
-
-```mermaid
-graph TD
-    A[User Query] --> B[Agent Analysis]
-    B -.->|Common Question Pattern| C[KB Search Tool]
-    B -.->|Emergency Keywords| D[Skip KB, Direct Ticket]
-    B -.->|Vague Description| E[Clarify First]
-    
-    C -.->|Helpful Result| F[Provide KB Answer]
-    C -.->|Incomplete| G[KB + Ticket Creation]
-    C -.->|No Results| H[Direct to Categorization]
-    
-    style C stroke:#388e3c,stroke-width:3px
-    style D stroke:#d32f2f,stroke-width:3px
-    style E stroke:#f57c00,stroke-width:3px
+```json
+{
+  "articles": [
+    {
+      "id": "password-reset",
+      "question": "How do I reset my password?",
+      "answer": "Use the self-service portal at company.com/reset..."
+    },
+    {
+      "id": "email-slow", 
+      "question": "Email is slow",
+      "answer": "Try clearing cache, check network connection..."
+    }
+  ]
+}
 ```
+
+The LLM can reference this data to provide instant answers for common questions.
 
 ## 7. User Journey Examples
 
@@ -232,12 +184,10 @@ User: "I have it plugged in"
 Agent: "I've created ticket #12345 for a hardware repair. This appears to be a power supply issue. A technician will contact you within 2 hours."
 ```
 
-### 7.2 Intelligent KB Usage Journey
+### 7.2 KB Data Usage Journey
 ```
 User: "How do I reset my password?"
-Agent: "Let me check our knowledge base for the most current password reset instructions."
-[Agent searches KB: "password reset"]
-Agent: "I found the steps! You can use our self-service portal at company.com/reset. If your account is locked, you'll need to call the service desk at ext. 4357. Would you like me to walk you through the self-service process?"
+Agent: "I can help with that! You can use our self-service portal at company.com/reset. If your account is locked, you'll need to call the service desk at ext. 4357. Would you like me to walk you through the self-service process?"
 User: "Yes please"
 Agent: "Great! First, go to company.com/reset and enter your username..."
 ```
