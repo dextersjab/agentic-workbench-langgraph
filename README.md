@@ -1,27 +1,520 @@
-# HelpHub – IT Support Chatbot Case Study
+# 🎯 HelpHub – IT Support Chatbot Case Study
 
-Clone the repo, then:
+> **Enterprise Agent Development Course by Dexter Awoyemi**  
+> A comprehensive case study for building realistic AI agents using LangGraph in IT support environments
+
+## 🚀 Quick Start
 
 ```bash
+# Clone and setup
+git clone https://github.com/dextersjab/agentic-course-case-study-0
+cd agentic-course-case-study-0
 pip install -r requirements.txt
+
+# Start the mock API
 uvicorn api.main:app --reload
 ```
 
-Open <http://localhost:8000/docs> for Swagger‑UI.
+Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
 
-## Run Tests
+## 🧪 Testing
 
 ```bash
 pytest -q
 ```
 
-## Folder Structure
-| Path | Purpose |
-|------|---------|
-| /api | FastAPI mock services |
-| /kb  | Knowledge base articles |
-| /data | Seed tickets for classification practice |
-| /tests | Autograder suite |
-| /docs | PRD and diagrams |
+---
 
-Enjoy!
+# 📋 Product Requirements Document (PRD)
+
+## 1. Executive Summary
+
+**HelpHub** is an AI-powered IT support chatbot designed to automatically **categorize**, **prioritize**, and **route** support tickets while providing instant knowledge base assistance. This system serves as a comprehensive case study for building enterprise-grade AI agents using **LangGraph** that handle real-world IT support scenarios through intelligent multi-turn conversations.
+
+### Key Objectives
+- **Automate** ticket categorization and routing through conversational AI
+- **Reduce** mean time to resolution (MTTR) via intelligent question loops
+- **Improve** first-contact resolution rates with dynamic KB search
+- **Handle** interruptions, topic changes, and escalation requests seamlessly
+
+## 2. LangGraph Workflow Architecture
+
+```mermaid
+graph TD
+    A[User Query] --> B[HelpHub Agent]
+    B --> C{Knowledge Base Search}
+    C -->|Found| D[Return KB Answer]
+    C -->|Not Found| E[Question Loop]
+    E --> F{Need More Info?}
+    F -->|Yes| G[Ask Clarifying Questions]
+    G --> H[Process User Response]
+    H --> I{Topic Change/Interruption?}
+    I -->|Yes| J[Handle Context Switch]
+    J --> E
+    I -->|No| F
+    F -->|No| K[NLP Categorization]
+    K --> L[Priority Assessment]
+    L --> M[Queue Assignment]
+    M --> N[ServiceHub Integration]
+    N --> O[Ticket Created]
+    O --> P[User Notification]
+    
+    Q[ServiceHub] --> N
+    R[Teams Webhook] --> S[Escalation Alerts]
+    T[Knowledge Base] --> C
+    
+    style B fill:#e1f5fe
+    style E fill:#fff3e0
+    style N fill:#f3e5f5
+    style T fill:#e8f5e8
+```
+
+## 3. Core Workflows
+
+### 3.1 Multi-Turn Conversation Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant H as HelpHub Agent
+    participant KB as Knowledge Base
+    participant NLP as Categorization Engine
+    participant SH as ServiceHub
+    
+    U->>H: "My computer isn't working"
+    H->>KB: Search for similar issues
+    KB->>H: No specific match found
+    H->>U: "What happens when you try to turn it on?"
+    U->>H: "The screen stays black"
+    H->>U: "Do you see any lights on the laptop?"
+    U->>H: "No lights at all"
+    H->>U: "Actually, I need to check email first"
+    Note over H: Handle interruption
+    H->>U: "I can help with both. Let me create a ticket for the laptop issue first, then help with email"
+    H->>NLP: Categorize: "laptop black screen no lights"
+    NLP->>H: Category: Hardware, Priority: P1
+    H->>SH: Create ticket
+    SH->>H: Ticket #12345
+    H->>U: "Ticket #12345 created for laptop repair. Now, what's the email issue?"
+```
+
+### 3.2 Complex Scenario Handling
+
+```mermaid
+flowchart TD
+    A[User Input] --> B{Input Type}
+    B -->|Vague| C[Question Loop]
+    B -->|Multi-Issue| D[Issue Decomposition]
+    B -->|Clear| E[Direct Processing]
+    
+    C --> F[Ask Clarifying Questions]
+    F --> G{Response Quality}
+    G -->|Good| H[Continue Processing]
+    G -->|Unclear| I[Rephrase Question]
+    G -->|Topic Change| J[Handle Interruption]
+    
+    D --> K[Prioritize Issues]
+    K --> L[Address Primary Issue]
+    L --> M[Queue Secondary Issues]
+    
+    J --> N[Save Context]
+    N --> O[Process New Topic]
+    O --> P[Return to Original]
+    
+    style C fill:#ffecb3
+    style J fill:#ffcdd2
+    style D fill:#e1f5fe
+```
+
+## 4. Realistic Ticket Scenarios
+
+### 4.1 Vague Descriptions
+| User Input | Agent Response | Expected Outcome |
+|------------|---------------|------------------|
+| "Everything is broken" | "I'm sorry to hear that. Can you tell me what specifically isn't working?" | Question loop to clarify |
+| "My computer is slow" | "When did you first notice the slowness? Is it when starting up, opening programs, or browsing?" | Categorize as Performance issue |
+| "I can't work" | "What's preventing you from working? Is it a login issue, application problem, or hardware failure?" | Multiple clarifying questions |
+
+### 4.2 Multi-Category Issues
+| Scenario | Categorization Challenge | Expected Handling |
+|----------|------------------------|-------------------|
+| "Can't login to email on new laptop" | Access + Hardware setup | Decompose into two tickets |
+| "VPN won't connect and now Teams is down" | Network + Software | Prioritize VPN (likely root cause) |
+| "Printer offline and need software installed" | Hardware + Software | Handle separately, software can wait |
+
+### 4.3 Interruption Scenarios
+| Original Issue | Interruption | Expected Behavior |
+|---------------|-------------|------------------|
+| Password reset request | "Actually, I need to join a meeting first" | Save context, prioritize meeting access |
+| Hardware repair | "Wait, is the help desk open now?" | Answer query, return to hardware issue |
+| Software installation | "This is urgent, my presentation is in 10 minutes" | Escalate priority, expedite handling |
+
+## 5. Technical Components
+
+### 5.1 Categorization Engine
+
+The system uses a multi-stage NLP pipeline to categorize incoming tickets:
+
+| Category | Common Phrases | Confidence Threshold |
+|----------|---------------|---------------------|
+| Hardware | "laptop", "battery", "printer", "black screen", "won't turn on" | 0.75 |
+| Software | "password", "login", "application", "install", "error message" | 0.80 |
+| Network | "wifi", "vpn", "connection", "internet", "can't connect" | 0.70 |
+| Access | "permissions", "account", "locked out", "can't access", "reset" | 0.85 |
+| Billing | "invoice", "cost", "license", "payment", "subscription" | 0.65 |
+
+### 5.2 Priority Assessment Matrix
+
+```mermaid
+graph LR
+    A[Incident Description] --> B[Keyword Analysis]
+    B --> C{Severity Keywords}
+    C -->|"cannot", "down", "outage", "urgent"| D[P1 - Critical]
+    C -->|"slow", "warning", "error", "intermittent"| E[P2 - High]
+    C -->|"request", "question", "when possible"| F[P3 - Medium]
+    
+    D --> G[Business Impact Assessment]
+    E --> G
+    F --> G
+    
+    G --> H[Final Priority]
+    
+    style D fill:#ffcdd2
+    style E fill:#ffe0b2
+    style F fill:#dcedc8
+```
+
+### 5.3 Built-in Constraints
+
+```mermaid
+graph TD
+    A[Agent Request] --> B[Rate Limiter]
+    B --> C{Within Limits?}
+    C -->|No| D[Queue Request]
+    C -->|Yes| E[Data Privacy Check]
+    E --> F[PII Detection API]
+    F --> G{PII Found?}
+    G -->|Yes| H[Mask/Anonymize]
+    G -->|No| I[Process Request]
+    H --> I
+    
+    style B fill:#fff3e0
+    style F fill:#e8f5e8
+    style H fill:#ffebee
+```
+
+## 6. User Journey Examples
+
+### 6.1 Success Journey - Hardware Issue
+```
+User: "My laptop won't start"
+Agent: "I'll help you with that. When you press the power button, what happens?"
+User: "Nothing at all, no lights or sounds"
+Agent: "Are you using the power adapter or just battery?"
+User: "I have it plugged in"
+Agent: "I've created ticket #12345 for a hardware repair. This appears to be a power supply issue. A technician will contact you within 2 hours."
+```
+
+### 6.2 Complex Journey - Multiple Issues
+```
+User: "I can't log into my email and my new laptop setup isn't working"
+Agent: "I'll help you with both issues. Let's start with your email login - what error do you see?"
+User: "It says invalid credentials"
+Agent: "I'll create a password reset ticket for you. While that's processing, what's not working with your laptop setup?"
+User: "Actually, the email thing is more urgent, I have a client call in 5 minutes"
+Agent: "Understood. I'll prioritize the email issue and create an urgent ticket. Try the password reset link I'm sending now."
+```
+
+### 6.3 Escalation Journey
+```
+User: "The server room is flooding!"
+Agent: "This is a critical emergency. I'm creating a P1 ticket and immediately notifying the facilities team. Are you in a safe location?"
+User: "Yes, I'm out of the room"
+Agent: "Ticket #99999 created. Emergency response team has been alerted. Please stay clear of the area."
+```
+
+## 7. ServiceHub Integration
+
+### 7.1 Mock Enterprise System
+
+ServiceHub simulates a realistic ITSM platform with:
+
+- **Ticket Management**: Creation, updates, status tracking
+- **Assignment Groups**: L1-Hardware, L1-Software, L2-Network, etc.
+- **SLA Tracking**: Automatic escalation based on priority
+- **Reporting**: Metrics dashboard and KPI tracking
+
+```mermaid
+graph LR
+    A[HelpHub Agent] -->|REST API| B[ServiceHub Instance]
+    B -->|Webhook| A
+    
+    A --> C[API Authentication]
+    B --> D[Incident Table]
+    B --> E[User Table]
+    B --> F[Assignment Groups]
+    B --> G[SLA Rules]
+    
+    style B fill:#e3f2fd
+    style C fill:#fff3e0
+```
+
+### 7.2 API Integration Points
+
+| Endpoint | Method | Purpose | Example |
+|----------|---------|---------|---------|
+| `/servicehub/incidents` | POST | Create new ticket | `{"category": "hardware", "priority": "P1"}` |
+| `/servicehub/incidents/{id}` | GET | Retrieve ticket status | Returns ticket details |
+| `/servicehub/incidents/{id}` | PUT | Update ticket | Add notes, change status |
+| `/servicehub/users/{id}` | GET | Get user details | For assignment and notifications |
+
+## 8. Evaluation Criteria
+
+### 8.1 Automated Assessment
+
+**Categorization Accuracy Score**: `(Correct Category + Correct Priority) / Total Predictions * 100`
+
+| Component | Weight | Measurement |
+|-----------|---------|-------------|
+| Category Accuracy | 40% | Hardware/Software/Network/Access/Billing |
+| Priority Accuracy | 30% | P1/P2/P3 assignment |
+| Conversation Quality | 20% | Multi-turn handling, context retention |
+| Edge Case Handling | 10% | Interruptions, topic changes, escalations |
+
+### 8.2 Test Dataset Structure
+
+```csv
+ticket_id,description,user_context,expected_category,expected_priority,conversation_turns,has_interruption
+1,"My laptop battery dies in 5 minutes","Remote worker, urgent project",hardware,P2,2,false
+2,"Can't access shared drive, presentation in 1 hour","Manager, time pressure",access,P1,3,true
+3,"Email is slow, not urgent","Regular user, no time pressure",software,P3,1,false
+```
+
+### 8.3 Multi-Turn Conversation Evaluation
+
+Test scenarios evaluate:
+- **Context Retention**: Agent remembers previous conversation details
+- **Clarification Quality**: Questions are relevant and specific
+- **Interruption Handling**: Graceful context switching
+- **Topic Management**: Ability to juggle multiple issues
+
+## 9. Technology Stack
+
+### 9.1 Core Technologies
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| Agent Framework | LangGraph | Workflow orchestration |
+| LLM Provider | OpenRouter (GPT-4.1-mini) | Natural language processing |
+| Alternative LLM | DeepSeek R1 | Cost-effective option |
+| API Framework | FastAPI | Mock ServiceHub endpoints |
+| Testing | pytest | Automated evaluation |
+
+### 9.2 LangGraph Structure
+
+```python
+# Project structure following Gemini quickstart pattern
+src/
+├── graph.py          # Main workflow definition
+├── nodes.py          # Individual workflow steps
+├── state.py          # Conversation state management
+├── tools.py          # ServiceHub integration tools
+└── evaluator.py      # Assessment logic
+```
+
+### 9.3 Environment Setup
+
+```bash
+# Required environment variables
+OPENROUTER_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here  # Optional fallback
+SERVICEHUB_BASE_URL=http://localhost:8000
+```
+
+## 10. Success Metrics & KPIs
+
+### 10.1 Student Success Metrics
+
+| Metric | Target | Measurement |
+|--------|---------|-------------|
+| Categorization Accuracy | ≥85% | Automated evaluation |
+| Priority Accuracy | ≥80% | Automated evaluation |
+| Multi-turn Conversation Score | ≥75% | Conversation quality rubric |
+| Edge Case Handling | ≥70% | Interruption/topic change scenarios |
+
+### 10.2 Learning Objectives Assessment
+
+```mermaid
+graph TD
+    A[Student Submission] --> B[Automated Tests]
+    B --> C[Categorization Accuracy]
+    B --> D[Priority Accuracy]
+    B --> E[Conversation Quality]
+    B --> F[Edge Case Handling]
+    
+    C --> G[Overall Score]
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H{Pass Threshold?}
+    H -->|≥80%| I[Course Complete]
+    H -->|<80%| J[Remediation Required]
+    
+    style G fill:#e8f5e8
+    style I fill:#c8e6c9
+    style J fill:#ffcdd2
+```
+
+## 11. Implementation Roadmap
+
+### Phase 1: Core Agent (Week 1)
+- [x] Basic LangGraph structure
+- [x] Simple question loop
+- [x] KB search integration
+- [x] Mock ServiceHub endpoints
+
+### Phase 2: Conversation Intelligence (Week 2)
+- [ ] Multi-turn conversation handling
+- [ ] Context retention across turns
+- [ ] Interruption management
+- [ ] Topic change detection
+
+### Phase 3: Advanced Features (Week 3)
+- [ ] Complex scenario handling
+- [ ] Built-in constraints (rate limiting, PII detection)
+- [ ] Escalation workflows
+- [ ] Performance optimization
+
+### Phase 4: Evaluation & Testing (Week 4)
+- [ ] Comprehensive test dataset
+- [ ] Automated scoring system
+- [ ] Edge case scenarios
+- [ ] Student assessment tools
+
+## 12. Project Structure
+
+```
+agentic-course-case-study-0/
+├── src/
+│   ├── graph.py              # LangGraph workflow
+│   ├── nodes.py              # Workflow nodes
+│   ├── state.py              # Conversation state
+│   ├── tools.py              # ServiceHub tools
+│   └── evaluator.py          # Assessment logic
+├── api/
+│   ├── main.py               # FastAPI mock services
+│   └── servicehub.py         # ServiceHub simulation
+├── data/
+│   ├── tickets_train.csv     # Training scenarios
+│   ├── tickets_test.csv      # Test scenarios
+│   └── conversations.json    # Multi-turn examples
+├── kb/
+│   └── articles.json         # Knowledge base articles
+├── tests/
+│   ├── test_categorization.py
+│   ├── test_conversation.py
+│   └── test_integration.py
+├── docs/
+│   └── course_guide.md       # Student instructions
+└── requirements.txt
+```
+
+## 13. Student Learning Path
+
+### 13.1 Prerequisites
+- **Python Proficiency**: Comfortable with Python programming
+- **Basic AI/ML Understanding**: Familiarity with LLMs and prompting
+- **No LangGraph Experience Required**: Will be taught as part of the course
+
+### 13.2 Learning Progression
+
+1. **Week 1**: Understand the problem domain and existing codebase
+2. **Week 2**: Implement basic LangGraph workflow with question loop
+3. **Week 3**: Add conversation intelligence and edge case handling
+4. **Week 4**: Optimize performance and complete evaluation
+
+### 13.3 Success Criteria
+
+Students will demonstrate mastery by:
+- Building a functional multi-turn conversation agent
+- Achieving ≥80% accuracy on categorization and priority assessment
+- Handling interruptions and topic changes gracefully
+- Integrating with mock enterprise systems
+
+## 14. API Reference
+
+### 14.1 Core Endpoints
+
+| Endpoint | Method | Purpose | Example Request |
+|----------|---------|---------|-----------------|
+| `/chat` | POST | Start conversation | `{"message": "My laptop won't start"}` |
+| `/chat/continue` | POST | Continue conversation | `{"session_id": "123", "message": "No lights"}` |
+| `/categorize` | POST | Categorize ticket | `{"description": "Email password reset"}` |
+| `/prioritize` | POST | Assess priority | `{"description": "Server room flooding"}` |
+| `/kb/search` | GET | Search knowledge base | `?query=password+reset` |
+
+### 14.2 Response Formats
+
+```json
+{
+  "session_id": "uuid",
+  "response": "I'll help you with that laptop issue...",
+  "needs_clarification": true,
+  "suggested_questions": ["What happens when you press power?"],
+  "category": "hardware",
+  "priority": "P1",
+  "confidence": 0.85
+}
+```
+
+## 15. Common Issues & Solutions
+
+### 15.1 Development Issues
+
+| Problem | Solution |
+|---------|----------|
+| LangGraph workflow not executing | Check node connections and state schema |
+| OpenRouter API limits | Implement rate limiting and retry logic |
+| Conversation context lost | Verify state persistence between turns |
+| Categorization accuracy low | Review training data and prompt engineering |
+
+### 15.2 Testing Issues
+
+| Problem | Solution |
+|---------|----------|
+| Tests failing inconsistently | Use deterministic test data and mock LLM responses |
+| Slow test execution | Implement test data caching and parallel execution |
+| Evaluation scores varying | Ensure consistent scoring criteria and test environment |
+
+## 16. Course Support
+
+### 16.1 Getting Help
+
+- **Issues**: Report problems at [GitHub Issues](https://github.com/dextersjab/agentic-course-case-study-0/issues)
+- **Discussion**: Use GitHub Discussions for questions and collaboration
+- **Documentation**: Comprehensive guides in `/docs` directory
+
+### 16.2 Contributing
+
+Students are encouraged to:
+1. Fork the repository
+2. Implement required features
+3. Add comprehensive tests
+4. Submit pull requests with clear descriptions
+
+---
+
+## 🎓 About This Course
+
+This case study is part of the **Enterprise Agent Development Course** by **Dexter Awoyemi**, focusing on building practical AI agents that handle real-world business scenarios. This particular case study emphasizes **linear LangGraph workflows** with intelligent conversation handling, distinguishing it from other case studies that focus on ReAct loops and complex workflow orchestration.
+
+### 🚀 Next Steps
+
+1. **Clone the repository** and explore the codebase
+2. **Set up your development environment** with OpenRouter API access
+3. **Run the existing tests** to understand the evaluation criteria
+4. **Start implementing** your LangGraph workflow
+5. **Test thoroughly** with the provided scenarios
+
+*For questions or feedback, please open an issue on GitHub. Happy coding!*

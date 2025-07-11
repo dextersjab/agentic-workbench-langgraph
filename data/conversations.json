@@ -1,0 +1,330 @@
+[
+  {
+    "conversation_id": "conv_001",
+    "scenario": "Hardware failure with clarification",
+    "expected_category": "hardware",
+    "expected_priority": "P1",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "My laptop won't start"
+      },
+      {
+        "speaker": "agent", 
+        "message": "I'll help you with that laptop issue. When you press the power button, what happens exactly?"
+      },
+      {
+        "speaker": "user",
+        "message": "Nothing at all, no lights or sounds"
+      },
+      {
+        "speaker": "agent",
+        "message": "Are you using the power adapter or running on battery?"
+      },
+      {
+        "speaker": "user", 
+        "message": "I have it plugged into the wall"
+      },
+      {
+        "speaker": "agent",
+        "message": "This sounds like a hardware failure. I'm creating a P1 ticket for immediate hardware repair. A technician will contact you within 2 hours. Ticket #HW-12345 has been created."
+      }
+    ],
+    "evaluation_criteria": {
+      "asks_clarifying_questions": true,
+      "identifies_category_correctly": true,
+      "assigns_correct_priority": true,
+      "provides_clear_resolution": true
+    }
+  },
+  {
+    "conversation_id": "conv_002", 
+    "scenario": "Interruption handling",
+    "expected_category": "access",
+    "expected_priority": "P2",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "I can't access my email account"
+      },
+      {
+        "speaker": "agent",
+        "message": "I'll help you with your email access. What error message do you see when you try to log in?"
+      },
+      {
+        "speaker": "user",
+        "message": "It says invalid credentials"
+      },
+      {
+        "speaker": "agent",
+        "message": "When did you last successfully access your email? Was it today or earlier?"
+      },
+      {
+        "speaker": "user",
+        "message": "Actually, I need to join a meeting right now. Can we do this later?"
+      },
+      {
+        "speaker": "agent",
+        "message": "Of course! I understand meetings take priority. I'll create a password reset ticket for you now (Ticket #AC-67890) so IT can start working on it. Would you like me to send a temporary meeting access solution to your personal email so you can join the meeting?"
+      },
+      {
+        "speaker": "user",
+        "message": "Yes, that would be great"
+      },
+      {
+        "speaker": "agent",
+        "message": "I've sent meeting access details to your personal email and escalated your password reset. Please reach out after your meeting if you need any additional help."
+      }
+    ],
+    "evaluation_criteria": {
+      "handles_interruption_gracefully": true,
+      "provides_immediate_solution": true,
+      "maintains_context": true,
+      "offers_alternative": true
+    }
+  },
+  {
+    "conversation_id": "conv_003",
+    "scenario": "Vague description requiring multiple clarifications",
+    "expected_category": "unknown",
+    "expected_priority": "P3",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "Everything is broken"
+      },
+      {
+        "speaker": "agent",
+        "message": "I'm sorry to hear you're having issues. Can you help me understand what specifically isn't working?"
+      },
+      {
+        "speaker": "user",
+        "message": "I don't know, just nothing works"
+      },
+      {
+        "speaker": "agent",
+        "message": "Let's start with basics. Are you able to turn on your computer?"
+      },
+      {
+        "speaker": "user",
+        "message": "Yeah it turns on"
+      },
+      {
+        "speaker": "agent",
+        "message": "Good! Can you open applications like your web browser or email?"
+      },
+      {
+        "speaker": "user",
+        "message": "Email won't load and browser is super slow"
+      },
+      {
+        "speaker": "agent",
+        "message": "That helps narrow it down. This sounds like a network connectivity issue. I'm creating a ticket to have IT check your network connection and email configuration. Ticket #NET-45678 has been created with P2 priority."
+      }
+    ],
+    "evaluation_criteria": {
+      "persistent_questioning": true,
+      "breaks_down_vague_issues": true,
+      "guides_user_effectively": true,
+      "reaches_actionable_conclusion": true
+    }
+  },
+  {
+    "conversation_id": "conv_004",
+    "scenario": "Multiple issues decomposition",
+    "expected_category": "multiple",
+    "expected_priority": "P1",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "I can't log into email and my new laptop setup isn't working"
+      },
+      {
+        "speaker": "agent",
+        "message": "I'll help you with both issues. Let's prioritize - which one is more urgent for your work right now?"
+      },
+      {
+        "speaker": "user",
+        "message": "The email, I have a client call in 10 minutes"
+      },
+      {
+        "speaker": "agent",
+        "message": "Understood. Let me create an urgent password reset ticket first. What error do you see when trying to access email?"
+      },
+      {
+        "speaker": "user",
+        "message": "Invalid password"
+      },
+      {
+        "speaker": "agent",
+        "message": "I'm creating a P1 ticket for immediate password reset - Ticket #AC-11111. I'll also create a separate ticket for your laptop setup - Ticket #HW-22222. For the immediate email issue, try accessing webmail at mail.company.com while we reset your password."
+      },
+      {
+        "speaker": "user",
+        "message": "Perfect, that webmail link worked!"
+      },
+      {
+        "speaker": "agent",
+        "message": "Excellent! You can use webmail for your call. IT will contact you about both the permanent password fix and laptop setup within the hour."
+      }
+    ],
+    "evaluation_criteria": {
+      "separates_multiple_issues": true,
+      "prioritizes_by_urgency": true,
+      "provides_immediate_workaround": true,
+      "creates_appropriate_tickets": true
+    }
+  },
+  {
+    "conversation_id": "conv_005",
+    "scenario": "Topic change mid-conversation",
+    "expected_category": "hardware",
+    "expected_priority": "P2",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "My printer isn't working"
+      },
+      {
+        "speaker": "agent",
+        "message": "I'll help with your printer issue. What happens when you try to print?"
+      },
+      {
+        "speaker": "user",
+        "message": "It just says offline"
+      },
+      {
+        "speaker": "agent",
+        "message": "Is this a network printer or connected directly to your computer via USB?"
+      },
+      {
+        "speaker": "user",
+        "message": "Wait, is the help desk open on weekends? I forgot to ask"
+      },
+      {
+        "speaker": "agent",
+        "message": "Yes, we have weekend support from 9 AM to 5 PM. Now, back to your printer - is it connected via network or USB?"
+      },
+      {
+        "speaker": "user",
+        "message": "Network printer on the 3rd floor"
+      },
+      {
+        "speaker": "agent",
+        "message": "Thank you. I'm checking the network printer status and creating ticket #PR-33333. It appears the printer may need a network configuration reset. A technician will address this on Monday morning, or if it's urgent, we can arrange weekend support."
+      }
+    ],
+    "evaluation_criteria": {
+      "answers_meta_question": true,
+      "returns_to_original_topic": true,
+      "maintains_conversation_flow": true,
+      "offers_appropriate_timing": true
+    }
+  },
+  {
+    "conversation_id": "conv_006",
+    "scenario": "Emergency escalation",
+    "expected_category": "hardware", 
+    "expected_priority": "P1",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "The server room is flooding!"
+      },
+      {
+        "speaker": "agent",
+        "message": "This is a critical emergency. I'm immediately creating a P1 incident and alerting facilities and IT management. Are you currently in a safe location away from the water?"
+      },
+      {
+        "speaker": "user",
+        "message": "Yes, I'm out of the room now"
+      },
+      {
+        "speaker": "agent",
+        "message": "Good. Emergency ticket #EM-99999 created. Facilities emergency response and IT management have been notified via SMS and phone. Please prevent anyone from entering the server room until emergency teams arrive. I'll stay in contact for updates."
+      }
+    ],
+    "evaluation_criteria": {
+      "recognizes_emergency": true,
+      "escalates_immediately": true,
+      "ensures_safety_first": true,
+      "notifies_appropriate_teams": true
+    }
+  },
+  {
+    "conversation_id": "conv_007",
+    "scenario": "Non-technical user with complex issue",
+    "expected_category": "software",
+    "expected_priority": "P2",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "My computer screen went blue and had lots of numbers"
+      },
+      {
+        "speaker": "agent",
+        "message": "It sounds like you experienced what's called a 'blue screen error.' How often does this happen?"
+      },
+      {
+        "speaker": "user",
+        "message": "This is the third time today"
+      },
+      {
+        "speaker": "agent",
+        "message": "That's concerning. When it happens, does the computer restart automatically or do you have to restart it manually?"
+      },
+      {
+        "speaker": "user",
+        "message": "It restarts by itself after a few seconds"
+      },
+      {
+        "speaker": "agent",
+        "message": "This indicates a system instability issue that needs immediate attention. I'm creating a P1 ticket for hardware diagnostics - Ticket #SYS-55555. Please save any important work frequently until we can resolve this. A technician will contact you within the hour."
+      }
+    ],
+    "evaluation_criteria": {
+      "translates_technical_terms": true,
+      "gathers_frequency_info": true,
+      "assesses_severity_correctly": true,
+      "provides_interim_guidance": true
+    }
+  },
+  {
+    "conversation_id": "conv_008",
+    "scenario": "Escalation with emotional user",
+    "expected_category": "hardware",
+    "expected_priority": "P2",
+    "turns": [
+      {
+        "speaker": "user",
+        "message": "This stupid computer never works and I'm so frustrated!"
+      },
+      {
+        "speaker": "agent",
+        "message": "I understand your frustration, and I'm here to help resolve this. Let's work together to fix the issue. What specific problems are you experiencing with your computer?"
+      },
+      {
+        "speaker": "user",
+        "message": "It's just so slow and freezes all the time"
+      },
+      {
+        "speaker": "agent",
+        "message": "Slow performance and freezing can definitely be frustrating, especially when you're trying to work. How long has this been happening?"
+      },
+      {
+        "speaker": "user",
+        "message": "For weeks! I keep asking for help but nothing gets fixed"
+      },
+      {
+        "speaker": "agent",
+        "message": "I apologize that this hasn't been resolved yet. Let me make sure we get this fixed properly this time. I'm creating a priority ticket #PERF-77777 and will personally follow up to ensure resolution. Would you prefer a technician to come to your desk or remote assistance?"
+      }
+    ],
+    "evaluation_criteria": {
+      "acknowledges_emotions": true,
+      "remains_professional": true,
+      "takes_ownership": true,
+      "offers_personalized_service": true
+    }
+  }
+]

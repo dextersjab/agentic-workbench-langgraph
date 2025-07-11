@@ -1,0 +1,51 @@
+ticket_id,description,user_context,expected_category,expected_priority,conversation_turns,has_interruption,scenario_type
+1,"My laptop won't start at all. When I press the power button nothing happens","Remote employee, has important client presentation tomorrow",hardware,P1,3,false,hardware_failure
+2,"Can't log into my email account. It keeps saying invalid password","Manager, needs to respond to urgent emails",access,P2,2,false,password_issue
+3,"The Wi-Fi in the conference room is really slow during meetings","Office worker, affects team productivity",network,P3,1,false,performance_issue
+4,"I need Microsoft Office installed on my new laptop","New employee, first day next week",software,P3,1,false,software_request
+5,"The printer on the 3rd floor is showing error code 0x00000709","Administrative assistant, needs to print invoices",hardware,P2,2,false,printer_issue
+6,"My VPN connection keeps dropping every few minutes","Remote worker, affects daily work",network,P2,2,false,network_connectivity
+7,"I forgot my password and my account is locked out","Sales representative, locked out since morning",access,P1,1,false,account_lockout
+8,"The server room temperature alarm is going off","Facilities, potential equipment damage",hardware,P1,1,false,emergency
+9,"Teams keeps crashing when I try to join video calls","Project manager, has back-to-back meetings",software,P2,2,false,application_crash
+10,"I can't access the shared drive where all our project files are stored","Team lead, blocking entire team",access,P1,2,false,access_critical
+11,"My computer is running very slowly, takes forever to open programs","Accountant, month-end reporting due",hardware,P2,2,false,performance_degradation
+12,"The licensing for Adobe Creative Suite has expired","Graphic designer, project deadline tomorrow",billing,P1,1,false,license_issue
+13,"Outlook is not syncing with my phone, missing important emails","Executive, travels frequently",software,P2,2,false,sync_issue
+14,"I spilled coffee on my keyboard and now some keys don't work","Marketing coordinator, needs to finish campaign",hardware,P2,1,false,physical_damage
+15,"Can't connect to the company VPN from home","Remote developer, needs access to development servers",network,P1,2,false,remote_access
+16,"The backup server is showing critical errors","IT administrator, data integrity at risk",hardware,P1,1,false,system_critical
+17,"My Zoom license needs to be upgraded for larger meetings","HR director, conducting interviews",billing,P3,1,false,license_upgrade
+18,"The Wi-Fi password for guests doesn't work","Receptionist, clients waiting in lobby",network,P2,1,false,guest_access
+19,"I can't install the new security software, getting permission errors","Security officer, compliance requirement",software,P1,1,false,security_software
+20,"My monitor keeps flickering and gives me headaches","Data analyst, works long hours",hardware,P2,1,false,display_issue
+21,"The company credit card payment for our software licenses was declined","Finance manager, services might be suspended",billing,P1,1,false,payment_issue
+22,"I can't access the customer database, getting connection timeout","Customer service representative, customers waiting",access,P1,2,false,database_access
+23,"My laptop battery only lasts 30 minutes now","Field technician, works on-site all day",hardware,P2,1,false,battery_issue
+24,"The file server is running out of space, users can't save files","System administrator, affects entire organization",hardware,P1,1,false,storage_critical
+25,"I need help setting up my new iPhone with company email","New manager, needs mobile access",software,P3,2,false,mobile_setup
+26,"The conference room projector won't connect to laptops","Office manager, important client meeting in 1 hour",hardware,P1,2,false,presentation_equipment
+27,"My antivirus software is showing malware warnings","Accounting clerk, handles sensitive financial data",software,P1,1,false,security_threat
+28,"The internet is completely down in our office","Office manager, affects entire building",network,P1,1,false,connectivity_outage
+29,"I can't print from my laptop to the color printer","Marketing designer, needs to print brochures",hardware,P3,2,false,printing_issue
+30,"My Slack notifications stopped working","Team coordinator, misses important updates",software,P3,1,false,notification_issue
+31,"The door access card reader isn't working","Security guard, people can't enter building",access,P1,1,false,physical_access
+32,"I accidentally deleted important files from the shared folder","Project manager, files needed for client presentation",access,P2,2,false,data_recovery
+33,"My computer keeps blue screening with different error codes","Software engineer, affects development work",hardware,P1,2,false,system_instability
+34,"The office phone system is down, can't make or receive calls","Receptionist, affects customer service",network,P1,1,false,phone_system
+35,"I need access to the new project management software","Team member, project starting next week",access,P3,1,false,software_access
+36,"My external hard drive is not being recognized","Content creator, important project files stored",hardware,P2,2,false,storage_device
+37,"The company website is loading very slowly","Marketing manager, affects customer experience",network,P2,1,false,website_performance
+38,"I can't join the video conference, getting audio/video errors","Remote consultant, client meeting in progress",software,P1,2,false,video_conferencing
+39,"My laptop fan is making loud noises and getting very hot","Developer, concerned about hardware damage",hardware,P2,1,false,cooling_issue
+40,"The shared calendar is not syncing across devices","Executive assistant, manages multiple schedules",software,P2,2,false,calendar_sync
+41,"I can't access the HR portal to submit my timesheet","Contractor, timesheet due today",access,P2,1,false,portal_access
+42,"The network printer is printing everything in strange colors","Administrative assistant, important documents affected",hardware,P3,1,false,print_quality
+43,"My VPN is working but I can't access internal servers","Remote engineer, needs development environment access",network,P1,2,false,internal_network
+44,"The company mobile hotspot device won't connect","Field sales, needs internet for client presentation",network,P1,1,false,mobile_internet
+45,"I can't save files to the cloud storage, getting sync errors","Graphic designer, project files need to be shared",software,P2,2,false,cloud_sync
+46,"My workstation randomly shuts down during intensive tasks","3D animator, loses hours of work",hardware,P1,2,false,power_issue
+47,"The building's Wi-Fi network is not broadcasting","IT support, affects all wireless devices",network,P1,1,false,wireless_infrastructure
+48,"I can't access my personal drive from the new computer","Transferred employee, needs access to previous work",access,P3,2,false,profile_migration
+49,"The license server for our engineering software is down","Engineering team, blocks product development",software,P1,1,false,license_server
+50,"My tablet won't connect to the company network","Mobile worker, needs network access for apps",network,P2,2,false,device_connectivity

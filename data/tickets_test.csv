@@ -1,0 +1,31 @@
+ticket_id,description,user_context,expected_category,expected_priority,conversation_turns,has_interruption,scenario_type
+101,"Everything is broken and I can't do anything","Frustrated employee, vague description",unknown,P3,4,false,vague_description
+102,"Can't login to email and my new laptop setup isn't working","New hire, multiple issues",access,P2,3,true,multi_issue
+103,"URGENT: Server room flooding right now!","Facilities manager, emergency situation",hardware,P1,1,false,emergency
+104,"My computer is a bit slow sometimes","Office worker, unclear severity",hardware,P3,3,false,ambiguous_priority
+105,"Password reset please","IT user, brief request",access,P3,2,false,simple_request
+106,"The thing won't work and it's really annoying","Non-technical user, unclear description",unknown,P3,4,false,non_technical
+107,"VPN won't connect and now Teams is down too","Remote worker, cascading issues",network,P1,2,false,cascading_failure
+108,"Actually wait, I need to join a meeting first before we fix my laptop","User changing priorities mid-conversation",hardware,P2,3,true,interruption
+109,"Is the help desk even open right now? Also my printer is broken","User with meta question and technical issue",hardware,P3,2,true,meta_question
+110,"I think someone hacked my account, seeing weird emails","Security concern, potential breach",access,P1,2,false,security_incident
+111,"My screen keeps turning blue and showing numbers","Non-technical description of blue screen",hardware,P1,2,false,blue_screen_layman
+112,"This stupid computer never works properly","Emotional user, general complaint",hardware,P3,3,false,emotional_user
+113,"Need software installed but it's not urgent, whenever is fine","Low priority request, flexible timing",software,P3,1,false,flexible_timing
+114,"Can't print and my presentation is in 5 minutes HELP!","Time-critical printing issue",hardware,P1,1,false,time_critical
+115,"The wifi thingy isn't connecting to my laptop","Non-technical WiFi issue",network,P2,2,false,wifi_layman
+116,"All our customer data seems to be gone from the system","Database administrator, data loss concern",access,P1,1,false,data_loss
+117,"My phone isn't getting company emails anymore","Mobile email sync issue",software,P2,2,false,mobile_sync
+118,"I hear a beeping sound from the server room","Facilities, potential hardware alarm",hardware,P1,1,false,audio_alarm
+119,"The license thing expired and now I can't use Photoshop","Creative professional, expired license",billing,P2,1,false,expired_license
+120,"Everyone in accounting says their computers are freezing","Multiple users affected, department-wide",hardware,P1,1,false,department_wide
+121,"I don't know what happened but now I can't access anything","Complete access loss, unclear cause",access,P1,3,false,complete_lockout
+122,"The big screen in the conference room has lines through it","Presentation equipment issue",hardware,P2,1,false,display_damage
+123,"I was working on a document and everything disappeared","Potential data loss, document recovery",software,P2,2,false,document_loss
+124,"My computer is making grinding noises and smells funny","Hardware failure with physical symptoms",hardware,P1,1,false,hardware_failure_symptoms
+125,"Can someone just remote in and fix whatever is wrong?","User requesting remote assistance",unknown,P3,2,false,remote_assistance_request
+126,"The internet is slow but only on my computer","Isolated network performance issue",network,P2,2,false,isolated_performance
+127,"I got a popup saying my computer is infected","Malware warning, security concern",software,P1,1,false,malware_popup
+128,"My boss said I need access to the financial system by tomorrow","Access request with deadline",access,P2,1,false,deadline_driven
+129,"The coffee machine near the servers is leaking water","Facilities issue near IT equipment",hardware,P1,1,false,environmental_threat
+130,"I can work but it's really annoying when the screen flickers","Usable but problematic display",hardware,P3,1,false,annoying_but_functional

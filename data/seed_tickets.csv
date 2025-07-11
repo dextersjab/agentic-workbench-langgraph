@@ -1,51 +1,51 @@
 id,subject,description,category,priority,expected_queue
-1,Sample ticket 1,Auto‑generated ticket description #1,billing,P3,L1
-2,Sample ticket 2,Auto‑generated ticket description #2,network,P2,L1
-3,Sample ticket 3,Auto‑generated ticket description #3,billing,P2,L1
-4,Sample ticket 4,Auto‑generated ticket description #4,software,P3,L1
-5,Sample ticket 5,Auto‑generated ticket description #5,access,P2,L1
-6,Sample ticket 6,Auto‑generated ticket description #6,network,P1,L2
-7,Sample ticket 7,Auto‑generated ticket description #7,hardware,P1,L2
-8,Sample ticket 8,Auto‑generated ticket description #8,software,P1,L2
-9,Sample ticket 9,Auto‑generated ticket description #9,hardware,P2,L1
-10,Sample ticket 10,Auto‑generated ticket description #10,access,P1,L2
-11,Sample ticket 11,Auto‑generated ticket description #11,billing,P1,L2
-12,Sample ticket 12,Auto‑generated ticket description #12,billing,P2,L1
-13,Sample ticket 13,Auto‑generated ticket description #13,billing,P2,L1
-14,Sample ticket 14,Auto‑generated ticket description #14,billing,P2,L1
-15,Sample ticket 15,Auto‑generated ticket description #15,access,P3,L1
-16,Sample ticket 16,Auto‑generated ticket description #16,software,P1,L2
-17,Sample ticket 17,Auto‑generated ticket description #17,software,P1,L2
-18,Sample ticket 18,Auto‑generated ticket description #18,access,P1,L2
-19,Sample ticket 19,Auto‑generated ticket description #19,billing,P1,L2
-20,Sample ticket 20,Auto‑generated ticket description #20,hardware,P2,L1
-21,Sample ticket 21,Auto‑generated ticket description #21,hardware,P3,L1
-22,Sample ticket 22,Auto‑generated ticket description #22,access,P1,L2
-23,Sample ticket 23,Auto‑generated ticket description #23,billing,P1,L2
-24,Sample ticket 24,Auto‑generated ticket description #24,hardware,P3,L1
-25,Sample ticket 25,Auto‑generated ticket description #25,billing,P1,L2
-26,Sample ticket 26,Auto‑generated ticket description #26,access,P1,L2
-27,Sample ticket 27,Auto‑generated ticket description #27,billing,P3,L1
-28,Sample ticket 28,Auto‑generated ticket description #28,software,P3,L1
-29,Sample ticket 29,Auto‑generated ticket description #29,software,P2,L1
-30,Sample ticket 30,Auto‑generated ticket description #30,access,P1,L2
-31,Sample ticket 31,Auto‑generated ticket description #31,billing,P2,L1
-32,Sample ticket 32,Auto‑generated ticket description #32,billing,P2,L1
-33,Sample ticket 33,Auto‑generated ticket description #33,software,P1,L2
-34,Sample ticket 34,Auto‑generated ticket description #34,access,P3,L1
-35,Sample ticket 35,Auto‑generated ticket description #35,billing,P2,L1
-36,Sample ticket 36,Auto‑generated ticket description #36,access,P3,L1
-37,Sample ticket 37,Auto‑generated ticket description #37,access,P1,L2
-38,Sample ticket 38,Auto‑generated ticket description #38,network,P2,L1
-39,Sample ticket 39,Auto‑generated ticket description #39,access,P3,L1
-40,Sample ticket 40,Auto‑generated ticket description #40,billing,P3,L1
-41,Sample ticket 41,Auto‑generated ticket description #41,network,P3,L1
-42,Sample ticket 42,Auto‑generated ticket description #42,network,P3,L1
-43,Sample ticket 43,Auto‑generated ticket description #43,access,P1,L2
-44,Sample ticket 44,Auto‑generated ticket description #44,software,P2,L1
-45,Sample ticket 45,Auto‑generated ticket description #45,access,P1,L2
-46,Sample ticket 46,Auto‑generated ticket description #46,access,P2,L1
-47,Sample ticket 47,Auto‑generated ticket description #47,access,P2,L1
-48,Sample ticket 48,Auto‑generated ticket description #48,network,P1,L2
-49,Sample ticket 49,Auto‑generated ticket description #49,network,P1,L2
-50,Sample ticket 50,Auto‑generated ticket description #50,network,P1,L2
+1,Laptop won't turn on,My work laptop completely dead - no lights when plugged in and power button does nothing,hardware,P1,L2
+2,Password reset needed,I'm locked out of my email account after failed login attempts,access,P2,L1
+3,WiFi slow in conference room,"Internet connection very slow during video calls, affecting client meetings",network,P2,L1
+4,Install Slack on new computer,Need Slack desktop app installed on my new workstation,software,P3,L1
+5,Printer showing error code,Color printer on 2nd floor displays error 0x00000503 and won't print,hardware,P2,L1
+6,VPN keeps disconnecting,Remote connection drops every 10-15 minutes while working from home,network,P2,L1
+7,Account locked urgent,Sales account locked during important client call - need immediate access,access,P1,L2
+8,Server room temperature alarm,Critical temperature alert in server room - equipment at risk,hardware,P1,L2
+9,Teams crashes during calls,Microsoft Teams application freezes and crashes during video conferences,software,P1,L2
+10,Can't access project files,Shared drive containing all project documentation is inaccessible,access,P1,L2
+11,Computer extremely slow,Workstation takes 5+ minutes to boot and programs frequently freeze,hardware,P2,L1
+12,Adobe license expired,Creative Cloud subscription expired blocking design work,billing,P1,L2
+13,Outlook not syncing phone,Mobile email not receiving new messages from company account,software,P2,L1
+14,Keyboard keys not working,Spilled liquid on keyboard - several keys now unresponsive,hardware,P2,L1
+15,VPN access from home,Cannot establish VPN connection to access development servers remotely,network,P1,L2
+16,Backup server critical errors,Primary backup system showing multiple drive failures,hardware,P1,L2
+17,Zoom license upgrade needed,Current license insufficient for department-wide training sessions,billing,P3,L1
+18,Guest WiFi password invalid,Visitors unable to connect using posted guest network credentials,network,P2,L1
+19,Security software install blocked,Cannot install mandatory antivirus - receiving administrator permission errors,software,P1,L2
+20,Monitor flickering constantly,Primary display has persistent flicker causing eye strain,hardware,P2,L1
+21,Software payment declined,Company credit card rejected for critical software renewals,billing,P1,L2
+22,Customer database offline,CRM system unreachable - customer service completely blocked,access,P1,L2
+23,Laptop battery dying quickly,Portable computer battery drains completely within 1 hour,hardware,P2,L1
+24,File server storage full,Network storage at capacity - users cannot save work,hardware,P1,L2
+25,iPhone email setup help,Need assistance configuring corporate email on new mobile device,software,P3,L1
+26,Projector won't connect,Conference room presentation equipment not detecting laptop connections,hardware,P1,L2
+27,Malware detection alert,Antivirus showing multiple threats detected on workstation,software,P1,L2
+28,Complete internet outage,Entire office building has lost all internet connectivity,network,P1,L2
+29,Cannot print to color printer,Marketing materials won't print from laptop to department printer,hardware,P3,L1
+30,Slack notifications stopped,No longer receiving team messages or mentions in application,software,P3,L1
+31,Door access card failed,Security badge reader not accepting employee access cards,access,P1,L2
+32,Accidentally deleted files,Important project documents removed from shared folder by mistake,access,P2,L1
+33,Blue screen errors recurring,Computer showing BSOD crashes multiple times daily,hardware,P1,L2
+34,Office phone system down,Cannot make or receive calls on desk phones throughout building,network,P1,L2
+35,Need project software access,Require permissions for new project management platform,access,P3,L1
+36,External drive not detected,USB storage device not appearing in file system,hardware,P2,L1
+37,Website loading very slowly,Company website taking 30+ seconds to load pages,network,P2,L1
+38,Video conference audio issues,Cannot hear or be heard during important client video calls,software,P1,L2
+39,Laptop overheating loudly,Computer fan running constantly at maximum speed with high temperatures,hardware,P2,L1
+40,Calendar sync problems,Appointments not appearing across all devices and applications,software,P2,L1
+41,HR portal login failed,Cannot access employee portal to submit required timesheet,access,P2,L1
+42,Printer color calibration off,Documents printing with incorrect colors affecting client materials,hardware,P3,L1
+43,VPN connects but no internal access,Can establish VPN but cannot reach company servers,network,P1,L2
+44,Mobile hotspot not working,Company-provided internet device failing to connect,network,P1,L2
+45,Cloud storage sync errors,Files not uploading to shared online storage platform,software,P2,L1
+46,Workstation random shutdowns,Computer powering off unexpectedly during intensive work,hardware,P1,L2
+47,Building WiFi not broadcasting,Wireless network completely unavailable throughout facility,network,P1,L2
+48,Profile transfer needed,Cannot access personal files after computer replacement,access,P3,L1
+49,Engineering software license server down,CAD application cannot validate licenses blocking development,software,P1,L2
+50,Tablet network connection failed,Mobile device unable to join company wireless network,network,P2,L1
