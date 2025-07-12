@@ -21,11 +21,56 @@ uv pip install -r requirements.txt
 # Alternative: traditional pip
 # pip install -r requirements.txt
 
-# Start the mock API
-uvicorn api.main:app --reload
+# Start the HelpHub API
+uvicorn src.core.api:app --reload
 ```
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
+
+## 🌐 Open WebUI Integration
+
+The API is fully compatible with [Open WebUI](https://openwebui.com/) for a chat interface:
+
+### 1. Start the HelpHub API
+```bash
+# Start the API server
+uvicorn src.core.api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 2. Configure Open WebUI
+```bash
+# Option 1: Docker (recommended)
+docker run -d -p 3000:8080 \
+  -e OPENAI_API_BASE_URL=http://localhost:8000/v1 \
+  -e OPENAI_API_KEY=not-needed \
+  --name open-webui ghcr.io/open-webui/open-webui:main
+
+# Option 2: Install locally
+pip install open-webui
+open-webui serve --port 3000
+```
+
+### 3. Add HelpHub Model
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Go to Settings → Connections
+3. Add OpenAI API connection:
+   - **API Base URL**: `http://localhost:8000/v1`
+   - **API Key**: `not-needed` (placeholder)
+4. The HelpHub models will appear in the model selector
+
+### 4. Chat with HelpHub
+Select "helphub-v1" from the model dropdown and start chatting! The agent will:
+- Ask clarifying questions for vague issues
+- Categorize your IT support request
+- Assess priority based on business impact
+- Route to appropriate support teams
+- Create ServiceHub tickets automatically
+
+Try these example conversations:
+- "My laptop won't turn on"
+- "I can't access my email"
+- "The wifi is really slow today"
+- "I need a software license for Adobe"
 
 ## 🧪 Testing
 

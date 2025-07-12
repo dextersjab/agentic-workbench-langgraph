@@ -1,0 +1,35 @@
+"""
+Main entry point for the HelpHub API server.
+
+TODO for participants: Add configuration management,
+logging setup, and production deployment settings.
+"""
+import logging
+import uvicorn
+from src.core.api import app
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    logger.info("Starting HelpHub API server")
+    
+    # TODO for participants:
+    # - Add configuration from environment variables
+    # - Include SSL/TLS configuration for production
+    # - Add health checks and monitoring endpoints
+    # - Configure CORS for production use
+    # - Add rate limiting and authentication
+    
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_level="info",
+        reload=True  # Set to False in production
+    )
