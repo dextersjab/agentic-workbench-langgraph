@@ -44,55 +44,18 @@ def routing_node(state: HelpHubState) -> Dict[str, Any]:
     priority = state.get("ticket_priority", "P3")
     user_context = state.get("user_context", {})
     
-    # TODO: Replace this placeholder logic with intelligent routing
+    # TODO: Replace this placeholder with LLM-based routing
     # You should:
     # 1. Use ROUTING_PROMPT to structure routing decisions
-    # 2. Consider category-priority combinations
-    # 3. Apply business rules for different scenarios
-    # 4. Route to appropriate ServiceHub endpoints
+    # 2. Consider category-priority matrix and business rules
+    # 3. Apply load balancing and team availability
+    # 4. Route to appropriate ServiceHub queues
+    # 5. Handle escalation paths for critical issues
     
-    # Placeholder routing logic - participants should replace this
-    if priority == "P1":
-        # Critical issues go to immediate escalation
-        route = "escalation"
-        target = "senior_support"
-        reasoning = "Critical priority requires immediate expert attention"
-        
-    elif category == "access" and priority == "P2":
-        # Access issues can often be resolved quickly
-        route = "servicehub"
-        target = "identity_management"
-        reasoning = "Account access issues routed to identity management team"
-        
-    elif category == "hardware":
-        # Hardware issues need physical intervention
-        route = "servicehub"
-        target = "field_support"
-        reasoning = "Hardware issues require on-site or depot support"
-        
-    elif category == "network":
-        # Network issues go to infrastructure team
-        route = "servicehub"
-        target = "network_ops"
-        reasoning = "Network connectivity routed to infrastructure team"
-        
-    elif category == "software":
-        # Software issues can often be resolved remotely
-        route = "servicehub"
-        target = "application_support"
-        reasoning = "Software issues routed to application support team"
-        
-    elif category == "billing":
-        # Billing issues go to finance team
-        route = "servicehub"
-        target = "finance_team"
-        reasoning = "Billing inquiries routed to finance department"
-        
-    else:
-        # Unknown or unclear issues go to general queue
-        route = "servicehub"
-        target = "general_queue"
-        reasoning = "Unclear issues routed to general support queue for triage"
+    # Placeholder routing logic - participants should implement LLM-based routing
+    route = "servicehub"
+    target = "application_support"  # Default target
+    reasoning = f"Routing {priority} {category} issue to appropriate support team"
     
     # Update state
     state["routing_decision"] = {

@@ -167,32 +167,23 @@ async def root():
 
 @app.post("/categorize")
 async def categorize(ticket: Ticket):
-    """Legacy categorization endpoint for backward compatibility."""
-    # Simple keyword-based categorization
-    desc_lower = ticket.description.lower()
-    
-    if any(word in desc_lower for word in ["password", "login", "access", "account", "locked", "permissions"]):
-        return {"category": "access", "confidence": 0.85}
-    elif any(word in desc_lower for word in ["wifi", "vpn", "internet", "connection", "network", "slow"]):
-        return {"category": "network", "confidence": 0.80}
-    elif any(word in desc_lower for word in ["laptop", "printer", "monitor", "hardware", "battery", "keyboard"]):
-        return {"category": "hardware", "confidence": 0.75}
-    elif any(word in desc_lower for word in ["license", "billing", "payment", "subscription", "invoice"]):
-        return {"category": "billing", "confidence": 0.70}
-    elif any(word in desc_lower for word in ["software", "application", "install", "crash", "error", "teams", "outlook"]):
-        return {"category": "software", "confidence": 0.80}
-    else:
-        return {"category": "unknown", "confidence": 0.30}
+    """Legacy categorization endpoint - TODO: implement LLM-based categorization."""
+    # TODO: Replace with LLM-based categorization using workflow nodes
+    # For now, return default response encouraging use of main chat endpoint
+    return {
+        "category": "software", 
+        "confidence": 0.50,
+        "note": "This is a legacy endpoint. Please use /v1/chat/completions for full LLM-powered analysis."
+    }
 
 
 @app.post("/prioritize")
 async def prioritize(ticket: Ticket):
-    """Legacy prioritization endpoint for backward compatibility."""
-    desc_lower = ticket.description.lower()
-    
-    if any(word in desc_lower for word in ["cannot", "down", "outage", "urgent", "emergency", "flooding", "critical"]):
-        return {"priority": "P1", "score": 0.90}
-    elif any(word in desc_lower for word in ["slow", "error", "problem", "issue", "affecting", "intermittent"]):
-        return {"priority": "P2", "score": 0.75}
-    else:
-        return {"priority": "P3", "score": 0.60}
+    """Legacy prioritization endpoint - TODO: implement LLM-based priority assessment."""
+    # TODO: Replace with LLM-based priority assessment using workflow nodes
+    # For now, return default response encouraging use of main chat endpoint
+    return {
+        "priority": "P2", 
+        "score": 0.50,
+        "note": "This is a legacy endpoint. Please use /v1/chat/completions for full LLM-powered analysis."
+    }

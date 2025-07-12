@@ -42,35 +42,23 @@ def clarification_node(state: HelpHubState) -> Dict[str, Any]:
     clarification_attempts = state.get("clarification_attempts", 0)
     max_attempts = state.get("max_clarification_attempts", 3)
     
-    # TODO: Replace this placeholder logic with LLM-based analysis
-    # You should use the ANALYSIS_PROMPT to determine if the input is clear enough
+    # TODO: Replace this placeholder with LLM-based analysis
+    # You should:
+    # 1. Use ANALYSIS_PROMPT to determine if input is clear enough
+    # 2. Call LLM to analyze the user input for completeness
+    # 3. If clarification needed, use CLARIFICATION_PROMPT to generate specific questions
+    # 4. Handle max attempts gracefully
     
-    # Placeholder logic - participants should replace this
-    if len(user_input.split()) < 3 and clarification_attempts < max_attempts:
-        # Input seems too vague
-        needs_clarification = True
-        
-        # TODO: Use CLARIFICATION_PROMPT to generate better questions
-        clarifying_question = "Can you provide more details about the issue you're experiencing?"
-        
-        state["needs_clarification"] = True
-        state["clarification_attempts"] = clarification_attempts + 1
-        state["current_response"] = clarifying_question
-        state["custom_llm_chunk"] = clarifying_question
-        
-        logger.info(f"Requesting clarification (attempt {clarification_attempts + 1})")
-        
-    else:
-        # Either input is clear enough OR max attempts reached
-        state["needs_clarification"] = False
-        
-        if clarification_attempts >= max_attempts:
-            # Proceed with best guess
-            state["current_response"] = "I'll proceed with the information provided."
-            state["custom_llm_chunk"] = "I'll proceed with the information provided."
-            logger.info("Max clarification attempts reached, proceeding")
-        else:
-            logger.info("Input appears clear enough, proceeding to categorization")
+    # Placeholder logic - participants should implement LLM-based analysis
+    response = "I need to analyze your request to determine if I have enough information to help you effectively."
+    
+    # For now, assume input is always clear enough to proceed
+    # In real implementation, LLM would analyze input complexity and completeness
+    state["needs_clarification"] = False
+    state["current_response"] = response
+    state["custom_llm_chunk"] = response
+    
+    logger.info("Clarification analysis completed - proceeding to categorization")
     
     return state
 

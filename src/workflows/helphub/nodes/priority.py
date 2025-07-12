@@ -44,51 +44,29 @@ def priority_node(state: HelpHubState) -> Dict[str, Any]:
     category = state.get("ticket_category", "unknown")
     user_context = state.get("user_context", {})
     
-    # TODO: Replace this placeholder logic with LLM-based priority assessment
+    # TODO: Replace this placeholder with LLM-based priority assessment
     # You should:
     # 1. Use PRIORITY_PROMPT to structure the assessment
-    # 2. Include conversation context and user role information
-    # 3. Call LLM to determine priority level and reasoning
-    # 4. Parse response to extract priority and justification
+    # 2. Analyze business impact, urgency, and user context
+    # 3. Call LLM to determine priority: P1 (Critical), P2 (High), P3 (Medium)
+    # 4. Parse response to extract priority level and detailed reasoning
+    # 5. Consider VIP users and business critical systems
     
-    # Placeholder logic - participants should replace this
-    user_input_lower = user_input.lower()
-    
-    # Check for P1 (Critical) indicators
-    if any(word in user_input_lower for word in [
-        "cannot", "down", "outage", "urgent", "emergency", "critical", 
-        "flooding", "fire", "security breach", "system down"
-    ]):
-        priority = "P1"
-        reasoning = "Critical issue requiring immediate attention"
-        
-    # Check for P2 (High) indicators  
-    elif any(word in user_input_lower for word in [
-        "slow", "error", "problem", "affecting", "multiple users", 
-        "intermittent", "deadline", "client meeting"
-    ]):
-        priority = "P2"
-        reasoning = "High priority issue impacting productivity"
-        
-    # Default to P3 (Medium)
-    else:
-        priority = "P3"
-        reasoning = "Standard priority for general requests"
-    
-    # Consider category-specific priority adjustments
-    if category == "access" and "locked" in user_input_lower:
-        # Account lockouts are typically higher priority
-        if priority == "P3":
-            priority = "P2"
-            reasoning = "Account lockout requires prompt resolution"
+    # Placeholder logic - participants should implement LLM-based assessment
+    priority = "P2"  # Default to high priority for demo
+    reasoning = "High priority issue requiring prompt attention"
     
     # Update state
     state["ticket_priority"] = priority
     
     logger.info(f"Assigned priority: {priority} - {reasoning}")
     
-    # Set response for streaming
-    response = f"I've assessed this as a {priority} priority issue. {reasoning}"
+    # Set response based on priority level
+    if priority in ["P1", "P2"]:
+        response = f"I've assessed this as a {priority} priority issue and will create a support ticket. {reasoning}"
+    else:
+        response = f"I've assessed this as a {priority} priority issue. While important, this doesn't require immediate ticketing. Please check our knowledge base or contact support directly for non-urgent requests."
+    
     state["current_response"] = response
     state["custom_llm_chunk"] = response
     
@@ -100,20 +78,24 @@ def escalate_emergency(state: HelpHubState) -> bool:
     Determine if this is an emergency requiring immediate escalation.
     
     TODO for participants:
-    - Implement emergency detection logic
-    - Define what constitutes an emergency (security, safety, critical systems)
-    - Create escalation procedures for different emergency types
+    - Use EMERGENCY_ESCALATION_PROMPT to analyze the situation
+    - Call LLM to detect safety, security, or critical infrastructure issues
+    - Implement escalation procedures for different emergency types
+    - Define organization-specific emergency criteria
     
     Returns:
         True if emergency escalation is needed
     """
     
-    user_input = state.get("current_user_input", "").lower()
+    user_input = state.get("current_user_input", "")
+    user_context = state.get("user_context", {})
     
-    # TODO: Implement comprehensive emergency detection
-    emergency_keywords = [
-        "fire", "flooding", "security breach", "data loss", 
-        "server room", "power outage", "gas leak"
-    ]
+    # TODO: Implement LLM-based emergency detection
+    # For now, assume no emergency unless explicitly determined by LLM
+    # In real implementation, use EMERGENCY_ESCALATION_PROMPT to analyze:
+    # - Safety issues (fire, flooding, electrical hazards)
+    # - Security breaches or unauthorized access
+    # - Critical system failures affecting business operations
+    # - Data loss or corruption scenarios
     
-    return any(keyword in user_input for keyword in emergency_keywords)
+    return False  # Placeholder - participants should implement LLM analysis

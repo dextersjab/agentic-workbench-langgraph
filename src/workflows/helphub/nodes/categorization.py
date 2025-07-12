@@ -44,34 +44,17 @@ def categorization_node(state: HelpHubState) -> Dict[str, Any]:
     conversation_history = state.get("messages", [])
     kb_articles = state.get("kb_articles", [])
     
-    # TODO: Replace this placeholder logic with LLM-based categorization
+    # TODO: Replace this placeholder with LLM-based categorization
     # You should:
-    # 1. Construct a prompt using CATEGORIZATION_PROMPT
-    # 2. Include conversation history and KB context
-    # 3. Call the LLM to get categorization
-    # 4. Parse the response to extract category and confidence
+    # 1. Use CATEGORIZATION_PROMPT to structure the analysis
+    # 2. Include conversation history and KB context in the prompt
+    # 3. Call LLM to determine category: hardware, software, network, access, billing
+    # 4. Parse LLM response to extract category and confidence level
+    # 5. Handle edge cases and multi-category issues
     
-    # Placeholder logic - participants should replace this
-    user_input_lower = user_input.lower()
-    
-    if any(word in user_input_lower for word in ["password", "login", "access", "account", "locked"]):
-        category = "access"
-        confidence = 0.85
-    elif any(word in user_input_lower for word in ["wifi", "network", "internet", "connection"]):
-        category = "network" 
-        confidence = 0.80
-    elif any(word in user_input_lower for word in ["laptop", "computer", "hardware", "printer", "monitor"]):
-        category = "hardware"
-        confidence = 0.75
-    elif any(word in user_input_lower for word in ["software", "application", "program", "install"]):
-        category = "software"
-        confidence = 0.80
-    elif any(word in user_input_lower for word in ["billing", "payment", "license", "subscription"]):
-        category = "billing"
-        confidence = 0.70
-    else:
-        category = "unknown"
-        confidence = 0.30
+    # Placeholder logic - participants should implement LLM-based categorization
+    category = "software"  # Default category for now
+    confidence = 0.85
     
     # Update state
     state["ticket_category"] = category
@@ -80,7 +63,7 @@ def categorization_node(state: HelpHubState) -> Dict[str, Any]:
     logger.info(f"Categorized as: {category} (confidence: {confidence})")
     
     # Set response for streaming
-    response = f"I've categorized this as a {category} issue."
+    response = f"I've analyzed your request and categorized this as a {category} issue."
     state["current_response"] = response
     state["custom_llm_chunk"] = response
     

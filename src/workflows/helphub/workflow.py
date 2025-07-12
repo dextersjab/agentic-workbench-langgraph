@@ -58,7 +58,7 @@ def create_helphub_workflow():
     # Set entry point
     workflow.set_entry_point("clarification")
     
-    # Add conditional edges
+    # Add conditional edges for simplified workflow
     # TODO: Participants should implement these conditional functions
     workflow.add_conditional_edges(
         "clarification",
@@ -72,19 +72,18 @@ def create_helphub_workflow():
     # After categorization, always go to priority assessment
     workflow.add_edge("categorization", "priority")
     
-    # After priority, go to routing
-    workflow.add_edge("priority", "routing")
-    
-    # Conditional routing based on decision
+    # Priority assessment determines if we proceed or discard
     workflow.add_conditional_edges(
-        "routing",
-        determine_next_step,
+        "priority",
+        lambda state: "routing" if state.get("ticket_priority", "P3") in ["P1", "P2"] else "discard",
         {
-            "servicehub": "servicehub",
-            "escalation": END,  # Emergency escalation ends workflow
-            "end": END  # Issue resolved immediately
+            "routing": "routing",
+            "discard": END  # Non-urgent issues are discarded
         }
     )
+    
+    # After routing, always create ServiceHub ticket for urgent issues
+    workflow.add_edge("routing", "servicehub")
     
     # ServiceHub creation ends the workflow
     workflow.add_edge("servicehub", END)

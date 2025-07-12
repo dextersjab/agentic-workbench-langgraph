@@ -96,41 +96,38 @@ pytest -q
 
 ```mermaid
 graph TD
-    A[User Input] --> B[Agent Node]
-    B -.->|Need Clarification| B
-    B -.->|Can Answer from KB| C[Provide KB Answer]
-    B -.->|Need Ticket| D[Categorization]
-    B -.->|Multi-Issue| E[Issue Decomposition]
+    A[User Input] --> B[Clarification]
+    B -.->|Needs More Info| END1[Ask Questions]
+    B -.->|Clear Enough| C[Categorization]
     
-    E -.->|Primary Issue| D
-    E -.->|Secondary Issues| F[Queue for Later]
+    C --> D[Priority Assessment]
+    D -.->|Non-Urgent P3| END2[Issue Discarded]
+    D -.->|Urgent P1/P2| E[Routing]
     
-    D --> G[Priority Assessment]
-    G --> H[Queue Assignment]
-    H --> I[ServiceHub Integration]
-    I --> J[Ticket Created]
+    E --> F[ServiceHub Integration]
+    F --> G[Ticket Created]
     
-    K[KB Data] --> B
-    L[ServiceHub] --> I
+    H[KB Data] --> B
+    I[ServiceHub] --> F
     
     style B stroke:#1976d2,stroke-width:3px
-    style D stroke:#388e3c,stroke-width:3px
-    style I stroke:#7b1fa2,stroke-width:3px
+    style D stroke:#ff9800,stroke-width:3px
+    style E stroke:#388e3c,stroke-width:3px
+    style F stroke:#7b1fa2,stroke-width:3px
 ```
 
-### 3.1 Agent Node Logic
+### 2.1 Simplified Workflow Logic
 
-The core Agent Node receives:
-- **User input** (current message)
-- **Conversation history** (previous turns)
-- **KB data** (relevant FAQ articles as JSON context)
-- **User context** (role, urgency, etc.)
+**Single Issue Focus**: The workflow only handles one issue at a time and discards non-urgent requests:
 
-The LLM then decides:
-- Return answer using KB data
-- Ask clarifying questions  
-- Proceed to ticket creation
-- Handle multiple issues
+1. **Clarification**: LLM determines if user input is clear enough to proceed
+2. **Categorization**: LLM categorizes the issue (hardware, software, network, access, billing)  
+3. **Priority Assessment**: LLM evaluates urgency and business impact
+4. **Urgency Filter**: Only P1 (Critical) and P2 (High) priority issues proceed
+5. **Routing**: LLM determines appropriate support team assignment
+6. **ServiceHub Integration**: Create ticket for urgent issues only
+
+**Non-urgent issues (P3)** are politely acknowledged but not processed further, keeping the agent focused on high-impact problems.
 
 ## 4. Realistic Ticket Scenarios
 
@@ -397,33 +394,7 @@ graph TD
     style I stroke:#d32f2f,stroke-width:3px
 ```
 
-## 12. Implementation Roadmap
-
-### Phase 1: Core Agent (Week 1)
-- [x] Basic LangGraph structure
-- [x] Simple question loop
-- [x] KB search integration
-- [x] Mock ServiceHub endpoints
-
-### Phase 2: Conversation Intelligence (Week 2)
-- [ ] Multi-turn conversation handling
-- [ ] Context retention across turns
-- [ ] Interruption management
-- [ ] Topic change detection
-
-### Phase 3: Advanced Features (Week 3)
-- [ ] Complex scenario handling
-- [ ] Built-in constraints (rate limiting, PII detection)
-- [ ] Escalation workflows
-- [ ] Performance optimization
-
-### Phase 4: Evaluation & Testing (Week 4)
-- [ ] Comprehensive test dataset
-- [ ] Automated scoring system
-- [ ] Edge case scenarios
-- [ ] Participant assessment tools
-
-## 13. Project Structure
+## 12. Project Structure
 
 ```
 agentic-course-case-study-0/
@@ -451,7 +422,7 @@ agentic-course-case-study-0/
 └── requirements.txt
 ```
 
-## 14. Participant Learning Path
+## 13. Participant Learning Path
 
 ### 14.1 Prerequisites
 - **Python Proficiency**: Comfortable with Python programming
@@ -473,7 +444,7 @@ Participants will demonstrate mastery by:
 - Handling interruptions and topic changes gracefully
 - Integrating with mock enterprise systems
 
-## 15. API Reference
+## 14. API Reference
 
 ### 15.1 Core Endpoints
 
@@ -499,7 +470,7 @@ Participants will demonstrate mastery by:
 }
 ```
 
-## 16. Common Issues & Solutions
+## 15. Common Issues & Solutions
 
 ### 16.1 Development Issues
 
@@ -518,15 +489,15 @@ Participants will demonstrate mastery by:
 | Slow test execution | Implement test data caching and parallel execution |
 | Evaluation scores varying | Ensure consistent scoring criteria and test environment |
 
-## 17. Course Support
+## 16. Course Support
 
-### 17.1 Getting Help
+### 16.1 Getting Help
 
 - **Issues**: Report problems at [GitHub Issues](https://github.com/dextersjab/agentic-course-case-study-0/issues)
 - **Discussion**: Use GitHub Discussions for questions and collaboration
 - **Documentation**: Comprehensive guides in `/docs` directory
 
-### 17.2 Contributing
+### 16.2 Contributing
 
 Participants are encouraged to:
 1. Fork the repository
