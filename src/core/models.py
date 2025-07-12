@@ -63,18 +63,6 @@ class OpenAIError(BaseModel):
     code: Optional[str] = None
 
 
-# Legacy models for backward compatibility with existing endpoints
-class Ticket(BaseModel):
-    """IT support ticket."""
-    subject: str
-    description: str
-
-
-class PIICheckRequest(BaseModel):
-    """PII detection request."""
-    text: str
-
-
 # LangChain message conversion utilities
 class SystemMessage:
     """System message for LangChain compatibility."""

@@ -288,14 +288,17 @@ graph LR
     style C stroke:#f57c00,stroke-width:3px
 ```
 
-### 8.2 API Integration Points
+### 8.2 ServiceHub Integration
 
-| Endpoint | Method | Purpose | Example |
-|----------|---------|---------|---------|
-| `/servicehub/incidents` | POST | Create new ticket | `{"category": "hardware", "priority": "P1"}` |
-| `/servicehub/incidents/{id}` | GET | Retrieve ticket status | Returns ticket details |
-| `/servicehub/incidents/{id}` | PUT | Update ticket | Add notes, change status |
-| `/servicehub/users/{id}` | GET | Get user details | For assignment and notifications |
+ServiceHub integration is handled internally by the **ServiceHub Integration node** in the LangGraph workflow. This node:
+
+- Creates tickets in the mock ITSM platform
+- Assigns tickets to appropriate queues based on routing decisions
+- Generates ticket IDs and tracking information
+- Provides users with ticket details and next steps
+- Handles SLA calculations and follow-up procedures
+
+**TODO for participants**: Implement the ServiceHub API client within the `servicehub_integration_node()` function to integrate with your organization's actual ITSM platform.
 
 ## 9. Evaluation Criteria
 
@@ -399,27 +402,27 @@ graph TD
 ```
 agentic-course-case-study-0/
 ├── src/
-│   ├── graph.py              # LangGraph workflow
-│   ├── nodes.py              # Workflow nodes
-│   ├── state.py              # Conversation state
-│   ├── tools.py              # ServiceHub tools
-│   └── evaluator.py          # Assessment logic
-├── api/
-│   ├── main.py               # FastAPI mock services
-│   └── servicehub.py         # ServiceHub simulation
+│   ├── core/
+│   │   ├── api.py             # OpenAI-compatible API
+│   │   ├── models.py          # Pydantic models
+│   │   ├── streaming.py       # SSE utilities
+│   │   └── llm_client.py      # LLM client
+│   └── workflows/
+│       ├── registry.py        # Workflow registry
+│       └── helphub/
+│           ├── workflow.py    # LangGraph workflow
+│           ├── state.py       # Workflow state
+│           ├── nodes/         # Workflow nodes
+│           └── prompts/       # LLM prompts
 ├── data/
-│   ├── tickets_train.csv     # Training scenarios
-│   ├── tickets_test.csv      # Test scenarios
-│   └── conversations.json    # Multi-turn examples
+│   ├── tickets_train.csv      # Training scenarios
+│   ├── tickets_test.csv       # Test scenarios
+│   └── conversations.json     # Multi-turn examples
 ├── kb/
-│   └── articles.json         # Knowledge base articles
-├── tests/
-│   ├── test_categorization.py
-│   ├── test_conversation.py
-│   └── test_integration.py
-├── docs/
-│   └── course_guide.md       # Participant instructions
-└── requirements.txt
+│   └── articles.json          # Knowledge base articles
+├── main.py                    # API server entry point
+├── requirements.txt           # Dependencies
+└── README.md
 ```
 
 ## 13. Participant Learning Path

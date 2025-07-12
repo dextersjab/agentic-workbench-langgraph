@@ -13,9 +13,7 @@ from .models import (
     ChatCompletionRequest, 
     ModelsResponse, 
     ModelInfo,
-    OpenAIError,
-    Ticket,
-    PIICheckRequest
+    OpenAIError
 )
 from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
 from ..workflows.registry import WorkflowRegistry
@@ -146,7 +144,7 @@ async def chat_completions(request: ChatCompletionRequest):
     )
 
 
-# Legacy endpoints for backward compatibility
+# API information endpoint
 @app.get("/")
 async def root():
     """API information."""
@@ -157,33 +155,10 @@ async def root():
         "openai_compatible": True,
         "endpoints": {
             "models": "/v1/models - List available models",
-            "chat": "/v1/chat/completions - OpenAI-compatible chat endpoint",
-            "legacy_categorize": "/categorize - Legacy ticket categorization",
-            "legacy_prioritize": "/prioritize - Legacy priority assessment",
-            "legacy_route": "/route - Legacy routing workflow"
+            "chat": "/v1/chat/completions - OpenAI-compatible chat endpoint"
+        },
+        "workflow": {
+            "description": "LangGraph workflow handles categorization, prioritization, and routing internally",
+            "stages": ["clarification", "categorization", "priority_assessment", "routing", "servicehub_integration"]
         }
-    }
-
-
-@app.post("/categorize")
-async def categorize(ticket: Ticket):
-    """Legacy categorization endpoint - TODO: implement LLM-based categorization."""
-    # TODO: Replace with LLM-based categorization using workflow nodes
-    # For now, return default response encouraging use of main chat endpoint
-    return {
-        "category": "software", 
-        "confidence": 0.50,
-        "note": "This is a legacy endpoint. Please use /v1/chat/completions for full LLM-powered analysis."
-    }
-
-
-@app.post("/prioritize")
-async def prioritize(ticket: Ticket):
-    """Legacy prioritization endpoint - TODO: implement LLM-based priority assessment."""
-    # TODO: Replace with LLM-based priority assessment using workflow nodes
-    # For now, return default response encouraging use of main chat endpoint
-    return {
-        "priority": "P2", 
-        "score": 0.50,
-        "note": "This is a legacy endpoint. Please use /v1/chat/completions for full LLM-powered analysis."
     }
