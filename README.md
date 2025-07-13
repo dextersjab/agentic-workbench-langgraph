@@ -1,5 +1,8 @@
 # 🎯 HelpHub – IT Support Chatbot Case Study
 
+> *"As CTO of GlobalTech Solutions, a Microsoft-centric enterprise with 15,000+ employees across 40 countries, our centralized IT team faces a constant challenge: providing 24/7 multilingual support to staff in every timezone. We needed an intelligent first-line agent that could handle the complexity of real IT issues while seamlessly integrating with our existing ServiceHub ITSM platform and Teams-based workflow. HelpHub represents our vision for scalable, intelligent IT support that never sleeps."*  
+> **– Sarah Chen, CTO, GlobalTech Solutions**
+
 > **Enterprise Agent Development Course**  
 > A comprehensive case study for building realistic AI agents using LangGraph in IT support environments
 
