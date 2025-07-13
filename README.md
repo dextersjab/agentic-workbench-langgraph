@@ -78,14 +78,14 @@ graph TD
   chat --> __end__
 ```
 
-Once you've completed this exercise, your chatbot should:
+Once you've completed this exercise, your chatbot will:
 - ask clarifying questions for vague issues
-- categorize your IT support request
+- categorise users' IT support requests
 - assess priority based on business impact
 - route to appropriate support teams
 - create ServiceHub tickets automatically
 
-Try these example conversations:
+Try these example conversation starters:
 - "My laptop won't turn on"
 - "I can't access my email"
 - "The wifi is really slow today"
@@ -115,38 +115,30 @@ pytest -q
 
 ```mermaid
 graph TD
-    A[User Input] --> B[Clarification]
-    B -.->|Needs More Info| END1[Ask Questions]
-    B -.->|Clear Enough| C[Categorization]
+    __start__ --> clarify_issue
+    clarify_issue --> categorize_issue
+    categorize_issue --> assess_priority
+    assess_priority --> route_ticket
+    route_ticket --> create_ticket
+    create_ticket --> __end__
     
-    C --> D[Priority Assessment]
-    D -.->|Non-Urgent P3| END2[Issue Discarded]
-    D -.->|Urgent P1/P2| E[Routing]
-    
-    E --> F[ServiceHub Integration]
-    F --> G[Ticket Created]
-    
-    H[KB Data] --> B
-    I[ServiceHub] --> F
-    
-    style B stroke:#1976d2,stroke-width:3px
-    style D stroke:#ff9800,stroke-width:3px
-    style E stroke:#388e3c,stroke-width:3px
-    style F stroke:#7b1fa2,stroke-width:3px
+    style clarify_issue stroke:#1976d2,stroke-width:3px
+    style assess_priority stroke:#ff9800,stroke-width:3px
+    style route_ticket stroke:#388e3c,stroke-width:3px
+    style create_ticket stroke:#7b1fa2,stroke-width:3px
 ```
 
 ### 2.1 Simplified Workflow Logic
 
-**Single Issue Focus**: The workflow only handles one issue at a time and discards non-urgent requests:
+**Linear Workflow**: The agent processes each support request through a sequence of LLM-powered nodes:
 
-1. **Clarification**: LLM determines if user input is clear enough to proceed
-2. **Categorization**: LLM categorizes the issue (hardware, software, network, access, billing)  
-3. **Priority Assessment**: LLM evaluates urgency and business impact
-4. **Urgency Filter**: Only P1 (Critical) and P2 (High) priority issues proceed
-5. **Routing**: LLM determines appropriate support team assignment
-6. **ServiceHub Integration**: Create ticket for urgent issues only
+1. **clarify_issue**: LLM determines if user input is clear enough or asks clarifying questions
+2. **categorize_issue**: LLM categorizes the issue (hardware, software, network, access, billing)  
+3. **assess_priority**: LLM evaluates urgency and business impact (P1/P2/P3)
+4. **route_ticket**: LLM determines appropriate support team assignment
+5. **create_ticket**: Makes API call to ServiceHub to create the support ticket
 
-**Non-urgent issues (P3)** are politely acknowledged but not processed further, keeping the agent focused on high-impact problems.
+Each node represents a distinct step where the LLM processes information and makes decisions, with the workflow progressing linearly from start to end.
 
 ## 4. Realistic Ticket Scenarios
 
@@ -309,7 +301,7 @@ graph LR
 
 ### 8.2 ServiceHub Integration
 
-ServiceHub integration is handled internally by the **ServiceHub Integration node** in the LangGraph workflow. This node:
+ServiceHub integration is handled internally by the **create_ticket node** in the LangGraph workflow. This node:
 
 - Creates tickets in the mock ITSM platform
 - Assigns tickets to appropriate queues based on routing decisions
@@ -317,7 +309,7 @@ ServiceHub integration is handled internally by the **ServiceHub Integration nod
 - Provides users with ticket details and next steps
 - Handles SLA calculations and follow-up procedures
 
-**TODO for participants**: Implement the ServiceHub API client within the `servicehub_integration_node()` function to integrate with your organization's actual ITSM platform.
+**TODO for participants**: Implement the ServiceHub API client within the `create_ticket()` function to integrate with your organization's actual ITSM platform.
 
 ## 9. Evaluation Criteria
 
