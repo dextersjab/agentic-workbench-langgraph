@@ -22,7 +22,7 @@ class OpenRouterClient:
     async def chat_completion(
         self,
         messages: List[Dict[str, str]],
-        model: str = "openai/gpt-4o-mini",
+        model: str = "openai/gpt-4.1-mini",
         temperature: float = 0.7,
         max_tokens: Optional[int] = None,
         stream_callback: Optional[Callable[[str], None]] = None

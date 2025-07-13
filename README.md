@@ -1,31 +1,41 @@
-# 🎯 HelpHub – IT Support Chatbot Case Study
+# 🎯 HelpHub — IT Support Chatbot Case Study
+
+A comprehensive case study for building realistic AI agents using LangGraph.
+
+Project description:
 
 > *"As CTO of GlobalTech Solutions, a Microsoft-centric enterprise with 15,000+ employees across 40 countries, our centralized IT team faces a constant challenge: providing 24/7 multilingual support to staff in every timezone. We needed an intelligent first-line agent that could handle the complexity of real IT issues while seamlessly integrating with our existing ServiceHub ITSM platform and Teams-based workflow. HelpHub represents our vision for scalable, intelligent IT support that never sleeps."*  
-> **– Sarah Chen, CTO, GlobalTech Solutions**
+> **– Sarah Chen, CTO, GlobalTech Solutions** (← fictional project sponsor)
 
-> **Enterprise Agent Development Course**  
-> A comprehensive case study for building realistic AI agents using LangGraph in IT support environments
+## 🚀 Setup
 
-## 🚀 Quick Start
+This repository is a template for building and running your agent with an API that's compatible with the OpenAI Chat Completions API and Open WebUI interface.
 
-```bash
-# Clone and setup
+Follow the steps below to get started.
+
+1. Clone this repo:
+```shell
 git clone https://github.com/dextersjab/agentic-course-case-study-0
 cd agentic-course-case-study-0
-# Setup with uv (recommended)
+```
 
+2. Set up using `uv` (recommended):
+```shell
 uv venv
 source .venv/bin/activate
-
 # On Windows: .venv\Scripts\activate
+```
 
+3. Install dependencies:
+```shell
 uv pip install -r requirements.txt
-
 # Alternative: traditional pip
 # pip install -r requirements.txt
+```
 
-# Start the HelpHub API
-uvicorn src.core.api:app --reload
+4. Start the HelpHub API:
+```
+uvicorn src.core.api:app --reload --port 8000
 ```
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
@@ -34,11 +44,7 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
 
 The API is fully compatible with [Open WebUI](https://openwebui.com/) for a chat interface:
 
-### 1. Start the HelpHub API
-```bash
-# Start the API server
-uvicorn src.core.api:app --host 0.0.0.0 --port 8000 --reload
-```
+### 1. Follow the steps above to start the HelpHub API
 
 ### 2. Configure Open WebUI
 ```bash
@@ -53,21 +59,31 @@ pip install open-webui
 open-webui serve --port 3000
 ```
 
-### 3. Add HelpHub Model
+### 3. Add the HelpHub agent as a "model"
 1. Open [http://localhost:3000](http://localhost:3000)
 2. Go to Settings → Connections
 3. Add OpenAI API connection:
    - **API Base URL**: `http://localhost:8000/v1`
    - **API Key**: `not-needed` (placeholder)
-4. The HelpHub models will appear in the model selector
+4. Your HelpHub models will appear in the model selector
 
 ### 4. Chat with HelpHub
-Select "helphub-v1" from the model dropdown and start chatting! The agent will:
-- Ask clarifying questions for vague issues
-- Categorize your IT support request
-- Assess priority based on business impact
-- Route to appropriate support teams
-- Create ServiceHub tickets automatically
+Select "helphub-v1" from the model dropdown and start chatting!
+
+Initially, a chatbot built on this agentic workflow will simply respond to questions.
+
+```mermaid
+graph TD
+  __start__ --> chat
+  chat --> __end__
+```
+
+Once you've completed this exercise, your chatbot should:
+- ask clarifying questions for vague issues
+- categorize your IT support request
+- assess priority based on business impact
+- route to appropriate support teams
+- create ServiceHub tickets automatically
 
 Try these example conversations:
 - "My laptop won't turn on"
