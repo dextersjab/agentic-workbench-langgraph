@@ -13,24 +13,31 @@ This repository is a template for building and running your agent with an API th
 
 Follow the steps below to get started.
 
-1. Clone this repo:
+1. Clone this repo
+
 ```shell
 git clone https://github.com/dextersjab/agentic-course-case-study-0
 cd agentic-course-case-study-0
 ```
 
-2. Set up using `uv` (recommended):
+2. Set up using `uv` (recommended)
+
+On Mac:
 ```shell
 uv venv
 source .venv/bin/activate
-# On Windows: .venv\Scripts\activate
+```
+
+On Windows:
+```shell
+uv venv
+.venv\Scripts\activate
 ```
 
 3. Install dependencies:
+
 ```shell
 uv pip install -r requirements.txt
-# Alternative: traditional pip
-# pip install -r requirements.txt
 ```
 
 4. Start the HelpHub API:

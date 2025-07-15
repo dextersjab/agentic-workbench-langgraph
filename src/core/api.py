@@ -147,18 +147,24 @@ async def chat_completions(request: ChatCompletionRequest):
 # API information endpoint
 @app.get("/")
 async def root():
-    """API information."""
+    """API information with HATEOAS links."""
     return {
         "name": "HelpHub IT Support Agent API",
         "version": "1.0.0",
-        "description": "OpenAI-compatible API for IT support agent training",
-        "openai_compatible": True,
-        "endpoints": {
-            "models": "/v1/models - List available models",
-            "chat": "/v1/chat/completions - OpenAI-compatible chat endpoint"
+        "description": "OpenAI-compatible API for IT support chatbot using LangGraph workflows",
+        "links": {
+            "self": {"href": "/v1/", "method": "GET"},
+            "models": {"href": "/v1/models", "method": "GET", "description": "List available AI models"},
+            "chat": {"href": "/v1/chat/completions", "method": "POST", "description": "Create chat completion"},
+            "docs": {"href": "/docs", "method": "GET", "description": "Interactive API documentation"}
         },
-        "workflow": {
-            "description": "LangGraph workflow handles categorization, prioritization, and routing internally",
-            "stages": ["clarification", "categorization", "priority_assessment", "routing", "servicehub_integration"]
+        "capabilities": {
+            "streaming": True,
+            "openai_compatible": True,
+            "workflow_based": True
+        },
+        "supported_formats": {
+            "request": "application/json",
+            "response": ["application/json", "text/event-stream"]
         }
     }
