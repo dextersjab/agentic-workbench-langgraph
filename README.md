@@ -128,7 +128,7 @@ pytest -q
 
 ---
 
-# 📋 Product Requirements Document (PRD)
+# 📋 Agentic workflow design
 
 ## 1. Executive Summary
 
