@@ -160,9 +160,9 @@ graph TD
 **Linear Workflow**: The agent processes each support request through a sequence of LLM-powered nodes:
 
 1. **clarify_issue**: LLM determines if user input is clear enough or asks clarifying questions
-2. **categorize_issue**: LLM categorizes the issue (hardware, software, network, access, billing)  
-3. **assess_priority**: LLM evaluates urgency and business impact (P1/P2/P3)
-4. **route_ticket**: LLM determines appropriate support team assignment
+2. **categorise_issue**: LLM categorizes the issue (hardware, software, network, access, billing)  
+3. **prioritise_issue**: LLM evaluates urgency and business impact (P1/P2/P3)
+4. **triage_issue**: LLM uses question tree to determine best course of action
 5. **create_ticket**: Makes API call to ServiceHub to create the support ticket
 
 Each node represents a distinct step where the LLM processes information and makes decisions, with the workflow progressing linearly from start to end.
