@@ -49,22 +49,32 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
 
 ## 🌐 Open WebUI Integration
 
-The API is fully compatible with [Open WebUI](https://openwebui.com/) for a chat interface:
+The Agent API is fully compatible with [Open WebUI](https://openwebui.com/), a popular web interface for LLM-based chat apps.
 
-### 1. Follow the steps above to start the HelpHub API
+To interact with your chatbot using Open WebUI:
+
+### 1. Follow the above steps to start the HelpHub API
 
 ### 2. Configure Open WebUI
-```bash
-# Option 1: Docker (recommended)
+
+Option 1: Install locally
+```shell
+uv pip install open-webui
+open-webui serve --port 3000
+```
+
+Option 2: Docker
+
+```shell
 docker run -d -p 3000:8080 \
   -e OPENAI_API_BASE_URL=http://localhost:8000/v1 \
   -e OPENAI_API_KEY=not-needed \
   --name open-webui ghcr.io/open-webui/open-webui:main
-
-# Option 2: Install locally
-pip install open-webui
-open-webui serve --port 3000
 ```
+
+Note: Open WebUI takes a few minutes to finish building. If running with Docker, you can monitor progress using `docker logs -f open-webui`.
+
+See the [Open WebUI](https://github.com/open-webui/open-webui) repository for more details.
 
 ### 3. Add the HelpHub agent as a "model"
 1. Open [http://localhost:3000](http://localhost:3000)
