@@ -57,13 +57,7 @@ To interact with your chatbot using Open WebUI:
 
 ### 2. Configure Open WebUI
 
-Option 1: Install locally
-```shell
-uv pip install open-webui
-open-webui serve --port 3000
-```
-
-Option 2: Docker
+Option 1: Docker container
 
 ```shell
 docker run -d -p 3000:8080 \
@@ -72,15 +66,21 @@ docker run -d -p 3000:8080 \
   --name open-webui ghcr.io/open-webui/open-webui:main
 ```
 
+Option 2: Install locally
+```shell
+uv pip install open-webui
+open-webui serve --port 3000
+```
+
 Note: Open WebUI takes a few minutes to finish building. If running with Docker, you can monitor progress using `docker logs -f open-webui`.
 
 See the [Open WebUI](https://github.com/open-webui/open-webui) repository for more details.
 
 ### 3. Add the HelpHub agent as a "model"
 1. Open [http://localhost:3000](http://localhost:3000)
-2. Go to Settings → Connections
+2. Go to Settings (in bottom right menu) → Connections
 3. Add OpenAI API connection:
-   - **API Base URL**: `http://localhost:8000/v1`
+   - **API Base URL**: `http://localhost:8000/`
    - **API Key**: `not-needed` (placeholder)
 4. Your HelpHub models will appear in the model selector
 

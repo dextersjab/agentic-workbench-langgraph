@@ -6,8 +6,9 @@ import traceback
 import logging
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from .models import (
     ChatCompletionRequest, 
@@ -24,9 +25,20 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="HelpHub IT Support Agent",
     description="OpenAI-compatible API for IT support chatbot training",
-    version="1.0.0",
-    root_path="/v1"
+    version="0.1.0"
 )
+
+# Add CORS middleware for Open WebUI compatibility
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Create v1 router
+v1_router = APIRouter(prefix="/v1")
 
 
 async def _helphub_stream(req: ChatCompletionRequest, workflow, state) -> AsyncGenerator[str, None]:
@@ -111,7 +123,7 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
         yield create_done_chunk()
 
 
-@app.get("/models")
+@v1_router.get("/models")
 async def list_models() -> ModelsResponse:
     """List available models for Open WebUI."""
     logger.info("Models list requested")
@@ -120,7 +132,13 @@ async def list_models() -> ModelsResponse:
     return ModelsResponse(data=models)
 
 
-@app.post("/chat/completions")
+@v1_router.options("/models")
+async def models_options():
+    """Handle OPTIONS request for models endpoint."""
+    logger.info("Models OPTIONS request")
+    return {"message": "OK"}
+
+@v1_router.post("/chat/completions")
 async def chat_completions(request: ChatCompletionRequest):
     """Handle OpenAI-compatible chat completion requests."""
     logger.info(f"Chat completion request - model: {request.model}, stream: {request.stream}")
@@ -145,7 +163,7 @@ async def chat_completions(request: ChatCompletionRequest):
 
 
 # API information endpoint
-@app.get("/")
+@v1_router.get("/")
 async def root():
     """API information with HATEOAS links."""
     return {
@@ -168,3 +186,6 @@ async def root():
             "response": ["application/json", "text/event-stream"]
         }
     }
+
+# Include the v1 router in the main app
+app.include_router(v1_router)
