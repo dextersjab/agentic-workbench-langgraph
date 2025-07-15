@@ -132,17 +132,15 @@ pytest -q
 
 ```mermaid
 graph TD
-    __start__ --> clarify_issue
-    clarify_issue --> categorize_issue
-    categorize_issue --> assess_priority
-    assess_priority --> route_ticket
-    route_ticket --> create_ticket
-    create_ticket --> __end__
+    __start__["\_\_start\_\_"] --> clarify_issue
+    clarify_issue --> categorise_issue
+    categorise_issue --> prioritise_issue
+    prioritise_issue --> triage_issue
+    triage_issue --> create_ticket
+    create_ticket --> __end__["\_\_end\_\_"]
     
-    style clarify_issue stroke:#1976d2,stroke-width:3px
-    style assess_priority stroke:#ff9800,stroke-width:3px
-    style route_ticket stroke:#388e3c,stroke-width:3px
-    style create_ticket stroke:#7b1fa2,stroke-width:3px
+    style __start__ stroke:green,stroke-width:3px
+    style __end__ stroke:red,stroke-width:3px
 ```
 
 ### 2.1 Simplified Workflow Logic

@@ -30,7 +30,7 @@ def create_helphub_workflow():
     This workflow implements the IT support agent flow:
     1. Initial clarification if needed
     2. Issue categorization
-    3. Priority assessment  
+    3. Priority assessment
     4. Routing decision
     5. ServiceHub ticket creation
     

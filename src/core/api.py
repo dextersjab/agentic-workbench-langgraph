@@ -14,7 +14,10 @@ from .models import (
     ChatCompletionRequest, 
     ModelsResponse, 
     ModelInfo,
-    OpenAIError
+    OpenAIError,
+    ChatCompletionResponse,
+    ChatCompletionChoice,
+    ChatMessage
 )
 from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
 from ..workflows.registry import WorkflowRegistry
@@ -123,6 +126,62 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
         yield create_done_chunk()
 
 
+async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatCompletionResponse:
+    """Create a non-streaming chat completion response."""
+    completion_id = f"chatcmpl-{uuid.uuid4().hex}"
+    created = int(time.time())
+    
+    logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}")
+    
+    try:
+        # Initialize HelpHub workflow state
+        state = create_initial_state()
+        workflow = WorkflowRegistry.get_workflow("helphub")
+        
+        # Convert OpenAI messages to LangChain format
+        lc_messages = [_to_lc(msg) for msg in req.messages]
+        
+        # Set the current user input from the last message
+        if req.messages:
+            state["current_user_input"] = req.messages[-1].content
+            state["messages"] = [msg.model_dump() for msg in req.messages]
+        
+        # Collect all workflow output
+        full_response = ""
+        async for chunk in workflow.astream(state, stream_mode="custom"):
+            if "custom_llm_chunk" in chunk:
+                text = chunk["custom_llm_chunk"]
+                if text:
+                    full_response += text
+        
+        # Create the response
+        return ChatCompletionResponse(
+            id=completion_id,
+            created=created,
+            model=req.model,
+            choices=[
+                ChatCompletionChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=full_response),
+                    finish_reason="stop"
+                )
+            ],
+            usage={
+                "prompt_tokens": len(str(req.messages)),
+                "completion_tokens": len(full_response),
+                "total_tokens": len(str(req.messages)) + len(full_response)
+            }
+        )
+        
+    except Exception as exc:
+        logger.error(f"Error in non-streaming completion {completion_id}: {str(exc)}")
+        logger.error(f"Stack trace: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error processing request: {str(exc)}"
+        )
+
+
 @v1_router.get("/models")
 async def list_models() -> ModelsResponse:
     """List available models for Open WebUI."""
@@ -143,23 +202,20 @@ async def chat_completions(request: ChatCompletionRequest):
     """Handle OpenAI-compatible chat completion requests."""
     logger.info(f"Chat completion request - model: {request.model}, stream: {request.stream}")
     
-    if not request.stream:
-        logger.warning("Non-streaming request received - returning error")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This implementation requires stream=true for Open WebUI compatibility"
+    if request.stream:
+        logger.info("Starting streaming response")
+        return StreamingResponse(
+            _sse_generator(request),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*"
+            }
         )
-    
-    logger.info("Starting streaming response")
-    return StreamingResponse(
-        _sse_generator(request),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*"
-        }
-    )
+    else:
+        logger.info("Starting non-streaming response")
+        return await _create_non_streaming_response(request)
 
 
 # API information endpoint
