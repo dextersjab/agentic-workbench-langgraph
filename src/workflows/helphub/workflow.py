@@ -11,13 +11,11 @@ from langgraph.prebuilt import ToolNode
 
 from .state import HelpHubState
 from .nodes import (
-    clarification_node,
-    should_continue_clarification,
-    categorization_node,
-    priority_node,
-    routing_node,
-    determine_next_step,
-    servicehub_integration_node
+    clarify_issue_node,
+    categorise_issue_node,
+    prioritise_issue_node,
+    triage_issue_node,
+    create_ticket_node
 )
 
 logger = logging.getLogger(__name__)
@@ -25,22 +23,17 @@ logger = logging.getLogger(__name__)
 
 def create_helphub_workflow():
     """
-    Create the complete HelpHub LangGraph workflow.
+    Create the HelpHub LangGraph workflow.
     
-    This workflow implements the IT support agent flow:
-    1. Initial clarification if needed
-    2. Issue categorization
-    3. Priority assessment
-    4. Routing decision
-    5. ServiceHub ticket creation
+    This workflow implements a linear IT support agent flow:
+    __start__ → clarify_issue → categorise_issue → prioritise_issue → triage_issue → create_ticket → __end__
     
-    TODO for participants:
-    - Implement all conditional edge logic
-    - Add error handling and fallback paths
-    - Include human-in-the-loop checkpoints
-    - Add workflow state persistence
-    - Implement retry logic for failed nodes
-    - Add monitoring and metrics collection
+    Students will implement each node incrementally:
+    1. clarify_issue: Ask clarifying questions for vague issues (IMPLEMENTED)
+    2. categorise_issue: Categorize issues (hardware, software, network, access, billing) (TODO)
+    3. prioritise_issue: Assess priority based on business impact (P1/P2/P3) (TODO)
+    4. triage_issue: Route to appropriate support teams (TODO)
+    5. create_ticket: Create ServiceHub tickets automatically (TODO)
     """
     
     logger.info("Creating HelpHub workflow")
@@ -48,45 +41,22 @@ def create_helphub_workflow():
     # Create the workflow graph
     workflow = StateGraph(HelpHubState)
     
-    # Add nodes to the workflow
-    workflow.add_node("clarification", clarification_node)
-    workflow.add_node("categorization", categorization_node)
-    workflow.add_node("priority", priority_node)
-    workflow.add_node("routing", routing_node)
-    workflow.add_node("servicehub", servicehub_integration_node)
+    # Add nodes to the workflow in linear order
+    workflow.add_node("clarify_issue", clarify_issue_node)
+    workflow.add_node("categorise_issue", categorise_issue_node)
+    workflow.add_node("prioritise_issue", prioritise_issue_node)
+    workflow.add_node("triage_issue", triage_issue_node)
+    workflow.add_node("create_ticket", create_ticket_node)
     
     # Set entry point
-    workflow.set_entry_point("clarification")
+    workflow.set_entry_point("clarify_issue")
     
-    # Add conditional edges for simplified workflow
-    # TODO: Participants should implement these conditional functions
-    workflow.add_conditional_edges(
-        "clarification",
-        should_continue_clarification,
-        {
-            "continue_clarification": END,  # Return to user for more info
-            "categorization": "categorization"
-        }
-    )
-    
-    # After categorization, always go to priority assessment
-    workflow.add_edge("categorization", "priority")
-    
-    # Priority assessment determines if we proceed or discard
-    workflow.add_conditional_edges(
-        "priority",
-        lambda state: "routing" if state.get("ticket_priority", "P3") in ["P1", "P2"] else "discard",
-        {
-            "routing": "routing",
-            "discard": END  # Non-urgent issues are discarded
-        }
-    )
-    
-    # After routing, always create ServiceHub ticket for urgent issues
-    workflow.add_edge("routing", "servicehub")
-    
-    # ServiceHub creation ends the workflow
-    workflow.add_edge("servicehub", END)
+    # Create linear workflow edges
+    workflow.add_edge("clarify_issue", "categorise_issue")
+    workflow.add_edge("categorise_issue", "prioritise_issue")
+    workflow.add_edge("prioritise_issue", "triage_issue")
+    workflow.add_edge("triage_issue", "create_ticket")
+    workflow.add_edge("create_ticket", END)
     
     # Compile the workflow
     compiled_workflow = workflow.compile()

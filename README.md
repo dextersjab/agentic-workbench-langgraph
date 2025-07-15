@@ -87,12 +87,24 @@ See the [Open WebUI](https://github.com/open-webui/open-webui) repository for mo
 ### 4. Chat with HelpHub
 Select "helphub-v1" from the model dropdown and start chatting!
 
-Initially, a chatbot built on this agentic workflow will simply respond to questions.
+Initially, a chatbot built on this agentic workflow simply ask a clarifying question in response to your prompts.
 
 ```mermaid
 graph TD
-  __start__ --> chat
-  chat --> __end__
+    __start__["\_\_start\_\_"] --> clarify_issue
+    clarify_issue --> categorise_issue
+    categorise_issue --> prioritise_issue
+    prioritise_issue --> triage_issue
+    triage_issue --> create_ticket
+    create_ticket --> __end__["\_\_end\_\_"]
+    
+    style __start__ stroke:green,stroke-width:3px
+    style __end__ stroke:red,stroke-width:3px
+    style clarify_issue stroke:white,stroke-width:1.5px
+    style categorise_issue stroke:#ccc,stroke-width:1px,stroke-dasharray: 5 5
+    style prioritise_issue stroke:#ccc,stroke-width:1px,stroke-dasharray: 5 5
+    style triage_issue stroke:#ccc,stroke-width:1px,stroke-dasharray: 5 5
+    style create_ticket stroke:#ccc,stroke-width:1px,stroke-dasharray: 5 5
 ```
 
 Once you've completed this exercise, your chatbot will:
@@ -363,21 +375,29 @@ Test scenarios evaluate:
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | Agent Framework | LangGraph | Workflow orchestration |
-| LLM Provider | OpenRouter (GPT-4.1-mini) | Natural language processing |
-| Alternative LLM | DeepSeek R1 | Cost-effective option |
-| API Framework | FastAPI | Mock ServiceHub endpoints |
+| LLM Provider | OpenRouter (GPT-4.1-mini, DeepSeek R1) | Natural language processing |
+| API Framework | FastAPI | OpenAI-compatible API |
 | Testing | pytest | Automated evaluation |
 
 ### 10.2 LangGraph Structure
 
 ```python
-# Project structure following Gemini quickstart pattern
-src/
-├── graph.py          # Main workflow definition
-├── nodes.py          # Individual workflow steps
-├── state.py          # Conversation state management
-├── tools.py          # ServiceHub integration tools
-└── evaluator.py      # Assessment logic
+# Actual project structure for LangGraph workflow
+src/workflows/helphub/
+├── workflow.py       # Main LangGraph workflow definition
+├── state.py          # Workflow state management (TypedDict)
+├── nodes/            # Individual workflow nodes
+│   ├── clarify_issue.py      # Clarification node (IMPLEMENTED)
+│   ├── categorise_issue.py   # Categorization node (TODO)
+│   ├── prioritise_issue.py   # Priority assessment node (TODO)
+│   ├── triage_issue.py       # Triage/routing node (TODO)
+│   └── create_ticket.py      # Ticket creation node (TODO)
+└── prompts/          # LLM prompts for each node
+    ├── clarification_prompt.py
+    ├── categorization_prompt.py
+    ├── priority_prompt.py
+    ├── routing_prompt.py
+    └── servicehub_prompt.py
 ```
 
 ### 10.3 Environment Setup
@@ -439,13 +459,28 @@ agentic-course-case-study-0/
 │           ├── workflow.py    # LangGraph workflow
 │           ├── state.py       # Workflow state
 │           ├── nodes/         # Workflow nodes
+│           │   ├── clarify_issue.py      # Clarification node (IMPLEMENTED)
+│           │   ├── categorise_issue.py   # Categorization node (TODO)
+│           │   ├── prioritise_issue.py   # Priority assessment node (TODO)
+│           │   ├── triage_issue.py       # Triage/routing node (TODO)
+│           │   └── create_ticket.py      # Ticket creation node (TODO)
 │           └── prompts/       # LLM prompts
+│               ├── clarification_prompt.py
+│               ├── categorization_prompt.py
+│               ├── priority_prompt.py
+│               ├── routing_prompt.py
+│               └── servicehub_prompt.py
 ├── data/
 │   ├── tickets_train.csv      # Training scenarios
 │   ├── tickets_test.csv       # Test scenarios
-│   └── conversations.json     # Multi-turn examples
+│   ├── conversations.json     # Multi-turn examples
+│   └── seed_tickets.csv       # Additional test data
 ├── kb/
 │   └── articles.json          # Knowledge base articles
+├── tests/
+│   └── grading.py             # Assessment utilities
+├── docs/
+│   └── prd.md                 # Product requirements document
 ├── main.py                    # API server entry point
 ├── requirements.txt           # Dependencies
 └── README.md
@@ -479,73 +514,51 @@ Participants will demonstrate mastery by:
 
 | Endpoint | Method | Purpose | Example Request |
 |----------|---------|---------|-----------------|
-| `/chat` | POST | Start conversation | `{"message": "My laptop won't start"}` |
-| `/chat/continue` | POST | Continue conversation | `{"session_id": "123", "message": "No lights"}` |
-| `/categorize` | POST | Categorize ticket | `{"description": "Email password reset"}` |
-| `/prioritize` | POST | Assess priority | `{"description": "Server room flooding"}` |
-| `/kb/search` | GET | Search knowledge base | `?query=password+reset` |
+| `/v1/models` | GET | List available models | N/A |
+| `/v1/chat/completions` | POST | Chat completion (streaming & non-streaming) | `{"model": "helphub-v1", "messages": [{"role": "user", "content": "My laptop won't start"}], "stream": true}` |
+| `/v1/` | GET | API information with HATEOAS links | N/A |
+| `/docs` | GET | Interactive API documentation | N/A |
 
 ### 15.2 Response Formats
 
+**Streaming Response (SSE)**:
+```
+data: {"id": "chatcmpl-abc123", "object": "chat.completion.chunk", "created": 1234567890, "model": "helphub-v1", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "I'll help you with that laptop issue..."}, "finish_reason": null}]}
+
+data: [DONE]
+```
+
+**Non-streaming Response**:
 ```json
 {
-  "session_id": "uuid",
-  "response": "I'll help you with that laptop issue...",
-  "needs_clarification": true,
-  "suggested_questions": ["What happens when you press power?"],
-  "category": "hardware",
-  "priority": "P1",
-  "confidence": 0.85
+  "id": "chatcmpl-abc123",
+  "object": "chat.completion",
+  "created": 1234567890,
+  "model": "helphub-v1",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "I'll help you with that laptop issue..."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 25,
+    "completion_tokens": 100,
+    "total_tokens": 125
+  }
 }
 ```
 
-## 15. Common Issues & Solutions
-
-### 16.1 Development Issues
-
-| Problem | Solution |
-|---------|----------|
-| LangGraph workflow not executing | Check node connections and state schema |
-| OpenRouter API limits | Implement rate limiting and retry logic |
-| Conversation context lost | Verify state persistence between turns |
-| Categorization accuracy low | Review training data and prompt engineering |
-
-### 16.2 Testing Issues
-
-| Problem | Solution |
-|---------|----------|
-| Tests failing inconsistently | Use deterministic test data and mock LLM responses |
-| Slow test execution | Implement test data caching and parallel execution |
-| Evaluation scores varying | Ensure consistent scoring criteria and test environment |
-
-## 16. Course Support
-
-### 16.1 Getting Help
-
-- **Issues**: Report problems at [GitHub Issues](https://github.com/dextersjab/agentic-course-case-study-0/issues)
-- **Discussion**: Use GitHub Discussions for questions and collaboration
-- **Documentation**: Comprehensive guides in `/docs` directory
-
-### 16.2 Contributing
-
-Participants are encouraged to:
-1. Fork the repository
-2. Implement required features
-3. Add comprehensive tests
-4. Submit pull requests with clear descriptions
-
 ---
 
-## 🎓 About This Course
+## 🧪 Testing
 
-This case study is part of the **Enterprise Agent Development Course**, focusing on building practical AI agents that handle real-world business scenarios. This particular case study emphasizes **intelligent LangGraph workflows** with LLM-driven decision making, distinguishing it from other case studies that focus on ReAct loops and complex workflow orchestration.
+```bash
+pytest -q
+```
 
-### 🚀 Next Steps
-
-1. **Clone the repository** and explore the codebase
-2. **Set up your development environment** with OpenRouter API access
-3. **Run the existing tests** to understand the evaluation criteria
-4. **Start implementing** your LangGraph workflow
-5. **Test thoroughly** with the provided scenarios
-
-*For questions or feedback, please open an issue on GitHub. Happy coding!*
+For questions or feedback, please open an issue on GitHub.
