@@ -23,6 +23,7 @@ from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, 
 from ..workflows.registry import WorkflowRegistry
 from ..workflows.helphub.state import create_initial_state
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
@@ -200,6 +201,7 @@ async def models_options():
 @v1_router.post("/chat/completions")
 async def chat_completions(request: ChatCompletionRequest):
     """Handle OpenAI-compatible chat completion requests."""
+    logger.info(f"Chat completion request - request: {request}")
     logger.info(f"Chat completion request - model: {request.model}, stream: {request.stream}")
     
     if request.stream:
