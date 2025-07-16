@@ -10,10 +10,11 @@ from langchain.globals import set_debug, set_verbose
 from src.core.api import app
 
 # Configure logging
-# logging.basicConfig(
-#     level=logging.INFO,
-#     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-# )
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    force=True
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,5 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        log_level="info",
-        # reload=True  # Set to False in production
+        log_level="debug",
     )

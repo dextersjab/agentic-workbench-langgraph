@@ -4,13 +4,14 @@ Triage Issue node for HelpHub workflow.
 TODO for students: Implement issue routing and triage logic.
 """
 import logging
+from copy import deepcopy
 from typing import Dict, Any
 from ..state import HelpHubState
 
 logger = logging.getLogger(__name__)
 
 
-def triage_issue_node(state: HelpHubState) -> Dict[str, Any]:
+def triage_issue_node(state: HelpHubState) -> HelpHubState:
     """
     Route the issue to the appropriate support team or resolution path.
     
@@ -36,6 +37,7 @@ def triage_issue_node(state: HelpHubState) -> Dict[str, Any]:
     """
     
     logger.info("Triage issue node - passing through (TODO: implement routing logic)")
+    state = deepcopy(state)
     
     # TODO: Students will implement:
     # 1. LLM-based routing decision using prompts
@@ -54,5 +56,11 @@ def triage_issue_node(state: HelpHubState) -> Dict[str, Any]:
     # Placeholder routing - students will implement proper triage
     state["assigned_team"] = "L1-General"
     state["routing_confidence"] = 0.5
+    
+    # Append message to conversation history
+    state["messages"].append({
+        "role": "assistant",
+        "content": response
+    })
     
     return state

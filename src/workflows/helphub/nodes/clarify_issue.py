@@ -4,6 +4,7 @@ Clarify Issue node for HelpHub workflow.
 This node analyzes user input and asks clarifying questions when needed.
 """
 import logging
+from copy import deepcopy
 from typing import Dict, Any
 from ..state import HelpHubState
 from ..prompts.clarification_prompt import CLARIFICATION_PROMPT, ANALYSIS_PROMPT
@@ -12,7 +13,7 @@ from src.core.llm_client import client
 logger = logging.getLogger(__name__)
 
 
-def clarify_issue_node(state: HelpHubState) -> Dict[str, Any]:
+def clarify_issue_node(state: HelpHubState) -> HelpHubState:
     """
     Analyze user input and ask clarifying questions if needed.
     
@@ -30,6 +31,7 @@ def clarify_issue_node(state: HelpHubState) -> Dict[str, Any]:
     """
     
     logger.info("Clarify issue node processing user input")
+    state = deepcopy(state)
     
     user_input = state.get("current_user_input", "")
     messages = state.get("messages", [])
@@ -77,6 +79,12 @@ def clarify_issue_node(state: HelpHubState) -> Dict[str, Any]:
             state["current_response"] = clarifying_question
             state["custom_llm_chunk"] = clarifying_question
             
+            # Append message to conversation history
+            state["messages"].append({
+                "role": "assistant",
+                "content": clarifying_question
+            })
+            
             logger.info(f"Clarification needed - attempt {clarification_attempts + 1}/{max_attempts}")
             
         else:
@@ -87,14 +95,27 @@ def clarify_issue_node(state: HelpHubState) -> Dict[str, Any]:
             state["current_response"] = response
             state["custom_llm_chunk"] = response
             
+            # Append message to conversation history
+            state["messages"].append({
+                "role": "assistant",
+                "content": response
+            })
+            
             logger.info("Input is clear enough - proceeding to categorization")
     
     except Exception as e:
         logger.error(f"Error in clarify_issue_node: {e}")
         # Fallback response
+        fallback_response = "I'll help you with your IT issue. Let me analyze your request."
         state["needs_clarification"] = False
-        state["current_response"] = "I'll help you with your IT issue. Let me analyze your request."
-        state["custom_llm_chunk"] = "I'll help you with your IT issue. Let me analyze your request."
+        state["current_response"] = fallback_response
+        state["custom_llm_chunk"] = fallback_response
+        
+        # Append message to conversation history
+        state["messages"].append({
+            "role": "assistant",
+            "content": fallback_response
+        })
     
     return state
 

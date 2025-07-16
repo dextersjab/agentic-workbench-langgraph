@@ -4,13 +4,14 @@ Categorise Issue node for HelpHub workflow.
 TODO for students: Implement issue categorization logic.
 """
 import logging
+from copy import deepcopy
 from typing import Dict, Any
 from ..state import HelpHubState
 
 logger = logging.getLogger(__name__)
 
 
-def categorise_issue_node(state: HelpHubState) -> Dict[str, Any]:
+def categorise_issue_node(state: HelpHubState) -> HelpHubState:
     """
     Categorize the IT issue into one of the predefined categories.
     
@@ -35,6 +36,7 @@ def categorise_issue_node(state: HelpHubState) -> Dict[str, Any]:
     """
     
     logger.info("Categorise issue node - passing through (TODO: implement categorization)")
+    state = deepcopy(state)
     
     # TODO: Students will implement:
     # 1. LLM-based categorization using prompts
@@ -52,5 +54,11 @@ def categorise_issue_node(state: HelpHubState) -> Dict[str, Any]:
     # Placeholder category - students will implement proper categorization
     state["category"] = "unknown"
     state["category_confidence"] = 0.5
+    
+    # Append message to conversation history
+    state["messages"].append({
+        "role": "assistant",
+        "content": response
+    })
     
     return state

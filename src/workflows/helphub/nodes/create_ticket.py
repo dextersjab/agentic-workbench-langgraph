@@ -5,13 +5,14 @@ TODO for students: Implement ServiceHub ticket creation.
 """
 import logging
 import uuid
+from copy import deepcopy
 from typing import Dict, Any
 from ..state import HelpHubState
 
 logger = logging.getLogger(__name__)
 
 
-def create_ticket_node(state: HelpHubState) -> Dict[str, Any]:
+def create_ticket_node(state: HelpHubState) -> HelpHubState:
     """
     Create a support ticket in the ServiceHub ITSM system.
     
@@ -36,6 +37,7 @@ def create_ticket_node(state: HelpHubState) -> Dict[str, Any]:
     """
     
     logger.info("Create ticket node - passing through (TODO: implement ticket creation)")
+    state = deepcopy(state)
     
     # TODO: Students will implement:
     # 1. ServiceHub API integration
@@ -57,5 +59,11 @@ def create_ticket_node(state: HelpHubState) -> Dict[str, Any]:
     state["ticket_id"] = ticket_id
     state["ticket_status"] = "created"
     state["sla_target"] = "24 hours"
+    
+    # Append message to conversation history
+    state["messages"].append({
+        "role": "assistant",
+        "content": response
+    })
     
     return state

@@ -4,13 +4,14 @@ Prioritise Issue node for HelpHub workflow.
 TODO for students: Implement priority assessment logic.
 """
 import logging
+from copy import deepcopy
 from typing import Dict, Any
 from ..state import HelpHubState
 
 logger = logging.getLogger(__name__)
 
 
-def prioritise_issue_node(state: HelpHubState) -> Dict[str, Any]:
+def prioritise_issue_node(state: HelpHubState) -> HelpHubState:
     """
     Assess the priority level of the IT issue.
     
@@ -33,6 +34,7 @@ def prioritise_issue_node(state: HelpHubState) -> Dict[str, Any]:
     """
     
     logger.info("Prioritise issue node - passing through (TODO: implement priority assessment)")
+    state = deepcopy(state)
     
     # TODO: Students will implement:
     # 1. LLM-based priority assessment using prompts
@@ -50,5 +52,11 @@ def prioritise_issue_node(state: HelpHubState) -> Dict[str, Any]:
     # Placeholder priority - students will implement proper assessment
     state["priority"] = "P3"
     state["priority_confidence"] = 0.5
+    
+    # Append message to conversation history
+    state["messages"].append({
+        "role": "assistant",
+        "content": response
+    })
     
     return state
