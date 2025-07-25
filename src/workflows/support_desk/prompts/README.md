@@ -1,8 +1,8 @@
-# Support Desk Workflow Prompts
+# Support desk workflow prompts
 
 This directory contains the prompt templates used by each node in the IT Service Desk workflow. These prompts demonstrate effective prompt engineering techniques for different business tasks.
 
-## Prompt Overview
+## Prompt overview
 
 Each prompt is defined as a string constant that can be formatted with specific variables:
 
@@ -17,11 +17,11 @@ Respond with...
 """
 ```
 
-## Prompt Files
+## Prompt files
 
 ### [clarify_issue_prompt.py](clarify_issue_prompt.py)
 
-Contains prompts for analyzing input clarity and generating clarifying questions.
+Contains prompts for analysing input clarity and generating clarifying questions.
 
 **Key prompts:**
 - `ANALYSIS_PROMPT`: Determines if input needs clarification
@@ -34,10 +34,10 @@ Contains prompts for analyzing input clarity and generating clarifying questions
 
 ### [classify_issue_prompt.py](classify_issue_prompt.py)
 
-Contains prompts for categorizing IT issues into predefined types.
+Contains prompts for categorising IT issues into predefined types.
 
 **Key prompts:**
-- `CLASSIFICATION_PROMPT`: Categorizes issues and sets priority
+- `CLASSIFICATION_PROMPT`: Categorises issues and sets priority
 
 **Educational focus:**
 - Classification techniques
@@ -80,7 +80,7 @@ Contains prompts for formatting final responses with ticket information.
 - Professional communication
 - Expectation setting
 
-## Prompt Engineering Techniques
+## Prompt engineering techniques
 
 These prompts demonstrate several key techniques:
 
@@ -97,7 +97,7 @@ These prompts demonstrate several key techniques:
 
 3. **Task Specification**: Clearly defining the expected task
    ```
-   Analyze the request and determine if...
+   Analyse the request and determine if...
    ```
 
 4. **Response Format**: Specifying the desired output structure
@@ -114,11 +114,11 @@ These prompts demonstrate several key techniques:
    - Use simple, non-technical language
    ```
 
-## Educational Value
+## Educational value
 
 Students can learn how to:
 - Design prompts for specific business workflows
 - Create prompts that generate consistent, structured outputs
-- Use role definitions to guide LLM behavior
+- Use role definitions to guide LLM behaviour
 - Manage context effectively in multi-turn conversations
 - Apply constraints to shape response characteristics

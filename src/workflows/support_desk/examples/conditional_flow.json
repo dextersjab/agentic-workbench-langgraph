@@ -1,0 +1,404 @@
+{
+  "conversation": [
+    {
+      "role": "user",
+      "content": "My computer isn't working right."
+    },
+    {
+      "role": "assistant",
+      "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+    },
+    {
+      "role": "user",
+      "content": "It's really slow and keeps freezing when I try to open my email."
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+    },
+    {
+      "role": "user",
+      "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you for the information. Let me help you with your IT issue."
+    },
+    {
+      "role": "assistant",
+      "content": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update."
+    },
+    {
+      "role": "assistant",
+      "content": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update."
+    },
+    {
+      "role": "assistant",
+      "content": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile."
+    },
+    {
+      "role": "assistant",
+      "content": "Your support ticket #T-1627385150-5678 has been created and assigned to our Software Support team with medium priority.\n\nA technician will contact you within the next 4-8 hours to help resolve your Outlook freezing issue. Since this started after a system update, they'll focus on potential compatibility issues.\n\nIn the meantime, you might try:\n- Restarting your computer if you haven't already\n- Running Outlook in safe mode (hold Ctrl while opening Outlook)\n- Checking if there are any pending updates\n\nThe Software Support team will reach out to you shortly. You can reference ticket #T-1627385150-5678 in any follow-up communications.\n\nThank you for your patience."
+    }
+  ],
+  "state_transitions": [
+    {
+      "node": "initial",
+      "state": {
+        "messages": [],
+        "current_user_input": "My computer isn't working right.",
+        "needs_clarification": false,
+        "clarification_attempts": 0,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "",
+        "custom_llm_chunk": null,
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (first attempt)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          }
+        ],
+        "current_user_input": "My computer isn't working right.",
+        "needs_clarification": true,
+        "clarification_attempts": 1,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?",
+        "custom_llm_chunk": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (second attempt)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          }
+        ],
+        "current_user_input": "It's really slow and keeps freezing when I try to open my email.",
+        "needs_clarification": true,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?",
+        "custom_llm_chunk": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (final response)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          },
+          {
+            "role": "user",
+            "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          }
+        ],
+        "current_user_input": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook.",
+        "needs_clarification": false,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "Thank you for the information. Let me help you with your IT issue.",
+        "custom_llm_chunk": "Thank you for the information. Let me help you with your IT issue.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "classify_issue",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          },
+          {
+            "role": "user",
+            "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update."
+          }
+        ],
+        "current_user_input": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook.",
+        "needs_clarification": false,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "medium",
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update.",
+        "custom_llm_chunk": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "triage_issue",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          },
+          {
+            "role": "user",
+            "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update."
+          }
+        ],
+        "current_user_input": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook.",
+        "needs_clarification": false,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "medium",
+        "support_team": "L2-Software",
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update.",
+        "custom_llm_chunk": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "gather_info",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          },
+          {
+            "role": "user",
+            "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update."
+          },
+          {
+            "role": "assistant",
+            "content": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile."
+          }
+        ],
+        "current_user_input": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook.",
+        "needs_clarification": false,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "medium",
+        "support_team": "L2-Software",
+        "ticket_info": {
+          "category": "software",
+          "priority": "medium",
+          "support_team": "L2-Software",
+          "description": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile.",
+          "timestamp": 1627385150,
+          "status": "new"
+        },
+        "user_context": {},
+        "current_response": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile.",
+        "custom_llm_chunk": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "send_to_desk",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "My computer isn't working right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help with your computer issue. To better assist you, could you please describe what specific problem you're experiencing? For example, is it not turning on, running slowly, showing error messages, or having trouble with specific applications?"
+          },
+          {
+            "role": "user",
+            "content": "It's really slow and keeps freezing when I try to open my email."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for that information. To help diagnose the issue better, could you tell me:\n1. What email application are you using (Outlook, Gmail in browser, etc.)?\n2. When did you first notice this problem?\n3. Does your computer freeze only with email, or with other applications too?"
+          },
+          {
+            "role": "user",
+            "content": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 90% confidence. This appears to be a MEDIUM priority issue because it's preventing you from accessing your email, which is an essential work tool, and the issue began after a system update."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our L2-Software team with MEDIUM priority. You can expect a response within 4-8 hours. This routing is based on the software issue you're experiencing with Outlook following a system update."
+          },
+          {
+            "role": "assistant",
+            "content": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile."
+          },
+          {
+            "role": "assistant",
+            "content": "Your support ticket #T-1627385150-5678 has been created and assigned to our Software Support team with medium priority.\n\nA technician will contact you within the next 4-8 hours to help resolve your Outlook freezing issue. Since this started after a system update, they'll focus on potential compatibility issues.\n\nIn the meantime, you might try:\n- Restarting your computer if you haven't already\n- Running Outlook in safe mode (hold Ctrl while opening Outlook)\n- Checking if there are any pending updates\n\nThe Software Support team will reach out to you shortly. You can reference ticket #T-1627385150-5678 in any follow-up communications.\n\nThank you for your patience."
+          }
+        ],
+        "current_user_input": "I'm using Outlook. It started yesterday after the system update. The computer is generally slow but freezes completely when I open Outlook.",
+        "needs_clarification": false,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "medium",
+        "support_team": "L2-Software",
+        "ticket_info": {
+          "category": "software",
+          "priority": "medium",
+          "support_team": "L2-Software",
+          "description": "# Outlook Freezing After System Update\n\n## Issue Summary\nUser is experiencing system slowness and complete freezing when attempting to open Outlook. The issue began after a system update that was installed yesterday.\n\n## Technical Details\n- Application: Microsoft Outlook\n- System: Company computer (additional details needed)\n- Timing: Started after system update yesterday\n- Symptoms: General slowness, complete freezing when opening Outlook\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nMEDIUM - User is unable to access email, which is an essential work tool.\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nIssue appears to be related to recent system update, suggesting potential compatibility issues or corrupted Outlook profile.",
+          "timestamp": 1627385150,
+          "status": "new"
+        },
+        "user_context": {},
+        "current_response": "Your support ticket #T-1627385150-5678 has been created and assigned to our Software Support team with medium priority.\n\nA technician will contact you within the next 4-8 hours to help resolve your Outlook freezing issue. Since this started after a system update, they'll focus on potential compatibility issues.\n\nIn the meantime, you might try:\n- Restarting your computer if you haven't already\n- Running Outlook in safe mode (hold Ctrl while opening Outlook)\n- Checking if there are any pending updates\n\nThe Software Support team will reach out to you shortly. You can reference ticket #T-1627385150-5678 in any follow-up communications.\n\nThank you for your patience.",
+        "custom_llm_chunk": "Your support ticket #T-1627385150-5678 has been created and assigned to our Software Support team with medium priority.\n\nA technician will contact you within the next 4-8 hours to help resolve your Outlook freezing issue. Since this started after a system update, they'll focus on potential compatibility issues.\n\nIn the meantime, you might try:\n- Restarting your computer if you haven't already\n- Running Outlook in safe mode (hold Ctrl while opening Outlook)\n- Checking if there are any pending updates\n\nThe Software Support team will reach out to you shortly. You can reference ticket #T-1627385150-5678 in any follow-up communications.\n\nThank you for your patience.",
+        "ticket_id": "T-1627385150-5678",
+        "ticket_status": "created"
+      }
+    }
+  ],
+  "description": "This example demonstrates the conditional loop when the user provides a vague request that needs clarification. The workflow loops back to the clarification node twice before proceeding to classification."
+}

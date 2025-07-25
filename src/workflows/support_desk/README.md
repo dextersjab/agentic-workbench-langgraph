@@ -1,8 +1,8 @@
-# Support Desk Workflow
+# Support desk workflow
 
 This directory contains the implementation of the IT Service Desk workflow with conditional loop logic.
 
-## Directory Structure
+## Directory structure
 
 ```
 support_desk/
@@ -13,7 +13,7 @@ support_desk/
 └── examples/                # Example conversations
 ```
 
-## Workflow Overview
+## Workflow overview
 
 The Support Desk workflow implements an IT service desk agent that:
 
@@ -23,7 +23,7 @@ The Support Desk workflow implements an IT service desk agent that:
 4. Gathers additional information
 5. Creates support tickets
 
-## Key Components
+## Key components
 
 ### [workflow.py](workflow.py)
 
@@ -48,8 +48,8 @@ Defines the `SupportDeskState` TypedDict that tracks conversation context, user 
 ### [nodes/](nodes/)
 
 Contains the implementation of each node in the workflow:
-- `clarify_issue.py`: Analyzes user input and asks clarifying questions
-- `classify_issue.py`: Categorizes issues into predefined types
+- `clarify_issue.py`: Analyses user input and asks clarifying questions
+- `classify_issue.py`: Categorises issues into predefined types
 - `triage_issue.py`: Routes issues to appropriate support teams
 - `gather_info.py`: Collects additional information
 - `send_to_desk.py`: Creates tickets and formats responses
@@ -70,7 +70,7 @@ The workflow is registered in the `WorkflowRegistry` and can be accessed through
 workflow = WorkflowRegistry.get_workflow("support_desk")
 ```
 
-## Learning Focus
+## Learning focus
 
 This workflow demonstrates two key educational concepts:
 

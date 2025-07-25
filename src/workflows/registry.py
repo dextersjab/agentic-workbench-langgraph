@@ -25,17 +25,11 @@ class WorkflowRegistry:
     
     _workflows: Dict[str, Any] = {}
     _models = {
-        "helphub-v1": ModelInfo(
-            id="helphub-v1",
+        "support-desk": ModelInfo(
+            id="support-desk",
             object="model",
             created=1234567890,
-            owned_by="helphub"
-        ),
-        "helphub-advanced": ModelInfo(
-            id="helphub-advanced",
-            object="model", 
-            created=1234567890,
-            owned_by="helphub"
+            owned_by="support-desk"
         )
     }
     
@@ -65,17 +59,17 @@ class WorkflowRegistry:
         - Include workflow health checks
         """
         if name not in cls._workflows:
-            # Lazy load the HelpHub workflow
-            if name == "helphub":
-                from .helphub.workflow import create_helphub_workflow
-                workflow = create_helphub_workflow()
+            # Lazy load the Support Desk workflow
+            if name == "support_desk":
+                from .support_desk.workflow import create_support_desk_workflow
+                workflow = create_support_desk_workflow()
                 cls.register_workflow(name, lambda: workflow)
                 return workflow
             else:
-                # Default to helphub workflow
-                name = "helphub"
-                from .helphub.workflow import create_helphub_workflow
-                workflow = create_helphub_workflow()
+                # Default to support_desk workflow
+                name = "support_desk"
+                from .support_desk.workflow import create_support_desk_workflow
+                workflow = create_support_desk_workflow()
                 cls.register_workflow(name, lambda: workflow)
                 return workflow
             

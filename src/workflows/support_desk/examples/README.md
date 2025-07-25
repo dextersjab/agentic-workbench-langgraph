@@ -1,8 +1,8 @@
-# Support Desk Workflow Examples
+# Support desk workflow examples
 
 This directory contains example conversations that demonstrate the IT Service Desk workflow in action. These examples showcase different user inputs and how the workflow responds, particularly highlighting the conditional clarification loop.
 
-## Example Files
+## Example files
 
 ### [linear_flow.json](linear_flow.json)
 
@@ -74,7 +74,7 @@ Support Desk: Thank you for the information. Let me help you with your IT issue.
 [Workflow proceeds with limited information]
 ```
 
-## State Transitions
+## State transitions
 
 Each example includes detailed state transitions showing how the `SupportDeskState` evolves throughout the conversation. This helps students understand:
 
@@ -83,7 +83,7 @@ Each example includes detailed state transitions showing how the `SupportDeskSta
 3. How information is gradually collected and stored
 4. How the final ticket is created
 
-## Educational Value
+## Educational value
 
 These examples demonstrate:
 
@@ -92,7 +92,7 @@ These examples demonstrate:
 3. **State Tracking**: How to maintain context across interactions
 4. **Graceful Degradation**: How to proceed even with limited information
 
-## Using the Examples
+## Using the examples
 
 These examples can be used for:
 

@@ -1,0 +1,496 @@
+{
+  "conversation": [
+    {
+      "role": "user",
+      "content": "Something's not right."
+    },
+    {
+      "role": "assistant",
+      "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+    },
+    {
+      "role": "user",
+      "content": "It's just not working."
+    },
+    {
+      "role": "assistant",
+      "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+    },
+    {
+      "role": "user",
+      "content": "The thing on my computer."
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+    },
+    {
+      "role": "user",
+      "content": "The icon thing."
+    },
+    {
+      "role": "assistant",
+      "content": "Thank you for the information. Let me help you with your IT issue."
+    },
+    {
+      "role": "assistant",
+      "content": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer."
+    },
+    {
+      "role": "assistant",
+      "content": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer."
+    },
+    {
+      "role": "assistant",
+      "content": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem."
+    },
+    {
+      "role": "assistant",
+      "content": "Your support ticket #T-1627385350-9012 has been created and assigned to our General Support team.\n\nA technician will contact you within the next 24-48 hours to help resolve your issue with the icon on your computer. They'll begin by gathering more specific information about what's happening.\n\nIn the meantime, you might try:\n- Restarting your computer\n- Right-clicking on the problematic icon and selecting \"Properties\" to check if there are any obvious issues\n- Checking if other icons or applications are also affected\n\nThe General Support team will reach out to you shortly. You can reference ticket #T-1627385350-9012 in any follow-up communications.\n\nThank you for your patience."
+    }
+  ],
+  "state_transitions": [
+    {
+      "node": "initial",
+      "state": {
+        "messages": [],
+        "current_user_input": "Something's not right.",
+        "needs_clarification": false,
+        "clarification_attempts": 0,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "",
+        "custom_llm_chunk": null,
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (first attempt)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          }
+        ],
+        "current_user_input": "Something's not right.",
+        "needs_clarification": true,
+        "clarification_attempts": 1,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?",
+        "custom_llm_chunk": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (second attempt)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          }
+        ],
+        "current_user_input": "It's just not working.",
+        "needs_clarification": true,
+        "clarification_attempts": 2,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful.",
+        "custom_llm_chunk": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (third attempt)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          }
+        ],
+        "current_user_input": "The thing on my computer.",
+        "needs_clarification": true,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?",
+        "custom_llm_chunk": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "clarify_issue (max attempts reached)",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          },
+          {
+            "role": "user",
+            "content": "The icon thing."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          }
+        ],
+        "current_user_input": "The icon thing.",
+        "needs_clarification": false,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": null,
+        "issue_priority": null,
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "Thank you for the information. Let me help you with your IT issue.",
+        "custom_llm_chunk": "Thank you for the information. Let me help you with your IT issue.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "classify_issue",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          },
+          {
+            "role": "user",
+            "content": "The icon thing."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer."
+          }
+        ],
+        "current_user_input": "The icon thing.",
+        "needs_clarification": false,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "low",
+        "support_team": null,
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer.",
+        "custom_llm_chunk": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "triage_issue",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          },
+          {
+            "role": "user",
+            "content": "The icon thing."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer."
+          }
+        ],
+        "current_user_input": "The icon thing.",
+        "needs_clarification": false,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "low",
+        "support_team": "General-Support",
+        "ticket_info": {},
+        "user_context": {},
+        "current_response": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer.",
+        "custom_llm_chunk": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "gather_info",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          },
+          {
+            "role": "user",
+            "content": "The icon thing."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer."
+          },
+          {
+            "role": "assistant",
+            "content": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem."
+          }
+        ],
+        "current_user_input": "The icon thing.",
+        "needs_clarification": false,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "low",
+        "support_team": "General-Support",
+        "ticket_info": {
+          "category": "software",
+          "priority": "low",
+          "support_team": "General-Support",
+          "description": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem.",
+          "timestamp": 1627385350,
+          "status": "new"
+        },
+        "user_context": {},
+        "current_response": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem.",
+        "custom_llm_chunk": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem.",
+        "ticket_id": null,
+        "ticket_status": null
+      }
+    },
+    {
+      "node": "send_to_desk",
+      "state": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "Something's not right."
+          },
+          {
+            "role": "assistant",
+            "content": "I'd be happy to help you. Could you please provide more details about what isn't working correctly? Is this related to your computer, a specific application, network connection, or something else?"
+          },
+          {
+            "role": "user",
+            "content": "It's just not working."
+          },
+          {
+            "role": "assistant",
+            "content": "I understand you're experiencing an issue. To help you effectively, I need to know what specifically isn't working. Is it your computer, phone, a software application, email, internet connection, or something else? Any details about error messages or when the problem started would also be helpful."
+          },
+          {
+            "role": "user",
+            "content": "The thing on my computer."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for letting me know it's related to your computer. Could you please specify which program, application, or feature on your computer isn't working? For example, is it your web browser, email, a specific software, or perhaps the computer itself (like startup issues or performance problems)?"
+          },
+          {
+            "role": "user",
+            "content": "The icon thing."
+          },
+          {
+            "role": "assistant",
+            "content": "Thank you for the information. Let me help you with your IT issue."
+          },
+          {
+            "role": "assistant",
+            "content": "I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. This appears to be a LOW priority issue based on the limited information available. It seems to be related to an icon or application on your computer."
+          },
+          {
+            "role": "assistant",
+            "content": "I'm routing your issue to our General-Support team with LOW priority. You can expect a response within 24-48 hours. This routing is based on the limited information available about your issue with an icon on your computer."
+          },
+          {
+            "role": "assistant",
+            "content": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem."
+          },
+          {
+            "role": "assistant",
+            "content": "Your support ticket #T-1627385350-9012 has been created and assigned to our General Support team.\n\nA technician will contact you within the next 24-48 hours to help resolve your issue with the icon on your computer. They'll begin by gathering more specific information about what's happening.\n\nIn the meantime, you might try:\n- Restarting your computer\n- Right-clicking on the problematic icon and selecting \"Properties\" to check if there are any obvious issues\n- Checking if other icons or applications are also affected\n\nThe General Support team will reach out to you shortly. You can reference ticket #T-1627385350-9012 in any follow-up communications.\n\nThank you for your patience."
+          }
+        ],
+        "current_user_input": "The icon thing.",
+        "needs_clarification": false,
+        "clarification_attempts": 3,
+        "max_clarification_attempts": 3,
+        "issue_category": "software",
+        "issue_priority": "low",
+        "support_team": "General-Support",
+        "ticket_info": {
+          "category": "software",
+          "priority": "low",
+          "support_team": "General-Support",
+          "description": "# Icon Issue on Computer\n\n## Issue Summary\nUser is experiencing an issue with an icon or application on their computer. Limited details are available about the specific nature of the problem.\n\n## Technical Details\n- Device: Computer (additional details needed)\n- Issue: Problem with an icon or application (additional details needed)\n- Timing: Unknown\n- Symptoms: \"Not working\" (additional details needed)\n- Error messages: None reported\n\n## Troubleshooting Attempted\nNone reported\n\n## Business Impact\nLOW - Based on limited information available\n\n## Availability for Follow-up\nUser is available for troubleshooting assistance.\n\n## Additional Notes\nAdditional information will be needed to properly diagnose and resolve this issue. Support agent should begin by gathering more specific details about the problem.",
+          "timestamp": 1627385350,
+          "status": "new"
+        },
+        "user_context": {},
+        "current_response": "Your support ticket #T-1627385350-9012 has been created and assigned to our General Support team.\n\nA technician will contact you within the next 24-48 hours to help resolve your issue with the icon on your computer. They'll begin by gathering more specific information about what's happening.\n\nIn the meantime, you might try:\n- Restarting your computer\n- Right-clicking on the problematic icon and selecting \"Properties\" to check if there are any obvious issues\n- Checking if other icons or applications are also affected\n\nThe General Support team will reach out to you shortly. You can reference ticket #T-1627385350-9012 in any follow-up communications.\n\nThank you for your patience.",
+        "custom_llm_chunk": "Your support ticket #T-1627385350-9012 has been created and assigned to our General Support team.\n\nA technician will contact you within the next 24-48 hours to help resolve your issue with the icon on your computer. They'll begin by gathering more specific information about what's happening.\n\nIn the meantime, you might try:\n- Restarting your computer\n- Right-clicking on the problematic icon and selecting \"Properties\" to check if there are any obvious issues\n- Checking if other icons or applications are also affected\n\nThe General Support team will reach out to you shortly. You can reference ticket #T-1627385350-9012 in any follow-up communications.\n\nThank you for your patience.",
+        "ticket_id": "T-1627385350-9012",
+        "ticket_status": "created"
+      }
+    }
+  ],
+  "description": "This example demonstrates what happens when the maximum number of clarification attempts is reached without getting clear information. The workflow proceeds with limited information, creating a generic ticket that requires further clarification from the support team."
+}

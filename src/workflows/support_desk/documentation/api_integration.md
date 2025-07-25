@@ -1,3 +1,31 @@
+# API Integration Design for IT Service Desk
+
+## Overview
+
+This document outlines the necessary updates to integrate the new Support Desk workflow with the existing API. The API provides an OpenAI-compatible interface that allows the workflow to be used with Open WebUI and other compatible clients.
+
+## Current API Implementation
+
+The current API is implemented in `src/core/api.py` and provides the following functionality:
+
+1. OpenAI-compatible chat completions endpoint
+2. Models listing endpoint
+3. Streaming and non-streaming response handling
+4. Error handling and logging
+
+## Required Updates
+
+To integrate the Support Desk workflow, we need to make the following updates:
+
+1. Update imports to use the Support Desk state
+2. Update workflow initialization to use the Support Desk workflow
+3. Update any references to HelpHub in the API documentation
+
+## Detailed Implementation
+
+Here's the detailed implementation of the updated API:
+
+```python
 """OpenAI-compatible API for Open WebUI integration."""
 import json
 import time
@@ -247,3 +275,100 @@ async def root():
 
 # Include the v1 router in the main app
 app.include_router(v1_router)
+```
+
+## Key Changes
+
+### 1. Updated Imports
+
+The imports have been updated to use the Support Desk state:
+
+```python
+from ..workflows.support_desk.state import create_initial_state
+```
+
+This replaces the previous import from HelpHub.
+
+### 2. Updated Function Names
+
+Function names have been updated to reflect the new workflow:
+
+```python
+async def _support_desk_stream(req: ChatCompletionRequest, workflow, state) -> AsyncGenerator[str, None]:
+    """Stream responses from the Support Desk workflow."""
+```
+
+This replaces the previous `_helphub_stream` function.
+
+### 3. Updated Workflow Initialization
+
+The workflow initialization has been updated to use the Support Desk workflow:
+
+```python
+# Initialize Support Desk workflow state
+state = create_initial_state()
+workflow = WorkflowRegistry.get_workflow("support_desk")
+```
+
+This ensures that the API uses the new workflow.
+
+### 4. Updated API Documentation
+
+The API documentation has been updated to reflect the new workflow:
+
+```python
+app = FastAPI(
+    title="Support Desk IT Service Agent",
+    description="OpenAI-compatible API for IT support chatbot training",
+    version="0.1.0"
+)
+```
+
+And:
+
+```python
+return {
+    "name": "Support Desk IT Service Agent API",
+    "version": "1.0.0",
+    "description": "OpenAI-compatible API for IT support chatbot using LangGraph workflows",
+    # ...
+}
+```
+
+## Integration Flow
+
+When a client makes a request to the API:
+
+1. The API initializes the Support Desk workflow state
+2. It retrieves the Support Desk workflow from the registry
+3. It processes the user input and passes it to the workflow
+4. The workflow executes, potentially looping through the clarification node
+5. The API streams the response back to the client
+
+This flow is the same as before, but now it uses the Support Desk workflow instead of HelpHub.
+
+## Educational Value
+
+This API integration design demonstrates several important concepts:
+
+1. **OpenAI Compatibility**: How to create an API that follows the OpenAI standard
+2. **Streaming Responses**: How to stream responses from a workflow
+3. **Error Handling**: How to handle errors in an API context
+4. **Workflow Integration**: How to integrate a workflow with an API
+
+Students will learn:
+- How to integrate LangGraph workflows with FastAPI
+- How to create OpenAI-compatible APIs
+- How to implement streaming responses
+- How to handle errors in an API context
+
+## Implementation Notes
+
+The API integration is implemented in `src/core/api.py` and includes:
+
+1. Updated imports
+2. Updated function names
+3. Updated workflow initialization
+4. Updated API documentation
+
+These changes ensure that the API uses the Support Desk workflow instead of HelpHub, completing the integration as specified in the requirements.

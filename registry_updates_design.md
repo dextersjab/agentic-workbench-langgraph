@@ -44,15 +44,9 @@ class WorkflowRegistry:
     
     _workflows: Dict[str, Any] = {}
     _models = {
-        "support-desk-v1": ModelInfo(
-            id="support-desk-v1",
+        "support-desk": ModelInfo(
+            id="support-desk",
             object="model",
-            created=1234567890,
-            owned_by="support-desk"
-        ),
-        "support-desk-advanced": ModelInfo(
-            id="support-desk-advanced",
-            object="model", 
             created=1234567890,
             owned_by="support-desk"
         )
@@ -127,26 +121,20 @@ logger.info("Workflow registry initialized")
 
 ### 1. Updated Model Names
 
-The model names have been updated to reflect the new Support Desk workflow:
+The model name has been updated to reflect the new Support Desk workflow:
 
 ```python
 _models = {
-    "support-desk-v1": ModelInfo(
-        id="support-desk-v1",
+    "support-desk": ModelInfo(
+        id="support-desk",
         object="model",
-        created=1234567890,
-        owned_by="support-desk"
-    ),
-    "support-desk-advanced": ModelInfo(
-        id="support-desk-advanced",
-        object="model", 
         created=1234567890,
         owned_by="support-desk"
     )
 }
 ```
 
-This replaces the previous "helphub-v1" and "helphub-advanced" models.
+This replaces the previous "helphub-v1" and "helphub-advanced" models with a single unified model.
 
 ### 2. Updated Lazy Loading Logic
 

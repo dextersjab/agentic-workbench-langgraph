@@ -1,8 +1,8 @@
-# Support Desk Workflow Nodes
+# Support desk workflow nodes
 
 This directory contains the implementation of each node in the IT Service Desk workflow.
 
-## Node Overview
+## Node overview
 
 Each node is implemented as an async function that takes a `SupportDeskState` as input and returns an updated `SupportDeskState`.
 
@@ -13,24 +13,24 @@ async def some_node(state: SupportDeskState) -> SupportDeskState:
     return state
 ```
 
-## Node Implementations
+## Node implementations
 
 ### [clarify_issue.py](clarify_issue.py)
 
-Analyzes user input and asks clarifying questions when needed. This node implements the conditional loop logic that is central to Phase 2 of the learning progression.
+Analyses user input and asks clarifying questions when needed. This node implements the conditional loop logic that is central to Phase 2 of the learning progression.
 
 **Key features:**
-- Analyzes input clarity using LLM
+- Analyses input clarity using LLM
 - Generates clarifying questions when needed
 - Tracks clarification attempts
 - Updates state to control workflow path
 
 ### [classify_issue.py](classify_issue.py)
 
-Categorizes the IT issue into one of the predefined categories: hardware, software, access, or other.
+Categorises the IT issue into one of the predefined categories: hardware, software, access, or other.
 
 **Key features:**
-- Uses LLM to analyze issue description
+- Uses LLM to analyse issue description
 - Assigns category and confidence level
 - Sets priority based on impact
 
@@ -61,7 +61,7 @@ Creates a support ticket and formats the final response with ticket information.
 - Creates professional response
 - Provides next steps and expectations
 
-## Common Patterns
+## Common patterns
 
 All nodes follow these common patterns:
 
@@ -71,7 +71,7 @@ All nodes follow these common patterns:
 4. **Update State**: Store results in the state
 5. **Handle Errors**: Gracefully manage exceptions
 
-## Educational Focus
+## Educational focus
 
 These nodes demonstrate:
 - Effective prompt engineering
