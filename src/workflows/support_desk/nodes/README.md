@@ -17,6 +17,15 @@ async def some_node(state: SupportDeskState) -> SupportDeskState:
 
 ### [clarify_issue.py](clarify_issue.py)
 
+```mermaid
+graph TD
+    A[clarify_issue] --> B{needs more info?}
+    B -->|clarify| A
+    B -->|classify| C[classify_issue]
+    
+    classDef default stroke:#f2f0ff,line-height:1.2
+```
+
 Analyses user input and asks clarifying questions when needed. This node implements a conditional loop logic at the start of the workflow.
 
 **Key features:**
@@ -27,6 +36,14 @@ Analyses user input and asks clarifying questions when needed. This node impleme
 
 ### [classify_issue.py](classify_issue.py)
 
+```mermaid
+graph TD
+    A[clarify_issue] --> B[classify_issue]
+    B --> C[triage_issue]
+    
+    classDef default stroke:#f2f0ff,line-height:1.2
+```
+
 Categorises the IT issue into one of the predefined categories: hardware, software, access, or other.
 
 **Key features:**
@@ -35,6 +52,14 @@ Categorises the IT issue into one of the predefined categories: hardware, softwa
 - Sets priority based on impact
 
 ### [triage_issue.py](triage_issue.py)
+
+```mermaid
+graph TD
+    A[classify_issue] --> B[triage_issue]
+    B --> C[gather_info]
+    
+    classDef default stroke:#f2f0ff,line-height:1.2
+```
 
 Routes the issue to the appropriate support team based on the category and priority.
 
@@ -45,6 +70,14 @@ Routes the issue to the appropriate support team based on the category and prior
 
 ### [gather_info.py](gather_info.py)
 
+```mermaid
+graph TD
+    A[triage_issue] --> B[gather_info]
+    B --> C[send_to_desk]
+    
+    classDef default stroke:#f2f0ff,line-height:1.2
+```
+
 Collects additional information needed for the support team to resolve the issue.
 
 **Key features:**
@@ -53,6 +86,17 @@ Collects additional information needed for the support team to resolve the issue
 - Formats information for support team
 
 ### [send_to_desk.py](send_to_desk.py)
+
+```mermaid
+graph TD
+    A[gather_info] --> B[send_to_desk]
+    B --> C[__end__]
+    
+    classDef default stroke:#f2f0ff,line-height:1.2
+    classDef last stroke:red
+    
+    class C last
+```
 
 Creates a support ticket and formats the final response with ticket information.
 
