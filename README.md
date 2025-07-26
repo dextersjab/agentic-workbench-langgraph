@@ -52,12 +52,12 @@ python main.py
 
 This will start the API server on port 8000, which you can interact with using the OpenAI API format.
 
-Optionally, you can run the Open WebUI to interact with the workflow via a chat interface.
-
-Run:
+Optionally, you can interact with the workflow through the Open WebUI chat interface:
 
 ```shell
 open-webui serve --port 3000
 ```
+
+The models will appear in the top-left corner dropdown.
 
 See [https://github.com/open-webui/open-webui]() for more details.
