@@ -46,7 +46,7 @@ The agentic workflows will appear in the top-left dropdown.
 
 ![Open WebUI screenshot](./open-webui-screenshot.png)
 
-See [https://github.com/open-webui/open-webui]() for more details.
+See [https://github.com/open-webui/open-webui]() for more.
 
 ## Adding new workflows
 
