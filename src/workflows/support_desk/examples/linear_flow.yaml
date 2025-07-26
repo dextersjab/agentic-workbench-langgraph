@@ -1,0 +1,518 @@
+# Linear Flow Example
+# Demonstrates the workflow when user provides clear, complete information
+# No clarification needed - straight path through all nodes
+
+conversation:
+  - role: user
+    content: |
+      My laptop won't connect to the company WiFi network. I've tried 
+      restarting it and forgetting the network, but it still won't connect. 
+      Other devices can connect fine, so it seems to be specific to my laptop. 
+      I need this fixed urgently as I have a client presentation this afternoon.
+
+  - role: assistant
+    content: "Thank you for the information. Let me help you with your IT issue."
+
+  - role: assistant
+    content: |
+      I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+      This appears to be a HIGH priority issue because it's preventing you from 
+      connecting to essential resources and you have an urgent client presentation.
+
+  - role: assistant
+    content: |
+      I'm routing your issue to our L1-Network team with HIGH priority. You can 
+      expect a response within 1-2 hours. This routing is based on the network 
+      connectivity problem you're experiencing with your laptop.
+
+  - role: assistant
+    content: |
+      # WiFi Connectivity Issue - Laptop Specific
+
+      ## Issue Summary
+      User is unable to connect their laptop to the company WiFi network despite 
+      trying standard troubleshooting steps. Other devices can connect successfully, 
+      indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+      client presentation.
+
+      ## Technical Details
+      - Device: Company laptop (additional details needed)
+      - Network: Company WiFi
+      - Troubleshooting attempted: Restart, forgetting network
+      - Error messages: None provided
+
+      ## Business Impact
+      HIGH - User has a client presentation this afternoon and requires network access.
+
+      ## Availability for Follow-up
+      User is available immediately for troubleshooting assistance.
+
+      ## Additional Notes
+      Recommend immediate remote assistance to resolve before the presentation.
+
+  - role: assistant
+    content: |
+      Your support ticket #T-1627384950-4321 has been created and assigned to our 
+      Network Support team with high priority.
+
+      A technician will contact you within the next 1-2 hours to help resolve your 
+      WiFi connectivity issue. Given the urgency of your presentation this afternoon, 
+      they'll prioritize getting you connected.
+
+      In the meantime, you might try:
+      - Connecting via ethernet cable if possible
+      - Using your phone as a hotspot temporarily
+      - Checking if there are any pending system updates
+
+      The Network Support team will reach out to you shortly. You can reference 
+      ticket #T-1627384950-4321 in any follow-up communications.
+
+      Thank you for your patience.
+
+state_transitions:
+  # Initial state - no processing yet
+  - node: initial
+    state:
+      messages: []
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: ""
+      custom_llm_chunk: null
+      ticket_id: null
+      ticket_status: null
+
+  # After clarification analysis - no clarification needed
+  - node: clarify_issue
+    state:
+      messages:
+        - role: user
+          content: |
+            My laptop won't connect to the company WiFi network. I've tried 
+            restarting it and forgetting the network, but it still won't connect. 
+            Other devices can connect fine, so it seems to be specific to my laptop. 
+            I need this fixed urgently as I have a client presentation this afternoon.
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+      
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: "Thank you for the information. Let me help you with your IT issue."
+      custom_llm_chunk: "Thank you for the information. Let me help you with your IT issue."
+      ticket_id: null
+      ticket_status: null
+
+  # After classification - network issue identified
+  - node: classify_issue
+    state:
+      messages:
+        - role: user
+          content: |
+            My laptop won't connect to the company WiFi network. I've tried 
+            restarting it and forgetting the network, but it still won't connect. 
+            Other devices can connect fine, so it seems to be specific to my laptop. 
+            I need this fixed urgently as I have a client presentation this afternoon.
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+            This appears to be a HIGH priority issue because it's preventing you from 
+            connecting to essential resources and you have an urgent client presentation.
+
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: network
+      issue_priority: high
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+        This appears to be a HIGH priority issue because it's preventing you from 
+        connecting to essential resources and you have an urgent client presentation.
+      custom_llm_chunk: |
+        I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+        This appears to be a HIGH priority issue because it's preventing you from 
+        connecting to essential resources and you have an urgent client presentation.
+      ticket_id: null
+      ticket_status: null
+
+  # After triage - routed to L1-Network team
+  - node: triage_issue
+    state:
+      messages:
+        - role: user
+          content: |
+            My laptop won't connect to the company WiFi network. I've tried 
+            restarting it and forgetting the network, but it still won't connect. 
+            Other devices can connect fine, so it seems to be specific to my laptop. 
+            I need this fixed urgently as I have a client presentation this afternoon.
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+            This appears to be a HIGH priority issue because it's preventing you from 
+            connecting to essential resources and you have an urgent client presentation.
+        - role: assistant
+          content: |
+            I'm routing your issue to our L1-Network team with HIGH priority. You can 
+            expect a response within 1-2 hours. This routing is based on the network 
+            connectivity problem you're experiencing with your laptop.
+
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: network
+      issue_priority: high
+      support_team: Escalated-L1-Network
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I'm routing your issue to our L1-Network team with HIGH priority. You can 
+        expect a response within 1-2 hours. This routing is based on the network 
+        connectivity problem you're experiencing with your laptop.
+      custom_llm_chunk: |
+        I'm routing your issue to our L1-Network team with HIGH priority. You can 
+        expect a response within 1-2 hours. This routing is based on the network 
+        connectivity problem you're experiencing with your laptop.
+      ticket_id: null
+      ticket_status: null
+
+  # After information gathering - ticket details collected
+  - node: gather_info
+    state:
+      messages:
+        - role: user
+          content: |
+            My laptop won't connect to the company WiFi network. I've tried 
+            restarting it and forgetting the network, but it still won't connect. 
+            Other devices can connect fine, so it seems to be specific to my laptop. 
+            I need this fixed urgently as I have a client presentation this afternoon.
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+            This appears to be a HIGH priority issue because it's preventing you from 
+            connecting to essential resources and you have an urgent client presentation.
+        - role: assistant
+          content: |
+            I'm routing your issue to our L1-Network team with HIGH priority. You can 
+            expect a response within 1-2 hours. This routing is based on the network 
+            connectivity problem you're experiencing with your laptop.
+        - role: assistant
+          content: |
+            # WiFi Connectivity Issue - Laptop Specific
+
+            ## Issue Summary
+            User is unable to connect their laptop to the company WiFi network despite 
+            trying standard troubleshooting steps. Other devices can connect successfully, 
+            indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+            client presentation.
+
+            ## Technical Details
+            - Device: Company laptop (additional details needed)
+            - Network: Company WiFi
+            - Troubleshooting attempted: Restart, forgetting network
+            - Error messages: None provided
+
+            ## Business Impact
+            HIGH - User has a client presentation this afternoon and requires network access.
+
+            ## Availability for Follow-up
+            User is available immediately for troubleshooting assistance.
+
+            ## Additional Notes
+            Recommend immediate remote assistance to resolve before the presentation.
+
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: network
+      issue_priority: high
+      support_team: Escalated-L1-Network
+      
+      # Ticket information has been gathered
+      ticket_info:
+        category: network
+        priority: high
+        support_team: Escalated-L1-Network
+        description: |
+          # WiFi Connectivity Issue - Laptop Specific
+
+          ## Issue Summary
+          User is unable to connect their laptop to the company WiFi network despite 
+          trying standard troubleshooting steps. Other devices can connect successfully, 
+          indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+          client presentation.
+
+          ## Technical Details
+          - Device: Company laptop (additional details needed)
+          - Network: Company WiFi
+          - Troubleshooting attempted: Restart, forgetting network
+          - Error messages: None provided
+
+          ## Business Impact
+          HIGH - User has a client presentation this afternoon and requires network access.
+
+          ## Availability for Follow-up
+          User is available immediately for troubleshooting assistance.
+
+          ## Additional Notes
+          Recommend immediate remote assistance to resolve before the presentation.
+        timestamp: 1627384950
+        status: new
+      
+      user_context: {}
+      current_response: |
+        # WiFi Connectivity Issue - Laptop Specific
+
+        ## Issue Summary
+        User is unable to connect their laptop to the company WiFi network despite 
+        trying standard troubleshooting steps. Other devices can connect successfully, 
+        indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+        client presentation.
+
+        ## Technical Details
+        - Device: Company laptop (additional details needed)
+        - Network: Company WiFi
+        - Troubleshooting attempted: Restart, forgetting network
+        - Error messages: None provided
+
+        ## Business Impact
+        HIGH - User has a client presentation this afternoon and requires network access.
+
+        ## Availability for Follow-up
+        User is available immediately for troubleshooting assistance.
+
+        ## Additional Notes
+        Recommend immediate remote assistance to resolve before the presentation.
+      custom_llm_chunk: |
+        # WiFi Connectivity Issue - Laptop Specific
+
+        ## Issue Summary
+        User is unable to connect their laptop to the company WiFi network despite 
+        trying standard troubleshooting steps. Other devices can connect successfully, 
+        indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+        client presentation.
+
+        ## Technical Details
+        - Device: Company laptop (additional details needed)
+        - Network: Company WiFi
+        - Troubleshooting attempted: Restart, forgetting network
+        - Error messages: None provided
+
+        ## Business Impact
+        HIGH - User has a client presentation this afternoon and requires network access.
+
+        ## Availability for Follow-up
+        User is available immediately for troubleshooting assistance.
+
+        ## Additional Notes
+        Recommend immediate remote assistance to resolve before the presentation.
+      ticket_id: null
+      ticket_status: null
+
+  # Final state - ticket created and user notified
+  - node: send_to_desk
+    state:
+      messages:
+        - role: user
+          content: |
+            My laptop won't connect to the company WiFi network. I've tried 
+            restarting it and forgetting the network, but it still won't connect. 
+            Other devices can connect fine, so it seems to be specific to my laptop. 
+            I need this fixed urgently as I have a client presentation this afternoon.
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as NETWORK with 95% confidence. 
+            This appears to be a HIGH priority issue because it's preventing you from 
+            connecting to essential resources and you have an urgent client presentation.
+        - role: assistant
+          content: |
+            I'm routing your issue to our L1-Network team with HIGH priority. You can 
+            expect a response within 1-2 hours. This routing is based on the network 
+            connectivity problem you're experiencing with your laptop.
+        - role: assistant
+          content: |
+            # WiFi Connectivity Issue - Laptop Specific
+
+            ## Issue Summary
+            User is unable to connect their laptop to the company WiFi network despite 
+            trying standard troubleshooting steps. Other devices can connect successfully, 
+            indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+            client presentation.
+
+            ## Technical Details
+            - Device: Company laptop (additional details needed)
+            - Network: Company WiFi
+            - Troubleshooting attempted: Restart, forgetting network
+            - Error messages: None provided
+
+            ## Business Impact
+            HIGH - User has a client presentation this afternoon and requires network access.
+
+            ## Availability for Follow-up
+            User is available immediately for troubleshooting assistance.
+
+            ## Additional Notes
+            Recommend immediate remote assistance to resolve before the presentation.
+        - role: assistant
+          content: |
+            Your support ticket #T-1627384950-4321 has been created and assigned to our 
+            Network Support team with high priority.
+
+            A technician will contact you within the next 1-2 hours to help resolve your 
+            WiFi connectivity issue. Given the urgency of your presentation this afternoon, 
+            they'll prioritize getting you connected.
+
+            In the meantime, you might try:
+            - Connecting via ethernet cable if possible
+            - Using your phone as a hotspot temporarily
+            - Checking if there are any pending system updates
+
+            The Network Support team will reach out to you shortly. You can reference 
+            ticket #T-1627384950-4321 in any follow-up communications.
+
+            Thank you for your patience.
+
+      current_user_input: |
+        My laptop won't connect to the company WiFi network. I've tried 
+        restarting it and forgetting the network, but it still won't connect. 
+        Other devices can connect fine, so it seems to be specific to my laptop. 
+        I need this fixed urgently as I have a client presentation this afternoon.
+      
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: network
+      issue_priority: high
+      support_team: Escalated-L1-Network
+      
+      ticket_info:
+        category: network
+        priority: high
+        support_team: Escalated-L1-Network
+        description: |
+          # WiFi Connectivity Issue - Laptop Specific
+
+          ## Issue Summary
+          User is unable to connect their laptop to the company WiFi network despite 
+          trying standard troubleshooting steps. Other devices can connect successfully, 
+          indicating a laptop-specific issue. This is time-sensitive due to an upcoming 
+          client presentation.
+
+          ## Technical Details
+          - Device: Company laptop (additional details needed)
+          - Network: Company WiFi
+          - Troubleshooting attempted: Restart, forgetting network
+          - Error messages: None provided
+
+          ## Business Impact
+          HIGH - User has a client presentation this afternoon and requires network access.
+
+          ## Availability for Follow-up
+          User is available immediately for troubleshooting assistance.
+
+          ## Additional Notes
+          Recommend immediate remote assistance to resolve before the presentation.
+        timestamp: 1627384950
+        status: new
+      
+      user_context: {}
+      current_response: |
+        Your support ticket #T-1627384950-4321 has been created and assigned to our 
+        Network Support team with high priority.
+
+        A technician will contact you within the next 1-2 hours to help resolve your 
+        WiFi connectivity issue. Given the urgency of your presentation this afternoon, 
+        they'll prioritize getting you connected.
+
+        In the meantime, you might try:
+        - Connecting via ethernet cable if possible
+        - Using your phone as a hotspot temporarily
+        - Checking if there are any pending system updates
+
+        The Network Support team will reach out to you shortly. You can reference 
+        ticket #T-1627384950-4321 in any follow-up communications.
+
+        Thank you for your patience.
+      custom_llm_chunk: |
+        Your support ticket #T-1627384950-4321 has been created and assigned to our 
+        Network Support team with high priority.
+
+        A technician will contact you within the next 1-2 hours to help resolve your 
+        WiFi connectivity issue. Given the urgency of your presentation this afternoon, 
+        they'll prioritize getting you connected.
+
+        In the meantime, you might try:
+        - Connecting via ethernet cable if possible
+        - Using your phone as a hotspot temporarily
+        - Checking if there are any pending system updates
+
+        The Network Support team will reach out to you shortly. You can reference 
+        ticket #T-1627384950-4321 in any follow-up communications.
+
+        Thank you for your patience.
+      
+      # Final ticket creation
+      ticket_id: T-1627384950-4321
+      ticket_status: created
+
+# Example description and metadata
+description: |
+  This example demonstrates the linear flow when the user provides a clear request 
+  that doesn't need clarification. The workflow proceeds directly through all nodes 
+  without looping back for clarification.
+
+# Educational annotations
+educational_notes:
+  - "Notice how `needs_clarification` stays false throughout"
+  - "State builds up progressively through each node"
+  - "Final ticket contains all necessary information"
+  - "User gets clear confirmation with ticket number" 
