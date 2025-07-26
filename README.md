@@ -42,7 +42,7 @@ Optionally, use the Open WebUI chat interface for a ChatGPT-like user experience
 open-webui serve --port 3000
 ```
 
-The models will appear in the top-left corner dropdown.
+The agentic workflows will appear in the top-left models dropdown.
 
 ![Open WebUI screenshot](./open-webui-screenshot.png)
 
