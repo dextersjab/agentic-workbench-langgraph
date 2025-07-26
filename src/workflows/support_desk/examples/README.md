@@ -4,7 +4,7 @@ This directory contains example conversations that demonstrate the IT Service De
 
 ## Example files
 
-### [linear_flow.json](linear_flow.json)
+### [linear_flow.yaml](linear_flow.yaml)
 
 Demonstrates the linear workflow when a user provides a clear request that doesn't need clarification.
 
@@ -23,7 +23,7 @@ Support Desk: Thank you for the information. Let me help you with your IT issue.
 [Workflow proceeds through classification, triage, information gathering, and ticket creation]
 ```
 
-### [conditional_flow.json](conditional_flow.json)
+### [conditional_flow.yaml](conditional_flow.yaml)
 
 Demonstrates the conditional loop when a user provides a vague request that needs clarification.
 
@@ -49,7 +49,7 @@ Support Desk: Thank you for that information. To help diagnose the issue better,
 [Conversation continues with clarification before proceeding]
 ```
 
-### [max_attempts.json](max_attempts.json)
+### [max_attempts.yaml](max_attempts.yaml)
 
 Demonstrates what happens when the maximum number of clarification attempts is reached without getting clear information.
 
