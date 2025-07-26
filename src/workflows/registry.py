@@ -39,25 +39,18 @@ class WorkflowRegistry:
         Get a workflow instance by name.
         """
         if name not in cls._workflows:
-            # Lazy load the Support Desk workflow
+            # Lazy load workflows
             if name == "support_desk":
                 from .support_desk.workflow import create_support_desk_workflow
                 workflow = create_support_desk_workflow()
                 cls.register_workflow(name, lambda: workflow)
                 return workflow
             else:
-                # Default to support_desk workflow
-                name = "support_desk"
-                from .support_desk.workflow import create_support_desk_workflow
-                workflow = create_support_desk_workflow()
-                cls.register_workflow(name, lambda: workflow)
-                return workflow
-            
+                raise ValueError(f"Unknown workflow: {name}")
+        
+        # Return registered workflow
         workflow_factory = cls._workflows[name]
-        if callable(workflow_factory):
-            workflow = workflow_factory()
-        else:
-            workflow = workflow_factory
+        workflow = workflow_factory() if callable(workflow_factory) else workflow_factory
         logger.info(f"Created workflow instance: {name}")
         return workflow
     
