@@ -42,7 +42,7 @@ graph TD;
     clarify_issue -. &nbsp;clarify&nbsp; .-> clarify_issue;
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef first stroke:green, stroke-opacity:0
+    classDef first stroke:green
     classDef last stroke:red
 ```
 
