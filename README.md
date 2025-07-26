@@ -6,7 +6,9 @@ Run this API locally to build and experiment with agentic workflows with ease.
 
 This API works directly with the popular frontend [Open WebUI](https://openwebui.com/) for a ChatGPT-like experience.
 
-The workfows in this project are based on real enterprise business use cases and technical patterns. Feel free to take inspiration, modify and build your own!
+The workfows in this project are based on real enterprise business use cases and technical patterns.
+
+Feel free to take inspiration, modify and build your own!
 
 ## Project structure
 
