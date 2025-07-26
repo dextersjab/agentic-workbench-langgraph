@@ -37,7 +37,7 @@ The system will automatically discover and load workflows based on this conventi
 Run the API server to interact with the agentic systems:
 
 ```bash
-python main.py
+uvicorn src.core.api:app --reload --port 8000
 ```
 
 You can interact with the server on [`http://localhost:8000`]() following commonly-used OpenAI-style request patterns.

@@ -48,5 +48,135 @@
       "category": "hardware",
       "priority": "P1"
     }
+  },
+  {
+    "id": "software_crash",
+    "input": "Microsoft Teams keeps crashing during video calls, happens every time I join a meeting",
+    "description": "Clear software issue with specific symptoms",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "software",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "vague_software",
+    "input": "Excel isn't working properly",
+    "description": "Vague software issue requiring clarification",
+    "expected_behavior": {
+      "needs_clarification": true,
+      "category": "software",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "vpn_disconnecting",
+    "input": "VPN keeps disconnecting every 10-15 minutes while working from home, have to reconnect constantly",
+    "description": "Clear network connectivity issue",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "network",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "printer_error",
+    "input": "Office printer on 2nd floor showing error code E503 and won't print anything",
+    "description": "Hardware issue with specific error code",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "hardware",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "account_locked_urgent",
+    "input": "My account is locked and I have a client presentation in 30 minutes, need immediate access",
+    "description": "Urgent access issue with time pressure",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "access",
+      "priority": "P1"
+    }
+  },
+  {
+    "id": "software_install_request",
+    "input": "I need Adobe Photoshop installed on my workstation for the marketing campaign project",
+    "description": "Software installation request",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "software",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "vague_network",
+    "input": "Internet is acting weird",
+    "description": "Very vague network issue requiring significant clarification",
+    "expected_behavior": {
+      "needs_clarification": true,
+      "category": "network",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "backup_failure",
+    "input": "Daily backup job failed last night with timeout error, critical data may not be backed up",
+    "description": "Critical system backup failure",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "hardware",
+      "priority": "P1"
+    }
+  },
+  {
+    "id": "shared_mailbox_access",
+    "input": "Cannot access shared mailbox support@company.com in Outlook, shows permission denied",
+    "description": "Clear access issue with specific error",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "access",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "mobile_device_setup",
+    "input": "Need help setting up company email on my new iPhone for remote work",
+    "description": "Mobile device configuration request",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "software",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "security_concern",
+    "input": "I think my computer might be infected, getting pop-ups and running very slowly",
+    "description": "Potential security issue requiring urgent attention",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "software",
+      "priority": "P1"
+    }
+  },
+  {
+    "id": "wifi_guest_access",
+    "input": "Client visiting today needs WiFi access for presentation, what's the guest network procedure?",
+    "description": "Network access request for visitor",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "network",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "multiple_issues",
+    "input": "Having several problems - email is slow, printer won't work, and WiFi keeps dropping",
+    "description": "Multiple issues that may require clarification to prioritize",
+    "expected_behavior": {
+      "needs_clarification": true,
+      "category": "hardware",
+      "priority": "P2"
+    }
   }
 ]
