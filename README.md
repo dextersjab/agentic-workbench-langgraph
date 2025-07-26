@@ -11,9 +11,9 @@ It contains workfows based on real business use cases and technical patterns. Fe
 ```
 .
 ├── src/
-│   ├── core/                     # Shared API and LLM code
+│   ├── core/                     # Shared API and LLM client code
 │   └── workflows/
-│       └── support_desk/         # IT Service Desk workflow
+│       └── support_desk/         # Business use case: IT Service Desk workflow
 ├── main.py                       # API server entrypoint
 └── requirements.txt
 ```
