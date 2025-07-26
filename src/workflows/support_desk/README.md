@@ -8,7 +8,7 @@ This directory contains the implementation of the IT Service Desk workflow.
 support_desk/
 ├── workflow.py              # Main workflow definition
 ├── state.py                 # State management
-├── data/                    # Test (evaluation) data
+├── data/                    # Evaluation data
 ├── examples/                # Example conversations
 ├── kb/                      # Knowledge base articles (domain context)
 ├── nodes/                   # Node implementations
