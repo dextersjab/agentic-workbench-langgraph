@@ -41,9 +41,9 @@ graph TD;
     send_to_desk --> __end__;
     clarify_issue -. &nbsp;clarify&nbsp; .-> clarify_issue;
     
-    classDef default fill:#f2f0ff,line-height:1.2
-    classDef first fill-opacity:0
-    classDef last fill:#bfb6fc
+    classDef default stroke:#f2f0ff,line-height:1.2
+    classDef first stroke-opacity:0
+    classDef last stroke:#bfb6fc
 ```
 
 ## Key components
