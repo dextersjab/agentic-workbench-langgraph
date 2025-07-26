@@ -7,9 +7,9 @@ This directory contains the implementation of each node in the IT Service Desk w
 Each node is implemented as an async function that takes a `SupportDeskState` as input and returns an updated `SupportDeskState`.
 
 ```python
-async def some_node(state: SupportDeskState) -> SupportDeskState:
+async def current_node(state: SupportDeskState) -> SupportDeskState:
     state = deepcopy(state)
-    # Process state...
+    # Update state...
     return state
 ```
 
