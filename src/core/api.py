@@ -81,9 +81,9 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
     logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}")
     
     try:
-        # Initialize Support Desk workflow state
+        # Initialize workflow state
         state = create_initial_state()
-        workflow = WorkflowRegistry.get_workflow("support_desk")
+        workflow = WorkflowRegistry.get_workflow(req.model)
         
         logger.info("Got Support Desk workflow, starting stream")
         
@@ -135,9 +135,9 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
     logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}")
     
     try:
-        # Initialize Support Desk workflow state
+        # Initialize workflow state
         state = create_initial_state()
-        workflow = WorkflowRegistry.get_workflow("support_desk")
+        workflow = WorkflowRegistry.get_workflow(req.model)
         
         # Convert OpenAI messages to LangChain format
         lc_messages = [_to_lc(msg) for msg in req.messages]

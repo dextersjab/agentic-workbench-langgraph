@@ -90,8 +90,10 @@ Contains example conversations showing the workflow in action with different typ
 The workflow is registered in the `WorkflowRegistry` and can be accessed through the API:
 
 ```python
-workflow = WorkflowRegistry.get_workflow("support_desk")
+workflow = WorkflowRegistry.get_workflow("support-desk")
 ```
+
+The workflow follows the project convention with a `create_workflow()` function that returns the LangGraph workflow instance.
 
 ## Learning focus
 

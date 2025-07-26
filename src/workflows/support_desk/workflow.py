@@ -42,7 +42,7 @@ def should_continue_clarifying(state: SupportDeskState) -> Literal["clarify", "c
         return "classify"
 
 
-def create_support_desk_workflow(draw_diagram: bool = True):
+def create_workflow(draw_diagram: bool = True):
     """
     Create the Support Desk LangGraph workflow with conditional loop.
     
