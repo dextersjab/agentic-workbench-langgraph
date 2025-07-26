@@ -1,4 +1,4 @@
-# Agentic workflow case studies
+# Agentic workflow workbench
 
 ## Overview
 
