@@ -24,7 +24,7 @@ graph TD
     A -. classify .-> C[classify_issue]
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef context opacity:0.3
+    classDef context opacity:0.6
     classDef first stroke:green
     
     class C context
@@ -47,7 +47,7 @@ graph TD
     B --> C[triage_issue]
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef context opacity:0.3
+    classDef context opacity:0.6
     
     class A,C context
 ```
@@ -67,7 +67,7 @@ graph TD
     B --> C[gather_info]
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef context opacity:0.3
+    classDef context opacity:0.6
     
     class A,C context
 ```
@@ -87,7 +87,7 @@ graph TD
     B --> C[send_to_desk]
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef context opacity:0.3
+    classDef context opacity:0.6
     
     class A,C context
 ```
@@ -107,7 +107,7 @@ graph TD
     B --> C[__end__]
     
     classDef default stroke:#f2f0ff,line-height:1.2
-    classDef context opacity:0.3
+    classDef context opacity:0.6
     classDef last stroke:red
     
     class A context
