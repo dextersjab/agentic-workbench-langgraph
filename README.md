@@ -44,6 +44,8 @@ open-webui serve --port 3000
 
 The models will appear in the top-left corner dropdown.
 
+![Open WebUI screenshot](./open-webui-screenshot.png)
+
 See [https://github.com/open-webui/open-webui]() for more details.
 
 ## Adding new workflows
