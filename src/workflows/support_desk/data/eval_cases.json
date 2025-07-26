@@ -1,0 +1,52 @@
+[
+  {
+    "id": "needs_clarification",
+    "input": "My laptop won't start",
+    "description": "Vague issue that requires clarification loop",
+    "expected_behavior": {
+      "needs_clarification": true,
+      "category": "hardware",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "clear_hardware_issue", 
+    "input": "My laptop is completely dead - no power light, tried different power cables and outlets, nothing happens when I press power button",
+    "description": "Clear hardware issue that bypasses clarification",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "hardware", 
+      "priority": "P1"
+    }
+  },
+  {
+    "id": "password_reset",
+    "input": "I need a password reset for my email account john.doe@company.com, I'm locked out after too many failed attempts",
+    "description": "Clear access issue",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "access",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "network_issue",
+    "input": "WiFi is extremely slow in the conference room during video calls",
+    "description": "Network performance issue",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "network",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "urgent_outage",
+    "input": "Server is down, cannot access any company applications, affecting entire sales team",
+    "description": "Critical outage requiring high priority",
+    "expected_behavior": {
+      "needs_clarification": false,
+      "category": "hardware",
+      "priority": "P1"
+    }
+  }
+]

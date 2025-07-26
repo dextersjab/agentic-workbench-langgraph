@@ -82,29 +82,45 @@ Contains prompts for formatting final responses with ticket information.
 
 ## Prompt engineering techniques
 
-These prompts demonstrate several key techniques:
+Prompts follow the following structure:
 
-1. **Role Definition**: Establishing context through clear roles
+1. **Define the role or objective**
+   Establishing context, either through clear role:
    ```
    You are an IT support analyst reviewing a user's request...
    ```
 
-2. **Context Provision**: Providing relevant information through variables
+   Or simply stating the objective:
+   ```
+   You are reviewing a user's request as part of an agentic support desk system...
+   ```
+
+2. **Explain the domain and situation**:
+   Give the language model relevant information using variables in the prompt:
    ```
    User Request: {user_input}
    Conversation History: {conversation_history}
    ```
 
-3. **Task Specification**: Clearly defining the expected task
+3. **Task specification**:
+   Clearly defining the expected task:
    ```
    Analyse the request and determine if...
    ```
 
-4. **Response Format**: Specifying the desired output structure
+4. **Response format**:
+   Specify the desired output structure:
    ```
    Respond with:
    - "CLEAR" if...
    - "NEEDS_CLARIFICATION" if...
+   ```
+
+   Or simply refer to a tool whose structure is described by its schema:
+   ```
+   Use the `Analysis` tool to set the `result` to:
+     - "CLEAR" if you have sufficient information
+     - "NEEDS_CLARIFICATION" if more details are required
    ```
 
 5. **Guidelines and Constraints**: Shaping response characteristics
@@ -113,12 +129,3 @@ These prompts demonstrate several key techniques:
    - Ask for one specific piece of information at a time
    - Use simple, non-technical language
    ```
-
-## Educational value
-
-Students can learn how to:
-- Design prompts for specific business workflows
-- Create prompts that generate consistent, structured outputs
-- Use role definitions to guide LLM behaviour
-- Manage context effectively in multi-turn conversations
-- Apply constraints to shape response characteristics
