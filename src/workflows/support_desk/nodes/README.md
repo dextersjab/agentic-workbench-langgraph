@@ -24,6 +24,9 @@ graph TD
     B -->|classify| C[classify_issue]
     
     classDef default stroke:#f2f0ff,line-height:1.2
+    classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
+    
+    class C context
 ```
 
 Analyses user input and asks clarifying questions when needed. This node implements a conditional loop logic at the start of the workflow.
@@ -42,6 +45,9 @@ graph TD
     B --> C[triage_issue]
     
     classDef default stroke:#f2f0ff,line-height:1.2
+    classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
+    
+    class A,C context
 ```
 
 Categorises the IT issue into one of the predefined categories: hardware, software, access, or other.
@@ -59,6 +65,9 @@ graph TD
     B --> C[gather_info]
     
     classDef default stroke:#f2f0ff,line-height:1.2
+    classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
+    
+    class A,C context
 ```
 
 Routes the issue to the appropriate support team based on the category and priority.
@@ -76,6 +85,9 @@ graph TD
     B --> C[send_to_desk]
     
     classDef default stroke:#f2f0ff,line-height:1.2
+    classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
+    
+    class A,C context
 ```
 
 Collects additional information needed for the support team to resolve the issue.
@@ -93,8 +105,10 @@ graph TD
     B --> C[__end__]
     
     classDef default stroke:#f2f0ff,line-height:1.2
+    classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
     classDef last stroke:red
     
+    class A context
     class C last
 ```
 
