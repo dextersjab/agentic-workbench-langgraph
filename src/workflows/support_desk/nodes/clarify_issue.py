@@ -7,7 +7,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import ITServiceDeskState
+from ..state import SupportDeskState
 from ..prompts.clarify_issue_prompt import ANALYSIS_PROMPT, CLARIFICATION_PROMPT
 from ..utils import build_conversation_history
 from src.core.llm_client import client
@@ -16,7 +16,7 @@ from langgraph.config import get_stream_writer
 logger = logging.getLogger(__name__)
 
 
-async def clarify_issue_node(state: ITServiceDeskState) -> ITServiceDeskState:
+async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
     Analyze user input and ask clarifying questions if needed.
     

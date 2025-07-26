@@ -19,11 +19,11 @@ class WorkflowRegistry:
     
     _workflows: Dict[str, Any] = {}
     _models = {
-        "it-service-desk": ModelInfo(
-            id="it-service-desk",
+        "support-desk": ModelInfo(
+            id="support-desk",
             object="model",
             created=1753056000,
-            owned_by="it-service-desk"
+            owned_by="support-desk"
         )
     }
     
@@ -59,12 +59,8 @@ class WorkflowRegistry:
         Try to auto-discover workflow using convention: each workflow has create_workflow() function.
         """
         try:
-            # Map model ID to directory name
-            if name == "it-service-desk":
-                dir_name = "support_desk"
-            else:
-                # Default: convert dashes to underscores (my-workflow -> my_workflow)
-                dir_name = name.replace('-', '_')
+            # Convert model name to directory name (support-desk -> support_desk)
+            dir_name = name.replace('-', '_')
             module_name = f"src.workflows.{dir_name}.workflow"
             
             module = importlib.import_module(module_name)

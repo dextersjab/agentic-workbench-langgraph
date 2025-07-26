@@ -20,7 +20,7 @@ It contains workfows based on real business use cases and technical patterns. Fe
 
 ## Agentic workflows in this project
 
-- **[IT Service Desk](src/workflows/support_desk/README.md)** - IT service desk with conditional clarification loop
+- **[Support Desk](src/workflows/support_desk/README.md)** - IT service desk with conditional clarification loop
 
 ## Adding new workflows
 

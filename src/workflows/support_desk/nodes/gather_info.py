@@ -8,7 +8,7 @@ import time
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import ITServiceDeskState
+from ..state import SupportDeskState
 from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
 from ..utils import build_conversation_history
 from src.core.llm_client import client
@@ -17,7 +17,7 @@ from langgraph.config import get_stream_writer
 logger = logging.getLogger(__name__)
 
 
-async def gather_info_node(state: ITServiceDeskState) -> ITServiceDeskState:
+async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     """
     Collect additional information needed for the support team.
     
