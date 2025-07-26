@@ -26,18 +26,6 @@ Feel free to take inspiration, modify and build your own!
 
 - **[IT Support Desk](src/workflows/support_desk/README.md)** - IT Support desk with conditional clarification loop
 
-## Adding new workflows
-
-To add a new workflow to the project:
-
-1. Create a new directory under `src/workflows/` using underscores (e.g., `my_workflow/`)
-2. Add a `workflow.py` file with a `create_workflow()` function that returns your LangGraph workflow
-3. Add a model entry to the registry with the corresponding model ID using dashes (e.g., `"my-workflow"`)
-
-The system will automatically discover and load workflows based on this convention:
-- Model ID `"my-workflow"` maps to directory `src/workflows/my_workflow/`
-- Each workflow must have `workflow.py` with `create_workflow()` function
-
 ## Getting started
 
 Run the API server to interact with the agentic systems:
@@ -57,3 +45,15 @@ open-webui serve --port 3000
 The models will appear in the top-left corner dropdown.
 
 See [https://github.com/open-webui/open-webui]() for more details.
+
+## Adding new workflows
+
+To add a new workflow to the project:
+
+1. Create a new directory under `src/workflows/` using underscores (e.g., `my_workflow/`)
+2. Add a `workflow.py` file with a `create_workflow()` function that returns your LangGraph workflow
+3. Add a model entry to the registry with the corresponding model ID using dashes (e.g., `"my-workflow"`)
+
+The system will automatically discover and load workflows based on this convention:
+- Model ID `"my-workflow"` maps to directory `src/workflows/my_workflow/`
+- Each workflow must have `workflow.py` with `create_workflow()` function
