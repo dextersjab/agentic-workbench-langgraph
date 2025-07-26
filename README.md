@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is structured to enable the effective development of agentic workflows and works best when used in conjuction with [Open WebUI](https://openwebui.com/), the popular open-source ChatGPT-like interface.
+This project is structured to enable the effective development of agentic workflows and works best when used in with [Open WebUI](https://openwebui.com/)—the popular open-source ChatGPT-like interface—as your frontend.
 
 It contains workfows based on real business use cases and technical patterns. Feel free to take inspiration, modify and build your own!
 
