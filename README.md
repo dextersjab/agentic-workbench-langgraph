@@ -24,7 +24,7 @@ Feel free to take inspiration, modify and build your own!
 
 ## Agentic workflows in this project
 
-- **[IT Support Desk](src/workflows/support_desk/README.md)** - IT support desk agentic chatbot that answers queries and raises tickets
+- **[Support desk](src/workflows/support_desk/README.md)** - IT support desk agentic chatbot that answers queries and raises tickets
 
 ## Getting started
 
