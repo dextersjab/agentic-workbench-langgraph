@@ -34,7 +34,7 @@ Run the API server to interact with the agentic systems:
 uvicorn src.core.api:app --reload --port 8000
 ```
 
-You can interact with the server on [`http://localhost:8000`]() following commonly-used OpenAI-style requests.
+You can interact with the server on [`http://localhost:8000`]() following OpenAI-style requests.
 
 Optionally, use the Open WebUI chat interface for a ChatGPT-like user experience:
 
