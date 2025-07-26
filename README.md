@@ -17,7 +17,7 @@ Feel free to take inspiration, modify and build your own!
 ├── src/
 │   ├── core/                     # Shared API and LLM client code
 │   └── workflows/
-│       └── support_desk/         # Business use case: IT Support Desk workflow
+│       └── support_desk/         # Business use case: IT support desk workflow
 ├── main.py                       # API server entrypoint
 └── requirements.txt
 ```
