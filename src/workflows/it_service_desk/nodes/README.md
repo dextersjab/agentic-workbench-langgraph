@@ -1,4 +1,4 @@
-# Support desk workflow nodes
+# IT Service Desk workflow nodes
 
 This directory contains the implementation of each node in the IT Service Desk workflow.
 

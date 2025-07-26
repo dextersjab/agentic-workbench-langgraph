@@ -7,7 +7,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import SupportDeskState
+from ..state import ITServiceDeskState
 from ..prompts.triage_issue_prompt import TRIAGE_PROMPT
 from ..utils import build_conversation_history
 from src.core.llm_client import client
@@ -16,7 +16,7 @@ from langgraph.config import get_stream_writer
 logger = logging.getLogger(__name__)
 
 
-async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
+async def triage_issue_node(state: ITServiceDeskState) -> ITServiceDeskState:
     """
     Route the issue to the appropriate support team.
     

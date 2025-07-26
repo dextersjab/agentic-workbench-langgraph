@@ -9,7 +9,7 @@ import os
 from typing import Literal
 from langgraph.graph import StateGraph, END
 
-from .state import SupportDeskState
+from .state import ITServiceDeskState
 from .nodes.clarify_issue import clarify_issue_node
 from .nodes.classify_issue import classify_issue_node
 from .nodes.triage_issue import triage_issue_node
@@ -19,7 +19,7 @@ from .nodes.send_to_desk import send_to_desk_node
 logger = logging.getLogger(__name__)
 
 
-def should_continue_clarifying(state: SupportDeskState) -> Literal["clarify", "classify"]:
+def should_continue_clarifying(state: ITServiceDeskState) -> Literal["clarify", "classify"]:
     """
     Predicate function for conditional edge from clarify_issue node.
     
@@ -67,7 +67,7 @@ def create_workflow(draw_diagram: bool = True):
     logger.info("Creating Support Desk workflow")
     
     # Create the workflow graph
-    workflow = StateGraph(SupportDeskState)
+    workflow = StateGraph(ITServiceDeskState)
     
     # Add nodes to the workflow
     workflow.add_node("clarify_issue", clarify_issue_node)

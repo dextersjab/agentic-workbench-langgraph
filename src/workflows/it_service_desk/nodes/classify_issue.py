@@ -7,7 +7,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import SupportDeskState
+from ..state import ITServiceDeskState
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
 from ..utils import build_conversation_history
 from src.core.llm_client import client
@@ -16,7 +16,7 @@ from langgraph.config import get_stream_writer
 logger = logging.getLogger(__name__)
 
 
-async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
+async def classify_issue_node(state: ITServiceDeskState) -> ITServiceDeskState:
     """
     Categorize the IT issue into one of the predefined categories.
     

@@ -21,7 +21,7 @@ from .models import (
 )
 from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
 from ..workflows.registry import WorkflowRegistry
-from ..workflows.support_desk.state import create_initial_state
+from ..workflows.it_service_desk.state import create_initial_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

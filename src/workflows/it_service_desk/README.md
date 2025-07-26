@@ -1,4 +1,4 @@
-# Support desk workflow
+# IT Service Desk workflow
 
 This directory contains the implementation of the IT Service Desk workflow.
 
@@ -17,7 +17,7 @@ support_desk/
 
 ## Workflow overview
 
-The Support Desk workflow implements an IT service desk agent that:
+The IT Service Desk workflow implements an IT service desk agent that:
 
 1. Clarifies user issues when needed (with conditional loop)
 2. Classifies issues into categories
@@ -92,7 +92,7 @@ Contains example conversations showing the workflow in action with different typ
 The workflow is registered in the `WorkflowRegistry` and can be accessed through the API:
 
 ```python
-workflow = WorkflowRegistry.get_workflow("support-desk")
+workflow = WorkflowRegistry.get_workflow("it-service-desk")
 ```
 
 The workflow follows the project convention with a `create_workflow()` function that returns the LangGraph workflow instance.

@@ -1,11 +1,11 @@
-"""Support Desk workflow state management."""
+"""IT Service Desk workflow state management."""
 from typing import List, Dict, Any, Optional
 from typing_extensions import TypedDict
 
 
-class SupportDeskState(TypedDict):
+class ITServiceDeskState(TypedDict):
     """
-    State for the Support Desk IT support workflow.
+    State for the IT Service Desk workflow.
     
     This state tracks the conversation and context needed for IT support ticket processing.
     """
@@ -36,14 +36,14 @@ class SupportDeskState(TypedDict):
     ticket_status: Optional[str]    # Status of the ticket
 
 
-def create_initial_state() -> SupportDeskState:
+def create_initial_state() -> ITServiceDeskState:
     """
-    Create initial state for Support Desk workflow.
+    Create initial state for IT Service Desk workflow.
     
     Returns:
         A new SupportDeskState with default values.
     """
-    return SupportDeskState(
+    return ITServiceDeskState(
         messages=[],
         current_user_input="",
         needs_clarification=False,
