@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains implementations of different agentic workflows designed as educational tools for teaching prompt engineering and LangGraph conditional logic. Each workflow demonstrates specific business use cases and technical patterns.
+This project contains implementations of different agentic workflows designed as educational tools for teaching prompt engineering and LangGraph conditional logic. Each workflow is based on real business use cases and technical patterns.
 
 ## Project structure
 
@@ -22,16 +22,30 @@ This project contains implementations of different agentic workflows designed as
 └── requirements.txt              # Python dependencies
 ```
 
-## Available workflows
+## Agentic workflows in this project
 
 - **[Support Desk](src/workflows/support_desk/README.md)** - IT service desk with conditional clarification loop
 
 ## Getting started
 
-To run the workflows:
+To interact with the agentic systems:
+
+
+Run the API:
 
 ```bash
 python main.py
 ```
 
+
 This will start the API server on port 8000, which you can interact with using the OpenAI API format.
+
+Optionally, you can run the Open WebUI to interact with the workflow via a chat interface.
+
+Run:
+
+```shell
+open-webui serve --port 3000
+```
+
+See [https://github.com/open-webui/open-webui]() for more details.
