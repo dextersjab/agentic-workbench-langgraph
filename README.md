@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project contains implementations of different agentic workflows designed as educational tools for teaching prompt engineering and LangGraph conditional logic. Each workflow is based on real business use cases and technical patterns.
+This project is structured to enable the effective development of agentic workflows and works best when used in conjuction with [Open WebUI](https://openwebui.com/), the popular open-source ChatGPT-like interface.
+
+It contains workfows based on real business use cases and technical patterns. Feel free to take inspiration, modify and build your own!
 
 ## Project structure
 
