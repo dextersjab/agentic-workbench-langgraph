@@ -44,7 +44,7 @@ open-webui serve --port 3000
 
 The agentic workflows will appear in the top-left dropdown.
 
-![Open WebUI screenshot](./open-webui-screenshot.png)
+![Open WebUI screenshot](./assets/open-webui-screenshot.png)
 
 See [https://github.com/open-webui/open-webui]() for more.
 
