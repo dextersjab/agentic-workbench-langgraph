@@ -82,21 +82,3 @@ Each example includes detailed state transitions showing how the `SupportDeskSta
 2. How the `needs_clarification` flag controls the workflow path
 3. How information is gradually collected and stored
 4. How the final ticket is created
-
-## Educational value
-
-These examples demonstrate:
-
-1. **Conditional Logic**: How the workflow adapts based on input clarity
-2. **Conversation Management**: How to handle multi-turn conversations
-3. **State Tracking**: How to maintain context across interactions
-4. **Graceful Degradation**: How to proceed even with limited information
-
-## Using the examples
-
-These examples can be used for:
-
-1. **Testing**: Verify that the workflow behaves as expected
-2. **Learning**: Understand how the workflow handles different scenarios
-3. **Debugging**: Identify issues in the implementation
-4. **Demonstration**: Show the workflow in action to stakeholders

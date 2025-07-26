@@ -739,20 +739,3 @@ state_transitions:
       # Generic ticket created despite limited information
       ticket_id: T-1627385350-9012
       ticket_status: created
-
-# Example description and metadata
-description: |
-  This example demonstrates what happens when the maximum number of clarification attempts 
-  is reached without getting clear information. The workflow proceeds with limited information, 
-  creating a generic ticket that requires further clarification from the support team.
-
-# Educational annotations
-educational_notes:
-  - "Clarification attempts reach maximum: 0 → 1 → 2 → 3"
-  - "When max attempts reached, `needs_clarification` becomes false to proceed"
-  - "Lower confidence classification (60% vs 90%+ in other examples)"
-  - "Lower priority assignment due to unclear issue severity"
-  - "Generic support team assignment instead of specialized team"
-  - "Ticket description emphasizes need for additional information"
-  - "Demonstrates graceful degradation when conversation fails"
-  - "Shows how system handles uncooperative or unclear users" 

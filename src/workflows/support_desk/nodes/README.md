@@ -125,16 +125,8 @@ Creates a support ticket and formats the final response with ticket information.
 
 All nodes follow these common patterns:
 
-1. **Deep Copy State**: Create a copy to avoid side effects
-2. **Extract Context**: Get relevant information from state
-3. **Process with LLM**: Use prompts to generate responses
-4. **Update State**: Store results in the state
-5. **Handle Errors**: Gracefully manage exceptions
-
-## Educational focus
-
-These nodes demonstrate:
-- Effective prompt engineering
-- State management in LangGraph
-- Error handling in AI workflows
-- Streaming responses for interactivity
+1. **Deep copy state**: Create a copy to avoid side effects
+2. **Extract context**: Get relevant information from state to inform the prompt
+3. **Process with LLM**: Use prompt to generate desired output (e.g. classification, summary, user response)
+4. **Update state**: Process and store results in the shared workflow state
+5. **Handle errors**: Gracefully manage exceptions

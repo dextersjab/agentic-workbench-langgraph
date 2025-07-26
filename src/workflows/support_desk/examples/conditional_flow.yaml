@@ -678,17 +678,3 @@ state_transitions:
       # Final ticket created
       ticket_id: T-1627385150-5678
       ticket_status: created
-
-# Example description and metadata
-description: |
-  This example demonstrates the conditional loop when the user provides a vague request 
-  that needs clarification. The workflow loops back to the clarification node twice 
-  before proceeding to classification.
-
-# Educational annotations
-educational_notes:
-  - "Notice how `needs_clarification` toggles from false → true → true → false"
-  - "Clarification attempts increment: 0 → 1 → 2 → 2"
-  - "Each clarification response gets progressively more specific"
-  - "Workflow only proceeds when sufficient information is gathered"
-  - "Shows adaptive conversation management based on user responses" 

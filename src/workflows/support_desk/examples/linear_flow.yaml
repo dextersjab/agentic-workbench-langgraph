@@ -503,16 +503,3 @@ state_transitions:
       # Final ticket creation
       ticket_id: T-1627384950-4321
       ticket_status: created
-
-# Example description and metadata
-description: |
-  This example demonstrates the linear flow when the user provides a clear request 
-  that doesn't need clarification. The workflow proceeds directly through all nodes 
-  without looping back for clarification.
-
-# Educational annotations
-educational_notes:
-  - "Notice how `needs_clarification` stays false throughout"
-  - "State builds up progressively through each node"
-  - "Final ticket contains all necessary information"
-  - "User gets clear confirmation with ticket number" 

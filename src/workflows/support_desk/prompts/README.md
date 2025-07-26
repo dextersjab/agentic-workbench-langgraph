@@ -27,22 +27,12 @@ Contains prompts for analysing input clarity and generating clarifying questions
 - `ANALYSIS_PROMPT`: Determines if input needs clarification
 - `CLARIFICATION_PROMPT`: Generates specific questions when needed
 
-**Educational focus:**
-- Input analysis techniques
-- Question generation strategies
-- Conversation management
-
 ### [classify_issue_prompt.py](classify_issue_prompt.py)
 
 Contains prompts for categorising IT issues into predefined types.
 
 **Key prompts:**
 - `CLASSIFICATION_PROMPT`: Categorises issues and sets priority
-
-**Educational focus:**
-- Classification techniques
-- Confidence scoring
-- Multi-attribute extraction
 
 ### [triage_issue_prompt.py](triage_issue_prompt.py)
 
@@ -51,11 +41,6 @@ Contains prompts for routing issues to appropriate support teams.
 **Key prompts:**
 - `TRIAGE_PROMPT`: Determines support team and response time
 
-**Educational focus:**
-- Routing logic
-- Priority-based decision making
-- Response time estimation
-
 ### [gather_info_prompt.py](gather_info_prompt.py)
 
 Contains prompts for collecting additional information for support tickets.
@@ -63,22 +48,12 @@ Contains prompts for collecting additional information for support tickets.
 **Key prompts:**
 - `INFO_GATHERING_PROMPT`: Gathers comprehensive ticket details
 
-**Educational focus:**
-- Information extraction
-- Context-aware data collection
-- Structured output generation
-
 ### [send_to_desk_prompt.py](send_to_desk_prompt.py)
 
 Contains prompts for formatting final responses with ticket information.
 
 **Key prompts:**
 - `FINAL_RESPONSE_PROMPT`: Creates professional handoff messages
-
-**Educational focus:**
-- Response formatting
-- Professional communication
-- Expectation setting
 
 ## Prompt engineering techniques
 
