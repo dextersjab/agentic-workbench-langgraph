@@ -33,11 +33,17 @@ graph TD
 
 Analyses user input and asks clarifying questions when needed. This node implements a **conditional loop** - the dotted lines show that based on the analysis, it can either loop back to itself for more clarification or proceed to classification.
 
-**Key features:**
-- Analyses input clarity using LLM
-- Generates clarifying questions when needed
-- Tracks clarification attempts
-- Updates state to control workflow path
+**Reads from state:**
+- `current_user_input` - The user's message to analyze for clarity
+- `messages` - Previous conversation context
+- `clarification_attempts` - How many questions have been asked
+- `max_clarification_attempts` - Maximum questions allowed
+
+**Updates state:**
+- `needs_clarification` - Whether more information is needed
+- `clarification_attempts` - Incremented when asking questions
+- `current_response` - Clarifying question or confirmation to proceed
+- `messages` - Updated with the agent's response
 
 ### [classify_issue.py](classify_issue.py)
 
@@ -54,10 +60,14 @@ graph TD
 
 Categorises the IT issue into one of the predefined categories: hardware, software, access, or other.
 
-**Key features:**
-- Uses LLM to analyse issue description
-- Assigns category and confidence level
-- Sets priority based on impact
+**Reads from state:**
+- `current_user_input` - The issue description to classify
+- `messages` - Full conversation context for better classification
+
+**Updates state:**
+- `issue_category` - Assigned category (hardware, software, access, other)
+- `issue_priority` - Priority level based on urgency keywords
+- `current_response` - Classification summary for the user
 
 ### [triage_issue.py](triage_issue.py)
 
@@ -74,10 +84,14 @@ graph TD
 
 Routes the issue to the appropriate support team based on the category and priority.
 
-**Key features:**
-- Determines support team based on category
-- Considers priority for escalation
-- Sets expected response time
+**Reads from state:**
+- `issue_category` - Category determined by classification
+- `issue_priority` - Priority level for routing decisions
+
+**Updates state:**
+- `support_team` - Assigned team (L1 support, specialist, escalation)
+- `ticket_info` - Routing information and SLA expectations
+- `current_response` - Routing confirmation for the user
 
 ### [gather_info.py](gather_info.py)
 
@@ -94,10 +108,15 @@ graph TD
 
 Collects additional information needed for the support team to resolve the issue.
 
-**Key features:**
-- Determines what information is needed
-- Creates comprehensive ticket details
-- Formats information for support team
+**Reads from state:**
+- `issue_category` - Type of issue to determine required information
+- `support_team` - Target team to tailor information gathering
+- `messages` - Conversation history to extract details
+- `user_context` - User information for ticket context
+
+**Updates state:**
+- `ticket_info` - Comprehensive ticket details and metadata
+- `current_response` - Information gathering summary
 
 ### [send_to_desk.py](send_to_desk.py)
 
@@ -116,17 +135,24 @@ graph TD
 
 Creates a support ticket and formats the final response with ticket information.
 
-**Key features:**
-- Generates ticket ID
-- Creates professional response
-- Provides next steps and expectations
+**Reads from state:**
+- `ticket_info` - Complete ticket details from previous nodes
+- `support_team` - Team assignment for ticket routing
+- `issue_priority` - Priority for ticket metadata
 
-## Common patterns
+**Updates state:**
+- `ticket_id` - Generated unique ticket identifier
+- `ticket_status` - Initial ticket status (e.g., "created", "assigned")
+- `current_response` - Final response with ticket details and next steps
 
-All nodes follow these common patterns:
+## State transformation patterns
+
+All nodes follow these state transformation patterns:
 
 1. **Deep copy state**: Create a copy to avoid side effects
-2. **Extract context**: Get relevant information from state to inform the prompt
-3. **Process with LLM**: Use prompt to generate desired output (e.g. classification, summary, user response)
-4. **Update state**: Process and store results in the shared workflow state
-5. **Handle errors**: Gracefully manage exceptions
+2. **Read required fields**: Extract specific state fields needed for processing
+3. **Transform data**: Use LLM to process inputs and generate outputs
+4. **Update state fields**: Store results in specific state fields
+5. **Handle errors**: Gracefully manage exceptions without corrupting state
+
+Each node acts as a pure function: `(state) -> updated_state`, making the workflow predictable and debuggable.
