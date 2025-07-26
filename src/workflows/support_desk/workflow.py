@@ -106,6 +106,8 @@ def create_support_desk_workflow(draw_diagram: bool = True, diagram_path: str = 
             with open(diagram_path, "wb") as f:
                 f.write(png_bytes)
             logger.info(f"Workflow diagram saved successfully to {diagram_path}")
+            mermaid_diagram = compiled_workflow.get_graph().draw_mermaid()
+            logger.info(mermaid_diagram)
         except Exception as e:
             logger.warning(f"Failed to generate workflow diagram: {e}")
     

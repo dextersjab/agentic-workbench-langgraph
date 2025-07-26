@@ -23,6 +23,29 @@ The Support Desk workflow implements an IT service desk agent that:
 4. Gathers additional information
 5. Creates support tickets
 
+```mermaid
+graph TD;
+    __start__([<p>__start__</p>]):::first
+    clarify_issue(clarify_issue)
+    classify_issue(classify_issue)
+    triage_issue(triage_issue)
+    gather_info(gather_info)
+    send_to_desk(send_to_desk)
+    __end__([<p>__end__</p>]):::last
+
+    __start__ --> clarify_issue;
+    clarify_issue -. &nbsp;classify&nbsp; .-> classify_issue;
+    classify_issue --> triage_issue;
+    gather_info --> send_to_desk;
+    triage_issue --> gather_info;
+    send_to_desk --> __end__;
+    clarify_issue -. &nbsp;clarify&nbsp; .-> clarify_issue;
+    
+    classDef default fill:#f2f0ff,line-height:1.2
+    classDef first fill-opacity:0
+    classDef last fill:#bfb6fc
+```
+
 ## Key components
 
 ### [workflow.py](workflow.py)
