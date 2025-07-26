@@ -9,17 +9,11 @@ This project contains implementations of different agentic workflows designed as
 ```
 .
 ├── src/
-│   ├── core/                     # Core API and LLM infrastructure
-│   └── workflows/                # Individual workflow implementations
+│   ├── core/                     # Shared API and LLM code
+│   └── workflows/
 │       └── support_desk/         # IT Service Desk workflow
-│           ├── data/             # Sample data and conversations
-│           ├── kb/               # Knowledge base articles
-│           ├── docs/             # Workflow documentation
-│           ├── nodes/            # Node implementations
-│           ├── prompts/          # Prompt templates
-│           └── examples/         # Example conversations
-├── main.py                       # API server entry point
-└── requirements.txt              # Python dependencies
+├── main.py                       # API server entrypoint
+└── requirements.txt
 ```
 
 ## Agentic workflows in this project

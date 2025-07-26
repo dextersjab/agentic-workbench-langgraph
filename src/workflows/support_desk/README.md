@@ -8,9 +8,12 @@ This directory contains the implementation of the IT Service Desk workflow with 
 support_desk/
 ├── workflow.py              # Main workflow definition with conditional logic
 ├── state.py                 # State management
+├── data/                    # Sample data and conversations
+├── docs/                    # Workflow documentation
+├── examples/                # Example conversations
+├── kb/                      # Knowledge base articles
 ├── nodes/                   # Node implementations
-├── prompts/                 # Prompt templates
-└── examples/                # Example conversations
+└── prompts/                 # Prompt templates
 ```
 
 ## Workflow overview
