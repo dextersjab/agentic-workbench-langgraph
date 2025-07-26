@@ -1,15 +1,14 @@
 # Support desk workflow
 
-This directory contains the implementation of the IT Service Desk workflow with conditional loop logic.
+This directory contains the implementation of the IT Service Desk workflow.
 
 ## Directory structure
 
 ```
 support_desk/
-├── workflow.py              # Main workflow definition with conditional logic
+├── workflow.py              # Main workflow definition
 ├── state.py                 # State management
-├── data/                    # Sample data and conversations
-├── docs/                    # Workflow documentation
+├── data/                    # Data for adding context
 ├── examples/                # Example conversations
 ├── kb/                      # Knowledge base articles
 ├── nodes/                   # Node implementations
