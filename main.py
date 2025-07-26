@@ -1,8 +1,5 @@
 """
-Main entry point for the HelpHub API server.
-
-TODO for participants: Add configuration management,
-logging setup, and production deployment settings.
+Main entry point for the agentic workflows API.
 """
 import dotenv
 import logging
@@ -20,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    logger.info("Starting HelpHub API server")
+    logger.info("Starting agentic workflows API server")
 
     # Load environment variables
     dotenv.load_dotenv()
@@ -29,12 +26,7 @@ if __name__ == "__main__":
     set_debug(True)
     set_verbose(True)
     
-    # TODO for participants:
-    # - Add configuration from environment variables
-    # - Include SSL/TLS configuration for production
-    # - Add health checks and monitoring endpoints
-    # - Configure CORS for production use
-    # - Add rate limiting and authentication
+    # TODO add configuration from environment variables?
     
     import uvicorn
     uvicorn.run(
