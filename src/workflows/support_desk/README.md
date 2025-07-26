@@ -1,6 +1,6 @@
 # Support desk workflow
 
-This directory contains the implementation of the IT Service Desk workflow.
+This directory contains the implementation of the IT Support Desk workflow.
 
 ## Directory structure
 
@@ -17,7 +17,7 @@ support_desk/
 
 ## Workflow overview
 
-The Support Desk workflow implements an IT service desk agent that:
+The Support Desk workflow implements an IT support desk agent that:
 
 1. Clarifies user issues when needed (with conditional loop)
 2. Classifies issues into categories
