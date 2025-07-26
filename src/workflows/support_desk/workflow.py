@@ -1,7 +1,7 @@
 """
 Support Desk LangGraph workflow definition with conditional loop logic.
 
-This module implements the IT Service Desk workflow with a conditional
+This module implements the IT Support Desk workflow with a conditional
 clarification loop, demonstrating advanced LangGraph patterns.
 """
 import logging

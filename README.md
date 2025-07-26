@@ -13,14 +13,14 @@ It contains workfows based on real business use cases and technical patterns. Fe
 ├── src/
 │   ├── core/                     # Shared API and LLM client code
 │   └── workflows/
-│       └── support_desk/         # Business use case: IT Service Desk workflow
+│       └── support_desk/         # Business use case: IT Support Desk workflow
 ├── main.py                       # API server entrypoint
 └── requirements.txt
 ```
 
 ## Agentic workflows in this project
 
-- **[Support Desk](src/workflows/support_desk/README.md)** - IT service desk with conditional clarification loop
+- **[IT Support Desk](src/workflows/support_desk/README.md)** - IT Support desk with conditional clarification loop
 
 ## Adding new workflows
 

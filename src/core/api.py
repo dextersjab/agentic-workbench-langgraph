@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Support Desk IT Service Agent",
+    title="Support Desk IT Support Agent",
     description="OpenAI-compatible API for IT support chatbot training",
     version="0.1.0"
 )
@@ -225,7 +225,7 @@ async def chat_completions(request: ChatCompletionRequest):
 async def root():
     """API information with HATEOAS links."""
     return {
-        "name": "Support Desk IT Service Agent API",
+        "name": "Support Desk IT Support Agent API",
         "version": "1.0.0",
         "description": "OpenAI-compatible API for IT support chatbot using LangGraph workflows",
         "links": {

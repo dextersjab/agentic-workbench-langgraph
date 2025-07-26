@@ -1,6 +1,6 @@
 # Support desk workflow examples
 
-This directory contains example conversations that demonstrate the IT Service Desk workflow in action. These examples showcase different user inputs and how the workflow responds, particularly highlighting the conditional clarification loop.
+This directory contains example conversations that demonstrate the IT Support Desk workflow in action. These examples showcase different user inputs and how the workflow responds, particularly highlighting the conditional clarification loop.
 
 ## Example files
 

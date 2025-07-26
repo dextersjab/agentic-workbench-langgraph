@@ -1,6 +1,6 @@
 # Support desk workflow prompts
 
-This directory contains the prompt templates used by each node in the IT Service Desk workflow. These prompts demonstrate effective prompt engineering techniques for different business tasks.
+This directory contains the prompt templates used by each node in the IT Support Desk workflow. These prompts demonstrate effective prompt engineering techniques for different business tasks.
 
 ## Prompt overview
 

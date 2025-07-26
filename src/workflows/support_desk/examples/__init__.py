@@ -1,5 +1,5 @@
 """
 Support Desk workflow example conversations.
 
-This package contains example conversations for the IT Service Desk workflow.
+This package contains example conversations for the IT Support Desk workflow.
 """
