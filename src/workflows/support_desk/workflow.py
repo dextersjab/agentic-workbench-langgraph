@@ -5,6 +5,7 @@ This module implements the IT Service Desk workflow with a conditional
 clarification loop, demonstrating advanced LangGraph patterns.
 """
 import logging
+import os
 from typing import Literal
 from langgraph.graph import StateGraph, END
 
@@ -41,7 +42,7 @@ def should_continue_clarifying(state: SupportDeskState) -> Literal["clarify", "c
         return "classify"
 
 
-def create_support_desk_workflow(draw_diagram: bool = True, diagram_path: str = "support_desk_workflow.png"):
+def create_support_desk_workflow(draw_diagram: bool = True):
     """
     Create the Support Desk LangGraph workflow with conditional loop.
     
@@ -58,7 +59,6 @@ def create_support_desk_workflow(draw_diagram: bool = True, diagram_path: str = 
     
     Args:
         draw_diagram: Whether to draw and save a mermaid diagram of the workflow.
-        diagram_path: Path where to save the diagram if draw_diagram is True.
     
     Returns:
         A compiled LangGraph workflow
@@ -100,6 +100,10 @@ def create_support_desk_workflow(draw_diagram: bool = True, diagram_path: str = 
     
     # Generate mermaid diagram if requested
     if draw_diagram:
+        # Generate diagram path in the same directory as this module
+        current_dir = os.path.dirname(__file__)
+        diagram_path = os.path.join(current_dir, "support_desk_workflow.png")
+        
         logger.info(f"Drawing workflow diagram to {diagram_path}")
         try:
             png_bytes = compiled_workflow.get_graph().draw_mermaid_png()
