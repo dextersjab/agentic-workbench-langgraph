@@ -46,10 +46,9 @@ Run the API server to interact with the agentic systems:
 python main.py
 ```
 
+You can interact with the server on `http://localhost:8000` following commonly-used OpenAI-style request patterns.
 
-This will start the API server on port 8000, which you can interact with using the OpenAI API format.
-
-Optionally, you can interact with the workflow through the Open WebUI chat interface:
+Optionally, use the Open WebUI chat interface for a ChatGPT-like user experience:
 
 ```shell
 open-webui serve --port 3000
