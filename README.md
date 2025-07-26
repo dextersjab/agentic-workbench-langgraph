@@ -40,10 +40,7 @@ The system will automatically discover and load workflows based on this conventi
 
 ## Getting started
 
-To interact with the agentic systems:
-
-
-Run the API:
+Run the API server to interact with the agentic systems:
 
 ```bash
 python main.py
