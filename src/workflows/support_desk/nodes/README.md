@@ -19,17 +19,19 @@ async def some_node(state: SupportDeskState) -> SupportDeskState:
 
 ```mermaid
 graph TD
-    A[clarify_issue] --> B{needs more info?}
-    B -->|clarify| A
-    B -->|classify| C[classify_issue]
+    START[__start__] --> A[clarify_issue]
+    A -. clarify .-> A
+    A -. classify .-> C[classify_issue]
     
     classDef default stroke:#f2f0ff,line-height:1.2
     classDef context stroke-dasharray: 5 5,stroke:#cccccc,line-height:1.2
+    classDef first stroke:green
     
     class C context
+    class START first
 ```
 
-Analyses user input and asks clarifying questions when needed. This node implements a conditional loop logic at the start of the workflow.
+Analyses user input and asks clarifying questions when needed. This node implements a **conditional loop** - the dotted lines show that based on the analysis, it can either loop back to itself for more clarification or proceed to classification.
 
 **Key features:**
 - Analyses input clarity using LLM
