@@ -76,7 +76,7 @@ Support Desk: Thank you for the information. Let me help you with your IT issue.
 
 ## State transitions
 
-Each example includes detailed state transitions showing how the `SupportDeskState` evolves throughout the conversation. This helps students understand:
+Each example includes detailed state transitions showing how the `SupportDeskState` evolves throughout the conversation. This helps you understand:
 
 1. How state is maintained across multiple turns
 2. How the `needs_clarification` flag controls the workflow path
@@ -100,5 +100,3 @@ These examples can be used for:
 2. **Learning**: Understand how the workflow handles different scenarios
 3. **Debugging**: Identify issues in the implementation
 4. **Demonstration**: Show the workflow in action to stakeholders
-
-Students can modify these examples or create new ones to test different scenarios and edge cases.

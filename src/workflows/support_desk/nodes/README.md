@@ -17,7 +17,7 @@ async def some_node(state: SupportDeskState) -> SupportDeskState:
 
 ### [clarify_issue.py](clarify_issue.py)
 
-Analyses user input and asks clarifying questions when needed. This node implements the conditional loop logic that is central to Phase 2 of the learning progression.
+Analyses user input and asks clarifying questions when needed. This node implements a conditional loop logic at the start of the workflow.
 
 **Key features:**
 - Analyses input clarity using LLM

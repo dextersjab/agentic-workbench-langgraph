@@ -96,10 +96,3 @@ workflow = WorkflowRegistry.get_workflow("support-desk")
 ```
 
 The workflow follows the project convention with a `create_workflow()` function that returns the LangGraph workflow instance.
-
-## Learning focus
-
-This workflow demonstrates two key educational concepts:
-
-1. **Prompt Engineering**: Each node uses carefully designed prompts
-2. **Conditional Logic in LangGraph**: The clarification loop shows how to implement conditional edges
