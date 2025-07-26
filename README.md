@@ -22,7 +22,7 @@ Feel free to take inspiration, modify and build your own!
 └── requirements.txt
 ```
 
-## Pre-made agentic workflows
+## Ready made workflows
 
 - **[Support desk](src/workflows/support_desk/README.md)** - IT support desk agentic chatbot that answers queries and raises tickets
 
