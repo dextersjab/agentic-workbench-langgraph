@@ -9,6 +9,7 @@ from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
+from ..utils import build_conversation_history
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer
 
@@ -37,10 +38,7 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     
     # Extract conversation history for context
     messages = state.get("messages", [])
-    conversation_history = "\n".join([
-        f"{msg.get('role', 'user')}: {msg.get('content', '')}" 
-        for msg in messages
-    ])
+    conversation_history = build_conversation_history(messages)
     
     try:
         # Get stream writer for custom streaming

@@ -10,6 +10,7 @@ from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
+from ..utils import build_conversation_history
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer
 
@@ -42,10 +43,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     messages = state.get("messages", [])
     
     # Build conversation history for context
-    conversation_history = "\n".join([
-        f"{msg.get('role', 'user')}: {msg.get('content', '')}" 
-        for msg in messages
-    ])
+    conversation_history = build_conversation_history(messages)
     
     try:
         # Get stream writer for custom streaming

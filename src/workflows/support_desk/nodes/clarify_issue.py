@@ -9,6 +9,7 @@ from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.clarify_issue_prompt import ANALYSIS_PROMPT, CLARIFICATION_PROMPT
+from ..utils import build_conversation_history
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer
 
@@ -41,10 +42,7 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     max_attempts = state.get("max_clarification_attempts", 3)
     
     # Build conversation history for context
-    conversation_history = "\n".join([
-        f"{msg.get('role', 'user')}: {msg.get('content', '')}" 
-        for msg in messages[-5:]  # Last 5 messages for context
-    ])
+    conversation_history = build_conversation_history(messages, last_n_messages=5)
     
     try:
         # Step 1: Analyze if input needs clarification using LLM

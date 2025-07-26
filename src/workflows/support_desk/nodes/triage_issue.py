@@ -9,6 +9,7 @@ from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.triage_issue_prompt import TRIAGE_PROMPT
+from ..utils import build_conversation_history
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer
 
@@ -41,10 +42,7 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
     messages = state.get("messages", [])
     
     # Build conversation history for context
-    conversation_history = "\n".join([
-        f"{msg.get('role', 'user')}: {msg.get('content', '')}" 
-        for msg in messages
-    ])
+    conversation_history = build_conversation_history(messages)
     
     try:
         # Get stream writer for custom streaming
