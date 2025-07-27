@@ -13,6 +13,7 @@ from ..models.gather_question_output import GatherQuestionOutput
 from ..models.gather_output import GatherOutput
 from ..prompts.gather_question_prompt import GATHER_QUESTION_PROMPT
 from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
+from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from ..utils import build_conversation_history
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
@@ -161,6 +162,7 @@ async def _create_final_ticket(state: SupportDeskState, issue_category: str, iss
     
     # Create prompt for final ticket information extraction
     prompt = INFO_GATHERING_PROMPT.format(
+        servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY,
         issue_category=issue_category,
         issue_priority=issue_priority,
         support_team=support_team,

@@ -4,16 +4,20 @@ Prompts for information gathering node in Support Desk workflow.
 These prompts use tool calling to generate structured outputs.
 """
 
+from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
+
 # Information gathering prompt using tool calling
 INFO_GATHERING_PROMPT = """
-You are an IT support agent gathering comprehensive information for a support ticket.
+You are a performing gathering comprehensive information for a support ticket as part of an IT support agentic workflow, working on behalf of ServiceHub.
+
+ServiceHub Support Ticket Policy: {servicehub_support_ticket_policy}
 
 Issue Category: {issue_category}
 Issue Priority: {issue_priority}
 Assigned Team: {support_team}
 Conversation History: {conversation_history}
 
-Analyze the conversation and extract comprehensive ticket information:
+Analyse the conversation and extract comprehensive ticket information:
 
 1. **Ticket Summary**: Create a concise, descriptive title for the issue
 2. **Detailed Description**: Comprehensive description including symptoms, context, and timeline

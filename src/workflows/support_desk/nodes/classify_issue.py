@@ -73,8 +73,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             output_data = extract_tool_call_args(response, tool_name)
             classify_output = ClassifyOutput(**output_data)
             
-            logger.info(f"Classification successful: category={classify_output.category}, "
-                       f"priority={classify_output.priority}, confidence={classify_output.confidence}")
+            logger.info(f"\033[34mClassification successful: category={classify_output.category}, "
+                       f"priority={classify_output.priority}, confidence={classify_output.confidence}\033[0m")
             
             # Check if clarification is needed
             if classify_output.needs_clarification:
@@ -88,7 +88,7 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
                     "content": classify_output.response
                 })
             else:
-                logger.info(f"Issue classified as {classify_output.category} with {classify_output.priority} priority")
+                logger.info(f"No clarification required: classified as {classify_output.category} with {classify_output.priority} priority")
                 
                 # DON'T stream - this is internal processing, not user-facing
                 # Classification happens silently and routes to triage
