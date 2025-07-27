@@ -13,6 +13,7 @@ from typing import Dict, Any
 from ..state import SupportDeskState, update_state_from_output
 from ..models.send_to_desk_output import SendToDeskOutput
 from ..prompts.send_to_desk_prompt import FINAL_RESPONSE_PROMPT
+from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
@@ -33,8 +34,11 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with final ticket information and response
     """
     
-    logger.info("Send to desk node processing user input")
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("send_to_desk", ["ticket_info", "support_team"])
     
     # Extract ticket information
     ticket_info = state.get("ticket_info", {})
@@ -80,7 +84,7 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
             output_data = extract_tool_call_args(response, tool_name)
             desk_output = SendToDeskOutput(**output_data)
             
-            logger.info(f"Final ticket creation successful: ticket_id={desk_output.ticket_id}")
+            logger.info(f"→ ticket {desk_output.ticket_id} created")
             
             # Stream the final response manually since tool calls don't auto-stream
             writer = get_stream_writer()
@@ -103,7 +107,7 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
                 "content": desk_output.response
             })
             
-            logger.info(f"Ticket created successfully: {desk_output.ticket_id}")
+            logger.info("→ desk submission complete")
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
@@ -117,5 +121,8 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         # Don't mask the real error with fallback messages
         # Let the error propagate for clean error handling
         raise
+    
+    # Log what this node wrote to state
+    log_node_complete("send_to_desk", state_before, state)
     
     return state

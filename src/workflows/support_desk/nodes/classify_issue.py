@@ -11,6 +11,7 @@ from ..state import SupportDeskState
 from ..models.classify_output import ClassifyOutput
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
 from ..utils import build_conversation_history
+from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
@@ -31,8 +32,11 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with category and priority information
     """
     
-    logger.info("Classify issue node processing user input")
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("classify_issue", ["messages"])
     
     # Extract conversation history for context
     messages = state.get("messages", [])
@@ -73,12 +77,11 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             output_data = extract_tool_call_args(response, tool_name)
             classify_output = ClassifyOutput(**output_data)
             
-            logger.info(f"\033[34mClassification successful: category={classify_output.category}, "
-                       f"priority={classify_output.priority}, confidence={classify_output.confidence}\033[0m")
+            logger.info(f"→ {classify_output.category}/{classify_output.priority} (conf: {classify_output.confidence})")
             
             # Check if clarification is needed
             if classify_output.needs_clarification:
-                logger.info("Classification requires clarification")
+                logger.info("→ needs clarification")
                 state["needs_clarification"] = True
                 state["current_response"] = classify_output.response
                 
@@ -88,7 +91,7 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
                     "content": classify_output.response
                 })
             else:
-                logger.info(f"No clarification required: classified as {classify_output.category} with {classify_output.priority} priority")
+                logger.info("→ classification complete")
                 
                 # DON'T stream - this is internal processing, not user-facing
                 # Classification happens silently and routes to triage
@@ -114,5 +117,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
         # Don't mask the real error with fallback messages
         # Let the error propagate for clean error handling
         raise
+    
+    # Log what this node wrote to state
+    log_node_complete("classify_issue", state_before, state)
     
     return state

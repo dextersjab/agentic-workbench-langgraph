@@ -11,6 +11,7 @@ from ..state import SupportDeskState
 from ..models.clarify_output import ClarifyOutput
 from ..prompts.clarify_issue_prompt import CLARIFICATION_PROMPT
 from ..utils import build_conversation_history
+from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
@@ -32,8 +33,11 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with clarifying question
     """
     
-    logger.info("Clarify issue node asking for more details")
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("clarify_issue", ["messages", "clarification_attempts", "max_clarification_attempts", "current_user_input"])
     
     messages = state.get("messages", [])
     clarification_attempts = state.get("clarification_attempts", 0)
@@ -79,7 +83,7 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         output_data = extract_tool_call_args(response, tool_name)
         clarify_output = ClarifyOutput(**output_data)
         
-        logger.info(f"Generated clarifying question with confidence={clarify_output.confidence}")
+        logger.info(f"→ clarifying question (conf: {clarify_output.confidence})")
         
         # Stream the clarifying question to the user BEFORE interrupting
         writer = get_stream_writer()
@@ -101,6 +105,9 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         # Let the error propagate for clean error handling
         raise
     
+    # Log what this node wrote to state
+    log_node_complete("clarify_issue", state_before, state)
+    
     # Use interrupt to pause and wait for user input - outside try/catch
     # Don't pass the question to interrupt() since we already streamed it
     interrupt("Waiting for user response")
@@ -120,8 +127,8 @@ def should_continue_to_triage(state: SupportDeskState) -> bool:
     """
     needs_clarification = state.get("needs_clarification", False)
     if needs_clarification:
-        logger.info("Need clarification, routing to clarify_issue")
+        logger.info("→ needs clarification")
         return False
     else:
-        logger.info("Have sufficient information, proceeding to triage_issue")
+        logger.info("→ sufficient info")
         return True

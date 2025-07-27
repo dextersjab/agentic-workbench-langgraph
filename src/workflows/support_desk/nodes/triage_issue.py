@@ -11,6 +11,7 @@ from ..state import SupportDeskState, update_state_from_output
 from ..models.triage_output import TriageOutput
 from ..prompts.triage_issue_prompt import TRIAGE_PROMPT
 from ..utils import build_conversation_history
+from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
@@ -31,8 +32,11 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with routing and team assignment information
     """
     
-    logger.info("Triage issue node processing user input")
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("triage_issue", ["issue_category", "issue_priority", "messages"])
     
     # Extract relevant information
     issue_category = state.get("issue_category", "other")
@@ -79,8 +83,7 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
             output_data = extract_tool_call_args(response, tool_name)
             triage_output = TriageOutput(**output_data)
             
-            logger.info(f"Triage successful: team={triage_output.support_team}, "
-                       f"resolution_time={triage_output.estimated_resolution_time}")
+            logger.info(f"→ {triage_output.support_team} team ({triage_output.estimated_resolution_time})")
             
             # DON'T stream - this is internal processing, not user-facing
             # Triage happens silently and routes to gather_info
@@ -96,7 +99,7 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
             # DON'T add to conversation history - this is internal routing
             # The user doesn't need to see "Your issue has been assigned to L1..."
             
-            logger.info(f"Issue triaged to {triage_output.support_team} team")
+            logger.info("→ triage complete")
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
@@ -110,5 +113,8 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
         # Don't mask the real error with fallback messages
         # Let the error propagate for clean error handling
         raise
+    
+    # Log what this node wrote to state
+    log_node_complete("triage_issue", state_before, state)
     
     return state

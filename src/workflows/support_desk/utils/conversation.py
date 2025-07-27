@@ -1,7 +1,7 @@
 """
-Utility functions for Support Desk workflow.
+Conversation utility functions for Support Desk workflow.
 
-This module contains shared utilities used across multiple nodes.
+This module contains utilities for building and formatting conversation history.
 """
 from typing import List, Dict, Any, Optional
 
@@ -30,4 +30,4 @@ def build_conversation_history(messages: List[Dict[str, Any]], last_n_messages: 
         for msg in messages
     ])
     
-    return conversation_history 
+    return conversation_history

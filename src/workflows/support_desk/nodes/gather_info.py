@@ -15,6 +15,7 @@ from ..prompts.gather_question_prompt import GATHER_QUESTION_PROMPT
 from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from ..utils import build_conversation_history
+from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
@@ -36,8 +37,11 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with current question or completed ticket information
     """
     
-    logger.info("Gather info node processing - iterative questioning mode")
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("gather_info", ["issue_category", "issue_priority", "support_team", "messages", "gathering_round", "is_gathering_complete"])
     
     # Extract relevant information
     issue_category = state.get("issue_category", "other")
@@ -98,7 +102,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
             
             # Check if gathering is complete
             if question_output.is_gathering_complete:
-                logger.info("Gathering deemed complete by LLM, proceeding to final ticket creation")
+                logger.info("→ gathering complete")
                 state["is_gathering_complete"] = True
                 return await _create_final_ticket(state, issue_category, issue_priority, support_team, messages)
             
@@ -118,7 +122,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
                 "content": question_output.response
             })
             
-            logger.info(f"Asked question (round {gathering_round}): {question_output.next_question[:50]}...")
+            logger.info(f"→ question round {gathering_round}")
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
@@ -130,6 +134,9 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     except Exception as e:
         logger.error(f"Error in gather_info_node: {e}")
         raise
+    
+    # Log what this node wrote to state
+    log_node_complete("gather_info", state_before, state)
     
     # Use interrupt to pause and wait for user response
     interrupt("Waiting for user response to information gathering question")
@@ -151,7 +158,7 @@ async def _create_final_ticket(state: SupportDeskState, issue_category: str, iss
     Returns:
         Updated state with comprehensive ticket information
     """
-    logger.info("Creating final comprehensive ticket from gathered information")
+    logger.info("→ creating final ticket")
     
     # Build conversation history for final analysis
     conversation_history = build_conversation_history(messages)
@@ -222,8 +229,9 @@ async def _create_final_ticket(state: SupportDeskState, issue_category: str, iss
         "content": gather_output.response
     })
     
-    logger.info("Final comprehensive ticket information created successfully")
+    logger.info("→ ticket created")
     
+    # Note: state_before/after logging handled by main gather_info_node function
     return state
 
 
