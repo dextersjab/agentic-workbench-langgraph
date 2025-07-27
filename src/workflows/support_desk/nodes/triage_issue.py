@@ -82,9 +82,8 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
             logger.info(f"Triage successful: team={triage_output.support_team}, "
                        f"resolution_time={triage_output.estimated_resolution_time}")
             
-            # Stream the response manually since tool calls don't auto-stream
-            writer = get_stream_writer()
-            writer({"custom_llm_chunk": triage_output.response})
+            # DON'T stream - this is internal processing, not user-facing
+            # Triage happens silently and routes to gather_info
             
             # Update state with structured triage information using helper
             update_state_from_output(state, triage_output, {
@@ -94,11 +93,8 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
                 'response': 'current_response'
             })
             
-            # Add response to conversation history
-            state["messages"].append({
-                "role": "assistant",
-                "content": triage_output.response
-            })
+            # DON'T add to conversation history - this is internal routing
+            # The user doesn't need to see "Your issue has been assigned to L1..."
             
             logger.info(f"Issue triaged to {triage_output.support_team} team")
             

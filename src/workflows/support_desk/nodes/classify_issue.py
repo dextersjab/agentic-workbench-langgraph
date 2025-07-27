@@ -90,9 +90,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             else:
                 logger.info(f"Issue classified as {classify_output.category} with {classify_output.priority} priority")
                 
-                # Stream the response manually since tool calls don't auto-stream
-                writer = get_stream_writer()
-                writer({"custom_llm_chunk": classify_output.response})
+                # DON'T stream - this is internal processing, not user-facing
+                # Classification happens silently and routes to triage
                 
                 # Update state with structured classification information
                 state["issue_category"] = classify_output.category
@@ -100,11 +99,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
                 state["needs_clarification"] = False
                 state["current_response"] = classify_output.response
                 
-                # Add response to conversation history
-                state["messages"].append({
-                    "role": "assistant",
-                    "content": classify_output.response
-                })
+                # DON'T add to conversation history - this is internal routing
+                # The user doesn't need to see "I've classified this as hardware..."
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
