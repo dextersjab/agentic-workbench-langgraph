@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 START_GREEN = "\033[38;5;84m"    # Vibrant mint green for starting
 END_RED = "\033[38;5;203m"       # Warm coral red for ending
+GREY = "\033[38;5;240m"          # Subtle grey for infrastructure logs
 RESET = "\033[0m"
 
 

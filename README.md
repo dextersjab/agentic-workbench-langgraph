@@ -39,7 +39,7 @@ You can interact with the server on [`http://localhost:8000`]() following OpenAI
 Optionally, use the Open WebUI chat interface for a ChatGPT-like user experience:
 
 ```shell
-open-webui serve --port 3000
+ENABLE_TAGS_GENERATION=false ENABLE_TITLE_GENERATION=false ENABLE_FOLLOW_UP_GENERATION=false open-webui serve --port 3000
 ```
 
 The agentic workflows will appear in the top-left dropdown.

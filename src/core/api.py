@@ -4,6 +4,8 @@ import time
 import uuid
 import traceback
 import logging
+
+from src.workflows.support_desk.utils.state_logger import GREY, RESET
 from typing import AsyncGenerator, Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, status
@@ -155,7 +157,7 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
     
     # Use thread_id from request if provided, otherwise use default thread for consistency
     thread_id = req.thread_id or "default-thread"
-    logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
+    logger.info(f"{GREY}Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}{RESET}")
     
     try:
         workflow = WorkflowRegistry.get_workflow(req.model, checkpointer)
@@ -233,11 +235,10 @@ async def models_options():
 @v1_router.post("/chat/completions")
 async def chat_completions(request: ChatCompletionRequest):
     """Handle OpenAI-compatible chat completion requests."""
-    logger.info(f"Chat completion request - request: {request}")
-    logger.info(f"Chat completion request - model: {request.model}, stream: {request.stream}")
+    logger.info(f"{GREY}Chat completion request: {request}{RESET}")
     
     if request.stream:
-        logger.info("Starting streaming response")
+        logger.info(f"{GREY}Starting streaming response{RESET}")
         return StreamingResponse(
             _sse_generator(request),
             media_type="text/event-stream",
@@ -248,7 +249,7 @@ async def chat_completions(request: ChatCompletionRequest):
             }
         )
     else:
-        logger.info("Starting non-streaming response")
+        logger.info(f"{GREY}Starting non-streaming response{RESET}")
         return await _create_non_streaming_response(request)
 
 

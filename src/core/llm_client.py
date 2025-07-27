@@ -5,9 +5,9 @@ import logging
 from typing import Dict, Any, Optional, Callable, List, Type
 import aiohttp
 from pydantic import BaseModel
+from src.workflows.support_desk.utils.state_logger import GREY, RESET
 
 logger = logging.getLogger(__name__)
-
 
 def pydantic_to_openai_tool(model_class: Type[BaseModel], tool_name: str) -> Dict[str, Any]:
     """
@@ -131,7 +131,7 @@ class OpenRouterClient:
         Returns:
             Complete response from the LLM, including tool calls if any
         """
-        logger.info(f"Processing chat request - model: {model}, messages: {len(messages)}")
+        logger.info(f"{GREY}Processing chat request - model: {model}, messages: {len(messages)}{RESET}")
         
         headers = {
             "Authorization": f"Bearer {self.api_key}",
