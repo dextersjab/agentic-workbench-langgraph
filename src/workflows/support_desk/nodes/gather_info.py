@@ -130,6 +130,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     # When resumed, this will return the user's input
     user_response = interrupt("Waiting for user response to information gathering")
     
+    
     # This code only executes on resume
     # Now we can safely increment the round
     new_round = gathering_round + 1

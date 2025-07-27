@@ -1,4 +1,7 @@
 """OpenAI-compatible API for Open WebUI integration."""
+# Import logging configuration first to set up file logging
+from . import logging_config
+
 import json
 import time
 import uuid

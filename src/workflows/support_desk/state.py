@@ -3,6 +3,8 @@ from typing import List, Dict, Any, Optional, Type, TypeVar
 from typing_extensions import TypedDict
 from pydantic import BaseModel
 
+from src.workflows.support_desk.constants import MAX_GATHERING_ROUNDS
+
 T = TypeVar('T', bound=BaseModel)
 
 
@@ -72,7 +74,7 @@ def create_initial_state() -> SupportDeskState:
         support_team=None,
         ticket_info={},
         gathering_round=1,
-        max_gathering_rounds=3,
+        max_gathering_rounds=MAX_GATHERING_ROUNDS,
         needs_more_info=True,
         info_completeness_confidence=None,
         missing_categories=[],

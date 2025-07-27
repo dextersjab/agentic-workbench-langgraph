@@ -88,7 +88,7 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
             state["needs_more_info"] = completeness_output.needs_more_info
             state["info_completeness_confidence"] = completeness_output.confidence
             state["missing_categories"] = completeness_output.missing_categories
-            state["current_response"] = completeness_output.response
+            # state["current_response"] = completeness_output.response
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
