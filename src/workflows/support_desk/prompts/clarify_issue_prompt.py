@@ -1,55 +1,42 @@
 """
 Prompts for clarification node in Support Desk workflow.
 
-These prompts are used to analyze user input for clarity and generate
-clarifying questions when needed.
+These prompts use structured outputs to generate JSON responses.
 """
 
-# Analysis prompt to determine if user input needs clarification
-ANALYSIS_PROMPT = """
+# Unified clarification prompt using structured outputs
+CLARIFICATION_PROMPT = """
 You are an IT support analyst reviewing a user's request for clarity and completeness.
 
 User Request: {user_input}
 Conversation History: {conversation_history}
+Clarification Attempt: {clarification_attempts} of {max_clarification_attempts}
 
-Analyze the request and determine if you have enough information to:
-1. Categorize the issue (hardware, software, access, other)
-2. Assess the priority level
-3. Begin resolution steps
+CRITICAL: You must determine if the user has provided enough information to proceed with support.
 
-Required information includes:
-- What specific problem the user is experiencing
-- When the problem started
-- What systems or devices are affected
-- What the user has already tried
-- How the issue is impacting their work
+ALWAYS NEED CLARIFICATION for requests like:
+- General greetings ("hi", "hello", "help me")
+- Vague questions ("how can you help?", "I need help", "what do you do?")
+- Incomplete descriptions ("something is wrong", "it's not working")
+- Missing details about what specifically is broken or needed
 
-Respond with:
-- "CLEAR" if you have sufficient information
-- "NEEDS_CLARIFICATION" if more details are required
+REQUIRED INFORMATION for IT support:
+1. **Specific Problem**: What exactly is broken, not working, or needed?
+2. **Affected Systems**: What device, application, or service is involved?
+3. **Problem Context**: When did this start? What were you trying to do?
+4. **Current Impact**: How is this affecting your work?
+5. **Troubleshooting**: What have you already tried to fix it?
 
-If clarification is needed, explain what specific information is missing.
-"""
+EXAMPLES of requests that NEED clarification:
+- "hi, how can you help?" → needs specific problem description
+- "I need help" → needs what kind of help and with what system
+- "something is broken" → needs what is broken and how
+- "I can't log in" → might be sufficient if it's clear what they're trying to log into
 
-# Clarification prompt to generate specific questions
-CLARIFICATION_PROMPT = """
-You are a helpful IT support agent. The user has submitted a request that needs clarification.
+Only set needs_clarification=false if the user has provided:
+- A clear description of a specific technical problem
+- Information about what system/device is affected
+- Enough context to categorize and prioritize the issue
 
-User Request: {user_input}
-Conversation History: {conversation_history}
-Clarification Attempt: {attempt_number} of {max_attempts}
-
-Generate a friendly, specific clarifying question that will help you better understand:
-- The exact problem or request
-- Steps the user has already tried
-- Impact and urgency
-- Relevant system/software details
-
-Guidelines:
-- Ask for one specific piece of information at a time
-- Use simple, non-technical language
-- Be empathetic and professional
-- Provide examples if helpful
-
-Generate your clarifying question:
+Use the {tool_name} tool to provide your analysis and response.
 """

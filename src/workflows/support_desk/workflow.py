@@ -8,9 +8,10 @@ import logging
 import os
 from typing import Literal
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from .state import SupportDeskState
-from .nodes.clarify_issue import clarify_issue_node
+from .nodes.clarify_issue import clarify_issue_node, should_continue_to_triage
 from .nodes.classify_issue import classify_issue_node
 from .nodes.triage_issue import triage_issue_node
 from .nodes.gather_info import gather_info_node
@@ -19,45 +20,32 @@ from .nodes.send_to_desk import send_to_desk_node
 logger = logging.getLogger(__name__)
 
 
-def should_continue_clarifying(state: SupportDeskState) -> Literal["clarify", "classify"]:
-    """
-    Predicate function for conditional edge from clarify_issue node.
-    
-    This function determines whether to:
-    1. Loop back to clarify_issue for more information (when needs_clarification=True)
-    2. Proceed to classify_issue when we have enough information (needs_clarification=False)
-    
-    Args:
-        state: Current workflow state
-        
-    Returns:
-        "clarify" to loop back for more clarification
-        "classify" to proceed to classification
-    """
-    if state.get("needs_clarification", False):
-        logger.info("Need more clarification, looping back to clarify_issue")
-        return "clarify"
-    else:
-        logger.info("Have enough information, proceeding to classify_issue")
-        return "classify"
+# Removed separate clarification routing function - using should_continue_clarifying from node
 
 
-def create_workflow(draw_diagram: bool = True):
+def create_workflow(checkpointer, draw_diagram: bool = True):
     """
-    Create the Support Desk LangGraph workflow with conditional loop.
+    Create the Support Desk LangGraph workflow with classify-first approach.
     
-    This workflow implements an IT support agent flow with a conditional clarification loop:
+    This workflow implements an IT support agent flow with natural conversation flow:
     
-    Phase 1 (Linear Flow):
-    clarify_issue → classify_issue → triage_issue → gather_info → send_to_desk
+    Classify-First Flow:
+    classify_issue → [sufficient info?] → triage_issue → gather_info → send_to_desk
+         ↑               [no]
+         └─── clarify_issue ←──┘
     
-    Phase 2 (Conditional Loop):
-    clarify_issue ⟲ (stays in clarify until clear) → classify_issue → triage_issue → gather_info → send_to_desk
+    Natural Flow Behavior:
+    - classify_issue attempts classification first
+    - If insufficient information: routes to clarify_issue for questions
+    - clarify_issue asks for details and returns to classification
+    - Loops until sufficient information is gathered
+    - No interrupt() calls needed - just natural conditional flow
     
-    The conditional loop demonstrates how to implement stateful, multi-turn conversations
-    that can adapt based on the quality and completeness of user input.
+    This approach provides a more intuitive user experience by attempting to help
+    immediately and falling back to clarification only when necessary.
     
     Args:
+        checkpointer: The checkpointer to use for persisting graph state.
         draw_diagram: Whether to draw and save a mermaid diagram of the workflow.
     
     Returns:
@@ -76,27 +64,29 @@ def create_workflow(draw_diagram: bool = True):
     workflow.add_node("gather_info", gather_info_node)
     workflow.add_node("send_to_desk", send_to_desk_node)
     
-    # Set entry point
-    workflow.set_entry_point("clarify_issue")
+    # Set entry point to classification
+    workflow.set_entry_point("classify_issue")
     
-    # Add conditional edge for clarification loop
+    # Conditional edge from classification: either proceed or ask for clarification
     workflow.add_conditional_edges(
-        "clarify_issue",
-        should_continue_clarifying,
+        "classify_issue",
+        should_continue_to_triage,
         {
-            "clarify": "clarify_issue",  # Loop back to clarify
-            "classify": "classify_issue"  # Proceed to classification
+            False: "clarify_issue",    # Need clarification
+            True: "triage_issue"       # Ready to proceed
         }
     )
     
-    # Add remaining edges for linear flow
-    workflow.add_edge("classify_issue", "triage_issue")
+    # Clarification loops back to classification
+    workflow.add_edge("clarify_issue", "classify_issue")
+    
+    # Continue with remaining linear flow
     workflow.add_edge("triage_issue", "gather_info")
     workflow.add_edge("gather_info", "send_to_desk")
     workflow.add_edge("send_to_desk", END)
     
-    # Compile the workflow
-    compiled_workflow = workflow.compile()
+    # Compile the workflow with the provided checkpointer
+    compiled_workflow = workflow.compile(checkpointer=checkpointer)
     
     # Generate mermaid diagram if requested
     if draw_diagram:

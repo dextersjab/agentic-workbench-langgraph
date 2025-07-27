@@ -7,10 +7,11 @@ import logging
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import SupportDeskState
+from ..state import SupportDeskState, update_state_from_output
+from ..models.triage_output import TriageOutput
 from ..prompts.triage_issue_prompt import TRIAGE_PROMPT
 from ..utils import build_conversation_history
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
@@ -18,90 +19,95 @@ logger = logging.getLogger(__name__)
 
 async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Route the issue to the appropriate support team.
+    Route the issue to the appropriate support team using structured outputs.
     
-    This node:
-    1. Determines the appropriate support team based on category
-    2. Assesses priority based on business impact
-    3. Routes to: L1 support, specialist, escalation
-    4. Updates the workflow state with routing information
+    This node uses tool calling to generate structured TriageOutput responses
+    for reliable team assignment and routing decisions.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with routing information
+        Updated state with routing and team assignment information
     """
     
     logger.info("Triage issue node processing user input")
     state = deepcopy(state)
     
     # Extract relevant information
-    category = state.get("issue_category", "unknown")
-    priority = state.get("issue_priority", "medium")
+    issue_category = state.get("issue_category", "other")
+    issue_priority = state.get("issue_priority", "P2")
     messages = state.get("messages", [])
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
     
+    # Set up the tool for structured output
+    tool_name = "triage_issue"
+    tools = [pydantic_to_openai_tool(TriageOutput, tool_name)]
+    
     try:
+        # Create prompt with tool calling instruction
+        prompt = TRIAGE_PROMPT.format(
+            issue_category=issue_category,
+            issue_priority=issue_priority,
+            conversation_history=conversation_history,
+            tool_name=tool_name
+        )
+        
         # Get stream writer for custom streaming
         writer = get_stream_writer()
-        
-        # Prepare triage prompt
-        triage_prompt = TRIAGE_PROMPT.format(
-            category=category,
-            conversation_history=conversation_history
-        )
         
         # Stream callback to emit chunks as they come in
         def stream_callback(chunk: str):
             writer({"custom_llm_chunk": chunk})
         
-        # Call LLM to triage the issue
-        triage_response = await client.chat_completion(
+        # Call LLM with tools for structured output
+        response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": triage_prompt}
+                {"role": "system", "content": prompt}
             ],
-            model="openai/gpt-4.1-mini",
+            model="openai/gpt-4.1",
             temperature=0.3,
+            tools=tools,
+            tool_choice="required",
             stream_callback=stream_callback
         )
         
-        # Parse the triage response
-        triage_content = triage_response.get("content", "")
-        
-        # Determine support team based on category and priority
-        # This is a simplified implementation - in a real system, we would use
-        # structured output parsing or function calling
-        if category == "hardware":
-            support_team = "L1-Hardware"
-        elif category == "software":
-            support_team = "L2-Software"
-        elif category == "access":
-            support_team = "Security-Team"
-        else:
-            support_team = "General-Support"
-        
-        # For high priority issues, escalate
-        if priority == "high":
-            support_team = f"Escalated-{support_team}"
-        
-        # Update state with triage information
-        state["support_team"] = support_team
-        state["current_response"] = triage_content
-        
-        # Append message to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": triage_content
-        })
-        
-        logger.info(f"Issue triaged to {support_team}")
+        # Extract structured output from tool call using robust utility
+        try:
+            output_data = extract_tool_call_args(response, tool_name)
+            triage_output = TriageOutput(**output_data)
+            
+            logger.info(f"Triage successful: team={triage_output.support_team}, "
+                       f"resolution_time={triage_output.estimated_resolution_time}")
+            
+            # Update state with structured triage information using helper
+            update_state_from_output(state, triage_output, {
+                'support_team': 'support_team',
+                'estimated_resolution_time': 'estimated_resolution_time',
+                'escalation_path': 'escalation_path',
+                'response': 'current_response'
+            })
+            
+            # Add response to conversation history
+            state["messages"].append({
+                "role": "assistant",
+                "content": triage_output.response
+            })
+            
+            logger.info(f"Issue triaged to {triage_output.support_team} team")
+            
+        except ValueError as e:
+            logger.error(f"Tool call parsing error: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating TriageOutput from tool call: {e}")
+            raise
         
     except Exception as e:
         logger.error(f"Error in triage_issue_node: {e}")
-        # Error response
+        # Fallback triage
         error_response = "I'm determining the priority of your issue and routing it to the appropriate team."
         
         # Stream the error response
@@ -109,19 +115,20 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
         writer({"custom_llm_chunk": error_response})
         
         # Default team based on category
-        if category == "hardware":
-            support_team = "L1-Hardware"
-        elif category == "software":
-            support_team = "L2-Software"
-        elif category == "access":
-            support_team = "Security-Team"
-        else:
-            support_team = "General-Support"
+        fallback_team = "L1"  # Default to L1 support
+        if issue_priority == "P1":
+            fallback_team = "escalation"
+        elif issue_category in ["software", "network"]:
+            fallback_team = "L2"
+        elif issue_category == "access":
+            fallback_team = "specialist"
             
-        state["support_team"] = support_team
+        state["support_team"] = fallback_team
+        state["estimated_resolution_time"] = "4-8 hours"  # Default SLA
+        state["escalation_path"] = "L2 -> Specialist -> Manager"
         state["current_response"] = error_response
         
-        # Append message to conversation history
+        # Add fallback response to conversation history
         state["messages"].append({
             "role": "assistant",
             "content": error_response

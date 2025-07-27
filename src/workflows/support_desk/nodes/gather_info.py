@@ -9,9 +9,10 @@ from copy import deepcopy
 from typing import Dict, Any
 
 from ..state import SupportDeskState
+from ..models.gather_output import GatherOutput
 from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
 from ..utils import build_conversation_history
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
@@ -19,86 +20,107 @@ logger = logging.getLogger(__name__)
 
 async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Collect additional information needed for the support team.
+    Collect comprehensive ticket information using structured outputs.
     
-    This node:
-    1. Determines what information the support team needs
-    2. Collects user details, context, urgency
-    3. Updates the workflow state with complete ticket information
+    This node uses tool calling to generate structured GatherOutput responses
+    that compile all necessary information for the support ticket.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with complete ticket information
+        Updated state with comprehensive ticket information
     """
     
     logger.info("Gather info node processing user input")
     state = deepcopy(state)
     
     # Extract relevant information
-    category = state.get("issue_category", "unknown")
-    priority = state.get("issue_priority", "medium")
-    support_team = state.get("support_team", "General-Support")
+    issue_category = state.get("issue_category", "other")
+    issue_priority = state.get("issue_priority", "P2")
+    support_team = state.get("support_team", "L1")
     messages = state.get("messages", [])
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
     
+    # Set up the tool for structured output
+    tool_name = "gather_info"
+    tools = [pydantic_to_openai_tool(GatherOutput, tool_name)]
+    
     try:
+        # Create prompt with tool calling instruction
+        prompt = INFO_GATHERING_PROMPT.format(
+            issue_category=issue_category,
+            issue_priority=issue_priority,
+            support_team=support_team,
+            conversation_history=conversation_history,
+            tool_name=tool_name
+        )
+        
         # Get stream writer for custom streaming
         writer = get_stream_writer()
-        
-        # Prepare info gathering prompt
-        info_prompt = INFO_GATHERING_PROMPT.format(
-            category=category,
-            priority=priority,
-            support_team=support_team,
-            conversation_history=conversation_history
-        )
         
         # Stream callback to emit chunks as they come in
         def stream_callback(chunk: str):
             writer({"custom_llm_chunk": chunk})
         
-        # Call LLM to gather information
-        info_response = await client.chat_completion(
+        # Call LLM with tools for structured output
+        response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": info_prompt}
+                {"role": "system", "content": prompt}
             ],
-            model="openai/gpt-4.1-mini",
+            model="openai/gpt-4.1",
             temperature=0.5,
+            tools=tools,
+            tool_choice="required",
             stream_callback=stream_callback
         )
         
-        # Parse the information gathering response
-        info_content = info_response.get("content", "")
-        
-        # Create ticket information dictionary
-        ticket_info = {
-            "category": category,
-            "priority": priority,
-            "support_team": support_team,
-            "description": info_content,
-            "timestamp": time.time(),
-            "status": "new"
-        }
-        
-        # Update state with ticket information
-        state["ticket_info"] = ticket_info
-        state["current_response"] = info_content
-        
-        # Append message to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": info_content
-        })
-        
-        logger.info("Ticket information gathered successfully")
+        # Extract structured output from tool call using robust utility
+        try:
+            output_data = extract_tool_call_args(response, tool_name)
+            gather_output = GatherOutput(**output_data)
+            
+            logger.info(f"Info gathering successful: summary='{gather_output.ticket_summary[:50]}...'")
+            
+            # Create comprehensive ticket information dictionary
+            ticket_info = {
+                "category": issue_category,
+                "priority": issue_priority,
+                "support_team": support_team,
+                "summary": gather_output.ticket_summary,
+                "description": gather_output.detailed_description,
+                "affected_systems": gather_output.affected_systems,
+                "user_impact": gather_output.user_impact,
+                "reproduction_steps": gather_output.reproduction_steps,
+                "metadata": gather_output.additional_metadata,
+                "timestamp": time.time(),
+                "status": "new"
+            }
+            
+            # Update state with structured ticket information
+            state["ticket_info"] = ticket_info
+            state["current_response"] = gather_output.response
+            
+            # Add response to conversation history
+            state["messages"].append({
+                "role": "assistant",
+                "content": gather_output.response
+            })
+            
+            logger.info("Comprehensive ticket information gathered successfully")
+            
+        except ValueError as e:
+            logger.error(f"Tool call parsing error: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating GatherOutput from tool call: {e}")
+            raise
         
     except Exception as e:
         logger.error(f"Error in gather_info_node: {e}")
-        # Error response
+        # Fallback information gathering
         error_response = "I'm gathering the necessary information for your support ticket."
         
         # Stream the error response
@@ -107,10 +129,15 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         
         # Create minimal ticket information
         ticket_info = {
-            "category": category,
-            "priority": priority,
+            "category": issue_category,
+            "priority": issue_priority,
             "support_team": support_team,
+            "summary": "IT Support Request",
             "description": "Issue requires attention",
+            "affected_systems": [],
+            "user_impact": "To be determined",
+            "reproduction_steps": [],
+            "metadata": {},
             "timestamp": time.time(),
             "status": "new"
         }
@@ -118,7 +145,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         state["ticket_info"] = ticket_info
         state["current_response"] = error_response
         
-        # Append message to conversation history
+        # Add fallback response to conversation history
         state["messages"].append({
             "role": "assistant",
             "content": error_response

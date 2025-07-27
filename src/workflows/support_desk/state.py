@@ -1,6 +1,9 @@
 """Support Desk workflow state management."""
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Type, TypeVar
 from typing_extensions import TypedDict
+from pydantic import BaseModel
+
+T = TypeVar('T', bound=BaseModel)
 
 
 class SupportDeskState(TypedDict):
@@ -13,8 +16,9 @@ class SupportDeskState(TypedDict):
     messages: List[Dict[str, str]]  # Chat messages in OpenAI format
     current_user_input: str         # Latest user message
     
-    # Workflow tracking
-    needs_clarification: bool       # Whether more info is needed
+    # Workflow tracking  
+    needs_clarification: bool       # Whether more info is needed (set by clarify_check)
+    clarification_question: str     # Question to ask user (set by clarify_check)
     clarification_attempts: int     # Number of questions asked
     max_clarification_attempts: int # Limit on questions
     
@@ -31,9 +35,15 @@ class SupportDeskState(TypedDict):
     current_response: str           # Response being built
     custom_llm_chunk: Optional[str] # For streaming
     
-    # Ticket generation
+    # Ticket generation and final details
     ticket_id: Optional[str]        # Generated ticket ID
     ticket_status: Optional[str]    # Status of the ticket
+    assigned_team: Optional[str]    # Final assigned team
+    sla_commitment: Optional[str]   # Service level agreement
+    next_steps: Optional[str]       # What happens next
+    contact_information: Dict[str, str]  # Support contact details
+    estimated_resolution_time: Optional[str]  # Expected resolution time
+    escalation_path: Optional[str]  # Escalation procedure
 
 
 def create_initial_state() -> SupportDeskState:
@@ -47,6 +57,7 @@ def create_initial_state() -> SupportDeskState:
         messages=[],
         current_user_input="",
         needs_clarification=False,
+        clarification_question="",
         clarification_attempts=0,
         max_clarification_attempts=3,
         issue_category=None,
@@ -57,5 +68,46 @@ def create_initial_state() -> SupportDeskState:
         current_response="",
         custom_llm_chunk=None,
         ticket_id=None,
-        ticket_status=None
+        ticket_status=None,
+        assigned_team=None,
+        sla_commitment=None,
+        next_steps=None,
+        contact_information={},
+        estimated_resolution_time=None,
+        escalation_path=None
     )
+
+
+def update_state_from_output(state: SupportDeskState, output: T, 
+                           field_mapping: Optional[Dict[str, str]] = None) -> None:
+    """
+    Update state fields from a Pydantic model output with type safety.
+    
+    Args:
+        state: The workflow state to update
+        output: Pydantic model with output data
+        field_mapping: Optional mapping of {output_field: state_field}
+                      Defaults to direct field name mapping
+    
+    Example:
+        update_state_from_output(state, clarify_output, {
+            'needs_clarification': 'needs_clarification',
+            'response': 'current_response'
+        })
+    """
+    if field_mapping is None:
+        # Try direct field mapping by default
+        field_mapping = {}
+        output_fields = set(output.model_fields.keys())
+        state_fields = set(state.keys())
+        
+        # Map fields that exist in both
+        for field in output_fields:
+            if field in state_fields:
+                field_mapping[field] = field
+    
+    # Update state with mapped fields
+    for output_field, state_field in field_mapping.items():
+        if hasattr(output, output_field) and state_field in state:
+            value = getattr(output, output_field)
+            state[state_field] = value

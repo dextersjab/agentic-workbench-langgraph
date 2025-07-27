@@ -1,31 +1,34 @@
 """
 Prompts for information gathering node in Support Desk workflow.
 
-These prompts are used to collect comprehensive information for support tickets.
+These prompts use tool calling to generate structured outputs.
 """
 
-# Information gathering prompt to collect ticket details
+# Information gathering prompt using tool calling
 INFO_GATHERING_PROMPT = """
-You are an IT support agent gathering information for a support ticket.
+You are an IT support agent gathering comprehensive information for a support ticket.
 
-Category: {category}
-Priority: {priority}
-Support Team: {support_team}
+Issue Category: {issue_category}
+Issue Priority: {issue_priority}
+Assigned Team: {support_team}
 Conversation History: {conversation_history}
 
-Gather comprehensive information for the support ticket by:
-1. Summarizing the issue clearly
-2. Extracting relevant technical details
-3. Noting any troubleshooting already attempted
-4. Identifying business impact
-5. Determining user availability for follow-up
+Analyze the conversation and extract comprehensive ticket information:
 
-For {category} issues, be sure to include specific details relevant to this category.
+1. **Ticket Summary**: Create a concise, descriptive title for the issue
+2. **Detailed Description**: Comprehensive description including symptoms, context, and timeline
+3. **Affected Systems**: List specific systems, applications, or hardware mentioned
+4. **User Impact**: How this issue affects the user's ability to work
+5. **Reproduction Steps**: If applicable, steps to reproduce the issue
+6. **Additional Context**: User role, department, location, or other relevant metadata
 
-Format your response as a professional ticket summary that:
-- Starts with a clear issue title (# Title format)
-- Includes all relevant details organized in sections (## Section format)
-- Ends with next steps and user availability
+For {issue_category} issues, ensure you capture category-specific details:
+- Hardware: Device models, error codes, physical symptoms
+- Software: Application versions, error messages, workflows affected
+- Access: Account names, systems involved, permission levels needed
+- Network: Connection types, locations, devices affected
 
-Your response will be used directly in the support ticket, so ensure it is complete, professional, and actionable for the {support_team}.
+Provide a user-facing summary of the information gathered.
+
+Use the {tool_name} tool to structure the ticket information.
 """

@@ -18,6 +18,7 @@ class ChatCompletionRequest(BaseModel):
     max_tokens: Optional[int] = Field(None, description="Maximum tokens to generate")
     stream: bool = Field(False, description="Whether to stream responses")
     stop: Optional[Union[str, List[str]]] = Field(None, description="Stop sequences")
+    thread_id: Optional[str] = Field(None, description="Conversation thread ID for stateful interactions")
 
 
 class ChatCompletionChoice(BaseModel):
@@ -36,6 +37,7 @@ class ChatCompletionResponse(BaseModel):
     model: str
     choices: List[ChatCompletionChoice]
     usage: Optional[Dict[str, int]] = None
+    thread_id: Optional[str] = Field(None, description="Conversation thread ID for stateful interactions")
 
 
 class ModelInfo(BaseModel):

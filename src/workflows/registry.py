@@ -36,27 +36,26 @@ class WorkflowRegistry:
         logger.info(f"Registered workflow: {name}")
     
     @classmethod
-    def get_workflow(cls, name: str):
+    def get_workflow(cls, name: str, checkpointer=None):
         """
-        Get a workflow instance by name.
+        Get a workflow instance by name, optionally with a checkpointer.
         """
         if name not in cls._workflows:
-            # Try to auto-discover workflow
-            cls._try_load_workflow(name)
+            # Try to auto-discover workflow, passing the checkpointer
+            cls._try_load_workflow(name, checkpointer)
         
         if name not in cls._workflows:
             raise ValueError(f"Unknown workflow: {name}")
             
-        # Return registered workflow
-        workflow_factory = cls._workflows[name]
-        workflow = workflow_factory() if callable(workflow_factory) else workflow_factory
-        logger.info(f"Created workflow instance: {name}")
+        # The factory is now a compiled graph instance from _try_load_workflow
+        workflow = cls._workflows[name]
+        logger.info(f"Retrieved workflow instance: {name}")
         return workflow
     
     @classmethod
-    def _try_load_workflow(cls, name: str):
+    def _try_load_workflow(cls, name: str, checkpointer=None):
         """
-        Try to auto-discover workflow using convention: each workflow has create_workflow() function.
+        Try to auto-discover and compile a workflow, passing the checkpointer.
         """
         try:
             # Convert model name to directory name (support-desk -> support_desk)
@@ -68,9 +67,13 @@ class WorkflowRegistry:
             # Convention: each workflow must have create_workflow() function
             if hasattr(module, 'create_workflow'):
                 create_func = getattr(module, 'create_workflow')
-                workflow = create_func()
-                cls.register_workflow(name, lambda: workflow)
-                logger.info(f"Auto-discovered workflow: {name}")
+                
+                # Pass the checkpointer to the factory function
+                workflow = create_func(checkpointer=checkpointer)
+                
+                # Register the compiled workflow instance directly
+                cls.register_workflow(name, workflow)
+                logger.info(f"Auto-discovered and compiled workflow: {name}")
             else:
                 logger.warning(f"No create_workflow() function found in {module_name}")
                 

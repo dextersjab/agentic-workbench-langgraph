@@ -1,42 +1,40 @@
 """
 Clarify Issue node for Support Desk workflow.
 
-This node analyzes user input and asks clarifying questions when needed.
+This node analyzes user input and asks clarifying questions when needed,
+following the LangGraph interrupt() pattern.
 """
 import logging
 from copy import deepcopy
-from typing import Dict, Any
 
 from ..state import SupportDeskState
-from ..prompts.clarify_issue_prompt import ANALYSIS_PROMPT, CLARIFICATION_PROMPT
+from ..models.clarify_output import ClarifyOutput
+from ..prompts.clarify_issue_prompt import CLARIFICATION_PROMPT
 from ..utils import build_conversation_history
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
+from langgraph.types import interrupt
 
 logger = logging.getLogger(__name__)
 
 
 async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Analyze user input and ask clarifying questions if needed.
+    Ask a clarifying question to gather more information.
     
-    This node:
-    1. Analyzes the user's input for clarity and completeness
-    2. Determines if enough information exists to categorize the issue  
-    3. Generates clarifying questions if needed
-    4. Updates the conversation state appropriately
+    This simplified node just asks for more details and returns to classification.
+    No interrupt() calls - just natural flow control.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with clarification decision and any questions
+        Updated state with clarifying question
     """
     
-    logger.info("Clarify issue node processing user input")
+    logger.info("Clarify issue node asking for more details")
     state = deepcopy(state)
     
-    user_input = state.get("current_user_input", "")
     messages = state.get("messages", [])
     clarification_attempts = state.get("clarification_attempts", 0)
     max_attempts = state.get("max_clarification_attempts", 3)
@@ -44,104 +42,102 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     # Build conversation history for context
     conversation_history = build_conversation_history(messages, last_n_messages=5)
     
+    # Set up tool for structured output
+    tool_name = "clarify_analysis"
+    tools = [pydantic_to_openai_tool(ClarifyOutput, tool_name)]
+    
     try:
-        # Step 1: Analyze if input needs clarification using LLM
-        analysis_prompt = ANALYSIS_PROMPT.format(
-            user_input=user_input,
-            conversation_history=conversation_history
+        # Create prompt with tool calling instruction
+        prompt = CLARIFICATION_PROMPT.format(
+            user_input=state.get("current_user_input", ""),
+            conversation_history=conversation_history,
+            clarification_attempts=clarification_attempts,
+            max_clarification_attempts=max_attempts,
+            tool_name=tool_name
         )
-        
-        # Call LLM to analyze if clarification is needed
-        analysis_response = await client.chat_completion(
-            messages=[
-                {"role": "system", "content": analysis_prompt}
-            ],
-            model="openai/gpt-4.1-mini",
-            temperature=0.3
-        )
-        
-        # Parse the analysis response to determine if clarification is needed
-        analysis_content = analysis_response.get("content", "").lower()
-        needs_clarification = (
-            "needs_clarification" in analysis_content or
-            "needs clarification" in analysis_content or
-            "clarification needed" in analysis_content or
-            "more information" in analysis_content
-        ) and clarification_attempts < max_attempts
         
         # Get stream writer for custom streaming
         writer = get_stream_writer()
         
-        if needs_clarification:
-            # Generate clarifying question using LLM
-            clarification_prompt = CLARIFICATION_PROMPT.format(
-                user_input=user_input,
-                conversation_history=conversation_history,
-                attempt_number=clarification_attempts + 1,
-                max_attempts=max_attempts
-            )
-            
-            # Stream callback to emit chunks as they come in
-            def stream_callback(chunk: str):
-                writer({"custom_llm_chunk": chunk})
-            
-            clarification_response = await client.chat_completion(
-                messages=[
-                    {"role": "system", "content": clarification_prompt}
-                ],
-                model="openai/gpt-4.1-mini",
-                temperature=0.7,
-                stream_callback=stream_callback
-            )
-            
-            clarifying_question = clarification_response.get("content", "")
-            
-            state["needs_clarification"] = True
-            state["clarification_attempts"] = clarification_attempts + 1
-            state["current_response"] = clarifying_question
-            
-            # Append message to conversation history
-            state["messages"].append({
-                "role": "assistant",
-                "content": clarifying_question
-            })
-            
-            logger.info(f"Clarification needed - attempt {clarification_attempts + 1}/{max_attempts}")
-            
-        else:
-            # Input is clear enough or max attempts reached
-            response = "Thank you for the information. Let me help you with your IT issue."
-            
-            # Stream the static response
-            writer({"custom_llm_chunk": response})
-            
-            state["needs_clarification"] = False
-            state["current_response"] = response
-            
-            # Append message to conversation history
-            state["messages"].append({
-                "role": "assistant",
-                "content": response
-            })
-            
-            logger.info("Input is clear enough - proceeding to categorization")
-    
-    except Exception as e:
-        logger.error(f"Error in clarify_issue_node: {e}")
-        # Error response - still needs to be properly formatted
-        error_response = "I'll help you with your IT issue. Let me analyze your request."
+        # Stream callback to emit chunks as they come in
+        def stream_callback(chunk: str):
+            writer({"custom_llm_chunk": chunk})
         
-        # Stream the error response
+        # Call LLM with tools for structured output
+        response = await client.chat_completion(
+            messages=[
+                {"role": "system", "content": prompt}
+            ],
+            model="openai/gpt-4.1",
+            temperature=0.3,
+            tools=tools,
+            tool_choice="required",
+            stream_callback=stream_callback
+        )
+        
+        # Extract structured output from tool call
+        output_data = extract_tool_call_args(response, tool_name)
+        clarify_output = ClarifyOutput(**output_data)
+        
+        logger.info(f"Generated clarifying question with confidence={clarify_output.confidence}")
+        
+        # Stream the clarifying question to the user BEFORE interrupting
         writer = get_stream_writer()
-        writer({"custom_llm_chunk": error_response})
+        writer({"custom_llm_chunk": clarify_output.response})
         
-        state["needs_clarification"] = False
-        state["current_response"] = error_response
-        
-        # Append message to conversation history
+        # Add clarifying question to conversation
         state["messages"].append({
             "role": "assistant",
-            "content": error_response
+            "content": clarify_output.response
         })
+        
+        # Update state for next iteration
+        state["clarification_attempts"] = clarification_attempts + 1
+        state["current_response"] = clarify_output.response
+        
+    except Exception as e:
+        logger.error(f"Error in clarify_issue_node: {e}")
+        # Fallback clarifying question
+        fallback_question = ("Could you please provide more specific details about the problem you're experiencing? "
+                           "For example, what device or application is involved, and what exactly isn't working?")
+        
+        # Stream fallback question BEFORE interrupting
+        writer = get_stream_writer()
+        writer({"custom_llm_chunk": fallback_question})
+        
+        state["messages"].append({
+            "role": "assistant",
+            "content": fallback_question
+        })
+        
+        state["clarification_attempts"] = clarification_attempts + 1
+        state["current_response"] = fallback_question
+        
+        # Use interrupt to pause and wait for user input - outside try/catch
+        interrupt("Waiting for user response")
+        return state
+    
+    # Use interrupt to pause and wait for user input - outside try/catch
+    # Don't pass the question to interrupt() since we already streamed it
+    interrupt("Waiting for user response")
     
     return state
+
+
+def should_continue_to_triage(state: SupportDeskState) -> bool:
+    """
+    Determine if we should continue to triage or ask for clarification.
+    
+    Args:
+        state: Current workflow state
+        
+    Returns:
+        True if ready for triage, False if need clarification
+    """
+    needs_clarification = state.get("needs_clarification", False)
+    if needs_clarification:
+        logger.info("Need clarification, routing to clarify_issue")
+        return False
+    else:
+        logger.info("Have sufficient information, proceeding to triage_issue")
+        return True

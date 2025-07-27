@@ -10,9 +10,10 @@ import json
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import SupportDeskState
+from ..state import SupportDeskState, update_state_from_output
+from ..models.send_to_desk_output import SendToDeskOutput
 from ..prompts.send_to_desk_prompt import FINAL_RESPONSE_PROMPT
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
@@ -20,19 +21,16 @@ logger = logging.getLogger(__name__)
 
 async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Format the final response with ticket information.
+    Create final ticket and response using structured outputs.
     
-    This node:
-    1. Creates a simulated ticket ID
-    2. Formats final response with ticket ID and next steps
-    3. Creates professional handoff message
-    4. Provides user confirmation and tracking info
+    This node uses tool calling to generate structured SendToDeskOutput responses
+    that provide complete ticket creation and user confirmation.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with final response
+        Updated state with final ticket information and response
     """
     
     logger.info("Send to desk node processing user input")
@@ -40,73 +38,97 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     
     # Extract ticket information
     ticket_info = state.get("ticket_info", {})
-    category = ticket_info.get("category", "unknown")
-    priority = ticket_info.get("priority", "medium")
-    support_team = state.get("support_team", "General-Support")
+    issue_category = ticket_info.get("category", "other")
+    issue_priority = ticket_info.get("priority", "P2")
+    support_team = state.get("support_team", "L1")
+    
+    # Set up the tool for structured output
+    tool_name = "send_to_desk"
+    tools = [pydantic_to_openai_tool(SendToDeskOutput, tool_name)]
     
     try:
+        # Create prompt with tool calling instruction
+        prompt = FINAL_RESPONSE_PROMPT.format(
+            issue_category=issue_category,
+            issue_priority=issue_priority,
+            support_team=support_team,
+            ticket_info=json.dumps(ticket_info, indent=2),
+            tool_name=tool_name
+        )
+        
         # Get stream writer for custom streaming
         writer = get_stream_writer()
-        
-        # Generate a ticket ID
-        ticket_id = f"T-{int(time.time())}-{random.randint(1000, 9999)}"
-        
-        # Prepare final response prompt
-        final_prompt = FINAL_RESPONSE_PROMPT.format(
-            ticket_id=ticket_id,
-            category=category,
-            priority=priority,
-            support_team=support_team,
-            ticket_info=json.dumps(ticket_info, indent=2)
-        )
         
         # Stream callback to emit chunks as they come in
         def stream_callback(chunk: str):
             writer({"custom_llm_chunk": chunk})
         
-        # Call LLM to generate final response
-        final_response = await client.chat_completion(
+        # Call LLM with tools for structured output
+        response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": final_prompt}
+                {"role": "system", "content": prompt}
             ],
-            model="openai/gpt-4.1-mini",
+            model="openai/gpt-4.1",
             temperature=0.5,
+            tools=tools,
+            tool_choice="required",
             stream_callback=stream_callback
         )
         
-        # Parse the final response
-        final_content = final_response.get("content", "")
-        
-        # Update state with final information
-        state["ticket_id"] = ticket_id
-        state["ticket_status"] = "created"
-        state["current_response"] = final_content
-        
-        # Append message to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": final_content
-        })
-        
-        logger.info(f"Ticket created successfully: {ticket_id}")
+        # Extract structured output from tool call using robust utility
+        try:
+            output_data = extract_tool_call_args(response, tool_name)
+            desk_output = SendToDeskOutput(**output_data)
+            
+            logger.info(f"Final ticket creation successful: ticket_id={desk_output.ticket_id}")
+            
+            # Update state with structured final information using helper
+            update_state_from_output(state, desk_output, {
+                'ticket_id': 'ticket_id',
+                'ticket_status': 'ticket_status', 
+                'assigned_team': 'assigned_team',
+                'sla_commitment': 'sla_commitment',
+                'next_steps': 'next_steps',
+                'contact_information': 'contact_information',
+                'response': 'current_response'
+            })
+            
+            # Add response to conversation history
+            state["messages"].append({
+                "role": "assistant",
+                "content": desk_output.response
+            })
+            
+            logger.info(f"Ticket created successfully: {desk_output.ticket_id}")
+            
+        except ValueError as e:
+            logger.error(f"Tool call parsing error: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating SendToDeskOutput from tool call: {e}")
+            raise
         
     except Exception as e:
         logger.error(f"Error in send_to_desk_node: {e}")
-        # Error response
+        # Fallback ticket creation
         error_response = f"Your support ticket has been created. A support agent from {support_team} will assist you shortly."
         
         # Generate a fallback ticket ID
-        ticket_id = f"T-{int(time.time())}-ERROR"
+        fallback_ticket_id = f"DESK-{int(time.time())}-ERROR"
         
         # Stream the error response
         writer = get_stream_writer()
         writer({"custom_llm_chunk": error_response})
         
-        state["ticket_id"] = ticket_id
+        state["ticket_id"] = fallback_ticket_id
         state["ticket_status"] = "created_with_errors"
+        state["assigned_team"] = support_team
+        state["sla_commitment"] = "4-8 hours"
+        state["next_steps"] = "A support agent will contact you shortly"
+        state["contact_information"] = {"email": "support@company.com", "phone": "(555) 123-4567"}
         state["current_response"] = error_response
         
-        # Append message to conversation history
+        # Add fallback response to conversation history
         state["messages"].append({
             "role": "assistant",
             "content": error_response

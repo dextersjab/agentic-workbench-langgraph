@@ -44,7 +44,8 @@ def create_sse_chunk(
     created: int,
     content: str = "",
     finish_reason: str = None,
-    role: str = None
+    role: str = None,
+    thread_id: str = None
 ) -> str:
     """Create a properly formatted SSE chunk for streaming."""
     delta = {}
@@ -67,6 +68,9 @@ def create_sse_chunk(
         }]
     }
     
+    if thread_id:
+        payload["thread_id"] = thread_id
+        
     return _sse(payload)
 
 

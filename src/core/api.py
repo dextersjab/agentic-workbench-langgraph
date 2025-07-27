@@ -4,11 +4,13 @@ import time
 import uuid
 import traceback
 import logging
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import Interrupt
 
 from .models import (
     ChatCompletionRequest, 
@@ -25,6 +27,9 @@ from ..workflows.support_desk.state import create_initial_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# In-memory checkpointer for storing graph state
+checkpointer = InMemorySaver()
 
 app = FastAPI(
     title="Support Desk IT Support Agent",
@@ -45,50 +50,64 @@ app.add_middleware(
 v1_router = APIRouter(prefix="/v1")
 
 
-async def _support_desk_stream(req: ChatCompletionRequest, workflow, state) -> AsyncGenerator[str, None]:
-    """Stream responses from the Support Desk workflow."""
-    logger.info("Starting Support Desk workflow stream")
+async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: str) -> AsyncGenerator[str, None]:
+    """Stream responses from the Support Desk workflow, managing interruptions."""
+    logger.info(f"Streaming Support Desk workflow for thread_id: {thread_id}")
     
-    # Convert OpenAI messages to LangChain format
-    lc_messages = [_to_lc(msg) for msg in req.messages]
-    logger.info(f"Converted {len(lc_messages)} messages to LangChain format")
-    
-    # Set the current user input from the last message
+    # Initial state for new conversations
+    state = create_initial_state()
     if req.messages:
         state["current_user_input"] = req.messages[-1].content
         state["messages"] = [msg.model_dump() for msg in req.messages]
+
+    config = {"configurable": {"thread_id": thread_id}}
     
     try:
         # Stream workflow execution
-        async for chunk in workflow.astream(state, stream_mode="custom"):
+        async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
             logger.info(f"Received chunk from workflow: {chunk}")
+            
+            # Check for custom LLM chunks to stream back
             if "custom_llm_chunk" in chunk:
-                text = chunk["custom_llm_chunk"]
+                text = chunk.get("custom_llm_chunk")
                 if text:
                     logger.info(f"Yielding text: {text}")
                     yield text
+            
+            # Handle LangGraph interrupt for human-in-the-loop
+            if "__interrupt__" in chunk:
+                interrupts = chunk.get("__interrupt__", [])
+                if interrupts:
+                    # For simplicity, handle the first interrupt
+                    interrupt_value = interrupts[0].value
+                    logger.info(f"Received interrupt with value: {interrupt_value}")
+                    if interrupt_value:
+                        logger.info(f"Yielding interrupt text: {interrupt_value}")
+                        yield interrupt_value
+                        # Stop streaming after an interrupt
+                        return
+
     except Exception as e:
-        logger.error(f"Error in workflow stream: {e}")
+        logger.error(f"Error in workflow stream for thread {thread_id}: {e}")
         logger.error(f"Stack trace: {traceback.format_exc()}")
         yield f"Error processing request: {str(e)}"
 
 
 async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None]:
-    """Generate SSE messages for streaming chat completion."""
+    """Generate SSE messages for streaming chat completion, managing conversation state."""
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}")
+    # Use thread_id from request if provided, otherwise create a new one
+    thread_id = req.thread_id or str(uuid.uuid4())
+    logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
     try:
-        # Initialize workflow state
-        state = create_initial_state()
-        workflow = WorkflowRegistry.get_workflow(req.model)
-        
+        workflow = WorkflowRegistry.get_workflow(req.model, checkpointer)
         logger.info("Got Support Desk workflow, starting stream")
         
         first_chunk = True
-        async for text in _support_desk_stream(req, workflow, state):
+        async for text in _support_desk_stream(req, workflow, thread_id):
             logger.info(f"Received text from workflow: {text}")
             
             # Create SSE chunk
@@ -97,19 +116,21 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
                 model=req.model,
                 created=created,
                 content=text,
-                role="assistant" if first_chunk else None
+                role="assistant" if first_chunk else None,
+                thread_id=thread_id  # Include thread_id in response
             )
             
             first_chunk = False
             logger.info(f"Sending SSE chunk")
             yield sse_chunk
         
-        # Send final chunk
+        # Send final chunk if the graph hasn't been interrupted
         final_chunk = create_sse_chunk(
             completion_id=completion_id,
             model=req.model,
             created=created,
-            finish_reason="stop"
+            finish_reason="stop",
+            thread_id=thread_id
         )
         logger.info("Sending final SSE chunk")
         yield final_chunk
@@ -128,34 +149,44 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
 
 
 async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatCompletionResponse:
-    """Create a non-streaming chat completion response."""
+    """Create a non-streaming chat completion response, managing conversation state."""
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}")
+    # Use thread_id from request if provided, otherwise create a new one
+    thread_id = req.thread_id or str(uuid.uuid4())
+    logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
     try:
-        # Initialize workflow state
+        workflow = WorkflowRegistry.get_workflow(req.model, checkpointer)
+        
+        # Initial state for new conversations
         state = create_initial_state()
-        workflow = WorkflowRegistry.get_workflow(req.model)
-        
-        # Convert OpenAI messages to LangChain format
-        lc_messages = [_to_lc(msg) for msg in req.messages]
-        
-        # Set the current user input from the last message
         if req.messages:
             state["current_user_input"] = req.messages[-1].content
             state["messages"] = [msg.model_dump() for msg in req.messages]
+            
+        config = {"configurable": {"thread_id": thread_id}}
         
         # Collect all workflow output
         full_response = ""
-        async for chunk in workflow.astream(state, stream_mode="custom"):
+        final_state = None
+        async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
             if "custom_llm_chunk" in chunk:
-                text = chunk["custom_llm_chunk"]
+                text = chunk.get("custom_llm_chunk")
                 if text:
                     full_response += text
-        
-        # Create the response
+            if "__interrupt__" in chunk:
+                interrupts = chunk.get("__interrupt__", [])
+                if interrupts:
+                    interrupt_value = interrupts[0].value
+                    logger.info(f"Non-streaming: Received interrupt with value: {interrupt_value}")
+                    if interrupt_value:
+                        full_response += interrupt_value
+                    # Stop processing on interrupt
+                    break
+            final_state = chunk
+
         return ChatCompletionResponse(
             id=completion_id,
             created=created,
@@ -164,14 +195,15 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
                 ChatCompletionChoice(
                     index=0,
                     message=ChatMessage(role="assistant", content=full_response),
-                    finish_reason="stop"
+                    finish_reason="stop" if not final_state.get("__interrupt__") else "interrupt"
                 )
             ],
             usage={
                 "prompt_tokens": len(str(req.messages)),
                 "completion_tokens": len(full_response),
                 "total_tokens": len(str(req.messages)) + len(full_response)
-            }
+            },
+            thread_id=thread_id
         )
         
     except Exception as exc:
@@ -237,7 +269,8 @@ async def root():
         "capabilities": {
             "streaming": True,
             "openai_compatible": True,
-            "workflow_based": True
+            "workflow_based": True,
+            "human_in_the_loop": True
         },
         "supported_formats": {
             "request": "application/json",

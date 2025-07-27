@@ -8,9 +8,10 @@ from copy import deepcopy
 from typing import Dict, Any
 
 from ..state import SupportDeskState
+from ..models.classify_output import ClassifyOutput
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
 from ..utils import build_conversation_history
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
@@ -18,19 +19,16 @@ logger = logging.getLogger(__name__)
 
 async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Categorize the IT issue into one of the predefined categories.
+    Categorize the IT issue using structured outputs.
     
-    This node:
-    1. Analyzes the user's issue description
-    2. Categorizes into: hardware, software, access, other
-    3. Sets appropriate confidence levels
-    4. Updates the workflow state with category information
+    This node uses tool calling to generate structured ClassifyOutput responses
+    for reliable issue categorization and priority assignment.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with category information
+        Updated state with category and priority information
     """
     
     logger.info("Classify issue node processing user input")
@@ -40,80 +38,90 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     messages = state.get("messages", [])
     conversation_history = build_conversation_history(messages)
     
+    # Set up the tool for structured output
+    tool_name = "classify_issue"
+    tools = [pydantic_to_openai_tool(ClassifyOutput, tool_name)]
+    
     try:
+        # Create prompt with tool calling instruction
+        prompt = CLASSIFICATION_PROMPT.format(
+            conversation_history=conversation_history,
+            tool_name=tool_name
+        )
+        
         # Get stream writer for custom streaming
         writer = get_stream_writer()
-        
-        # Prepare classification prompt
-        classification_prompt = CLASSIFICATION_PROMPT.format(
-            conversation_history=conversation_history
-        )
         
         # Stream callback to emit chunks as they come in
         def stream_callback(chunk: str):
             writer({"custom_llm_chunk": chunk})
         
-        # Call LLM to classify the issue
-        classification_response = await client.chat_completion(
+        # Call LLM with tools for structured output
+        response = await client.chat_completion(
             messages=[
-                {"role": "system", "content": classification_prompt}
+                {"role": "system", "content": prompt}
             ],
-            model="openai/gpt-4.1-mini",
+            model="openai/gpt-4.1",
             temperature=0.3,
+            tools=tools,
+            tool_choice="required",
             stream_callback=stream_callback
         )
         
-        # Parse the classification response
-        classification_content = classification_response.get("content", "")
-        
-        # Extract category from response
-        # This is a simplified implementation - in a real system, we would use
-        # structured output parsing or function calling
-        classification_content_lower = classification_content.lower()
-        if "hardware" in classification_content_lower:
-            category = "hardware"
-        elif "software" in classification_content_lower:
-            category = "software"
-        elif "access" in classification_content_lower:
-            category = "access"
-        else:
-            category = "other"
+        # Extract structured output from tool call using robust utility
+        try:
+            output_data = extract_tool_call_args(response, tool_name)
+            classify_output = ClassifyOutput(**output_data)
             
-        # Extract priority from response
-        if "high" in classification_content_lower:
-            priority = "high"
-        elif "medium" in classification_content_lower:
-            priority = "medium"
-        else:
-            priority = "low"
-        
-        # Update state with classification information
-        state["issue_category"] = category
-        state["issue_priority"] = priority
-        state["current_response"] = classification_content
-        
-        # Append message to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": classification_content
-        })
-        
-        logger.info(f"Issue classified as {category} with {priority} priority")
+            logger.info(f"Classification successful: category={classify_output.category}, "
+                       f"priority={classify_output.priority}, confidence={classify_output.confidence}")
+            
+            # Check if clarification is needed
+            if classify_output.needs_clarification:
+                logger.info("Classification requires clarification")
+                state["needs_clarification"] = True
+                state["current_response"] = classify_output.response
+                
+                # Add clarifying question to conversation
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": classify_output.response
+                })
+            else:
+                logger.info(f"Issue classified as {classify_output.category} with {classify_output.priority} priority")
+                
+                # Update state with structured classification information
+                state["issue_category"] = classify_output.category
+                state["issue_priority"] = classify_output.priority
+                state["needs_clarification"] = False
+                state["current_response"] = classify_output.response
+                
+                # Add response to conversation history
+                state["messages"].append({
+                    "role": "assistant",
+                    "content": classify_output.response
+                })
+            
+        except ValueError as e:
+            logger.error(f"Tool call parsing error: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error creating ClassifyOutput from tool call: {e}")
+            raise
         
     except Exception as e:
         logger.error(f"Error in classify_issue_node: {e}")
-        # Error response
-        error_response = "I'm analyzing your issue. Moving to the next step..."
+        # Fallback: ask for clarification when error occurs
+        error_response = "I'm having trouble understanding your issue. Could you please provide more specific details about what problem you're experiencing?"
         
         # Stream the error response
         writer = get_stream_writer()
         writer({"custom_llm_chunk": error_response})
         
-        state["issue_category"] = "unknown"
-        state["issue_priority"] = "medium"  # Default to medium priority
+        state["needs_clarification"] = True
         state["current_response"] = error_response
         
-        # Append message to conversation history
+        # Add fallback clarification to conversation history
         state["messages"].append({
             "role": "assistant",
             "content": error_response

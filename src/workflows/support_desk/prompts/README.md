@@ -24,7 +24,6 @@ Respond with...
 Contains prompts for analysing input clarity and generating clarifying questions.
 
 **Key prompts:**
-- `ANALYSIS_PROMPT`: Determines if input needs clarification
 - `CLARIFICATION_PROMPT`: Generates specific questions when needed
 
 ### [classify_issue_prompt.py](classify_issue_prompt.py)
