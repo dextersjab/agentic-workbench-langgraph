@@ -9,6 +9,8 @@ from copy import deepcopy
 from ..state import SupportDeskState
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
+from ..constants import MAX_GATHERING_ROUNDS
+from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
@@ -46,7 +48,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     
     # Initialize max_gathering_rounds if not set
     if "max_gathering_rounds" not in state:
-        state["max_gathering_rounds"] = 3
+        state["max_gathering_rounds"] = MAX_GATHERING_ROUNDS
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
@@ -56,8 +58,11 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         missing_info_text = ", ".join(missing_categories) if missing_categories else "general details"
         
         prompt = f"""
-You are an IT support agent asking a follow-up question to gather more information.
+You are a ServiceHub IT support agent asking a follow-up question to gather more information.
 
+{SERVICEHUB_SUPPORT_TICKET_POLICY}
+
+CURRENT TICKET CONTEXT:
 Issue Category: {issue_category}
 Issue Priority: {issue_priority}
 Assigned Team: {support_team}
@@ -84,16 +89,17 @@ Ask ONE specific, targeted question to gather the most important missing informa
 Focus on: {missing_info_text}
 
 Keep the question:
-- Natural and conversational
+- Natural and conversational using ServiceHub terminology ("Portal" not "system", "colleagues" not "users")
 - Specific rather than vague
-- Relevant to {issue_category} issues
+- Relevant to {issue_category} issues and ServiceHub's environment
 - Helpful for the {support_team} team to resolve the issue
+- Considerate of ServiceHub's business context and procedures
 
-Examples of good questions:
-- "What web browser and version are you using to access Salesforce?"
-- "When did you first notice this error - was it this morning or earlier?"
-- "Are other team members experiencing the same issue, or just you?"
-- "What specific error message do you see when you try to log in?"
+Examples of good ServiceHub-specific questions:
+- "What web browser and version are you using to access the ServiceHub Portal?"
+- "Are other colleagues in your department experiencing the same Salesforce issue?"
+- "Which ServiceHub location are you working from today?"
+- "What specific error message do you see when accessing Dynamics 365?"
 
 Ask your question directly - no prefixes or explanations needed.
 """

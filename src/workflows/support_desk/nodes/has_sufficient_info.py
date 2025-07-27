@@ -10,6 +10,8 @@ from ..state import SupportDeskState
 from ..models.info_completeness_output import InfoCompletenessOutput
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
+from ..constants import MAX_GATHERING_ROUNDS
+from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from src.core.llm_client import client
 from src.core.schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 
@@ -52,8 +54,11 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
     try:
         # Create prompt for completeness assessment
         prompt = f"""
-You are an IT support analyst assessing if enough information has been gathered to create a comprehensive support ticket.
+You are a ServiceHub IT support analyst assessing if enough information has been gathered to create a comprehensive support ticket.
 
+{SERVICEHUB_SUPPORT_TICKET_POLICY}
+
+CURRENT TICKET CONTEXT:
 Issue Category: {issue_category}
 Issue Priority: {issue_priority}
 Assigned Team: {support_team}
@@ -68,30 +73,31 @@ REQUIRED INFORMATION CATEGORIES:
 5. **Context**: What user was doing when issue occurred, recent changes
 6. **Environment**: User location, department, role (if relevant to issue)
 
-For {issue_category} issues, prioritize:
-- Hardware: Device models, physical symptoms, connectivity
-- Software: Application versions, error messages, affected workflows  
-- Access: Account names, systems, permission levels
-- Network: Connection types, locations, affected devices
+For {issue_category} issues in ServiceHub's environment, prioritize:
+- Hardware: Device models, physical symptoms, connectivity (Dell/Lenovo equipment)
+- Software: Application versions, error messages, affected workflows (ServiceHub Portal, Dynamics 365, Salesforce CRM, Azure AD)
+- Access: Account names, systems, permission levels (consider department-specific procedures)
+- Network: Connection types, locations, affected devices (London HQ, Manchester, Edinburgh, remote workers)
 
 ASSESSMENT CRITERIA:
-- Set needs_more_info=True if critical information is missing
-- Set needs_more_info=False if you have enough to create a meaningful ticket
-- After 3 rounds of gathering, be more lenient (users get fatigued)
-- Consider issue priority - P1 issues may need less detail to start resolution
+- Set needs_more_info=True if critical information is missing for ServiceHub's procedures
+- Set needs_more_info=False if you have enough to create a meaningful ticket following ServiceHub standards
+- After {MAX_GATHERING_ROUNDS} rounds of gathering, be more lenient (colleagues get fatigued)
+- Consider issue priority and ServiceHub SLAs - P1 issues may need less detail to start resolution
+- Consider ServiceHub-specific requirements (location, department, systems)
 
-EXAMPLES OF SUFFICIENT INFORMATION:
-- "Sales team can't access Salesforce CRM - getting 'service unavailable' error. This is blocking our quarterly deal closure calls."
-  → Usually sufficient: specific system, error type, business impact
+EXAMPLES OF SUFFICIENT INFORMATION FOR SERVICEHUB:
+- "Sales colleagues can't access Salesforce CRM - getting 'service unavailable' error. This is blocking our quarterly deal closure calls."
+  → Usually sufficient: specific ServiceHub system, error type, business impact
 
-- "I can't log in" + "trying to access email" + "started this morning" + "error says password invalid"
-  → Sufficient: system, timeline, specific error
+- "I can't log in to the ServiceHub Portal" + "started this morning" + "error says password invalid" + "working from Manchester office"
+  → Sufficient: system, timeline, specific error, location
 
 EXAMPLES NEEDING MORE INFO:
-- "Something is broken" → needs what system, what's happening
-- "It's slow" → needs what system, how slow, when it started
+- "Something is broken" → needs what ServiceHub system, what's happening
+- "The Portal is slow" → needs specific performance issue, when it started, which Portal function
 
-Use the {tool_name} tool to assess completeness.
+Use the {tool_name} tool to assess completeness for ServiceHub procedures.
 """
         
         # Call LLM with tools for structured output (fast, non-streaming)
@@ -148,10 +154,10 @@ def has_sufficient_info(state: SupportDeskState) -> bool:
     """
     needs_more = state.get("needs_more_info", True)
     gathering_round = state.get("gathering_round", 1)
-    max_rounds = state.get("max_gathering_rounds", 3)
+    max_rounds = state.get("max_gathering_rounds", MAX_GATHERING_ROUNDS)
     
     # Consider sufficient if we've hit max rounds or have enough info
-    if gathering_round > max_rounds:
+    if gathering_round >= max_rounds:
         logger.info(f"→ max rounds reached ({max_rounds}), considering sufficient")
         return True
     elif not needs_more:
