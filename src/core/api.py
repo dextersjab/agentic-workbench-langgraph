@@ -195,7 +195,7 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
                 ChatCompletionChoice(
                     index=0,
                     message=ChatMessage(role="assistant", content=full_response),
-                    finish_reason="stop" if not final_state.get("__interrupt__") else "interrupt"
+                    finish_reason="stop" if not (final_state and final_state.get("__interrupt__")) else "interrupt"
                 )
             ],
             usage={

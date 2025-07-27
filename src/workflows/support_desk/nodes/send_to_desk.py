@@ -82,6 +82,10 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
             
             logger.info(f"Final ticket creation successful: ticket_id={desk_output.ticket_id}")
             
+            # Stream the final response manually since tool calls don't auto-stream
+            writer = get_stream_writer()
+            writer({"custom_llm_chunk": desk_output.response})
+            
             # Update state with structured final information using helper
             update_state_from_output(state, desk_output, {
                 'ticket_id': 'ticket_id',

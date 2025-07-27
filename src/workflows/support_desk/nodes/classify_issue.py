@@ -90,6 +90,10 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             else:
                 logger.info(f"Issue classified as {classify_output.category} with {classify_output.priority} priority")
                 
+                # Stream the response manually since tool calls don't auto-stream
+                writer = get_stream_writer()
+                writer({"custom_llm_chunk": classify_output.response})
+                
                 # Update state with structured classification information
                 state["issue_category"] = classify_output.category
                 state["issue_priority"] = classify_output.priority

@@ -14,7 +14,7 @@ from .state import SupportDeskState
 from .nodes.clarify_issue import clarify_issue_node, should_continue_to_triage
 from .nodes.classify_issue import classify_issue_node
 from .nodes.triage_issue import triage_issue_node
-from .nodes.gather_info import gather_info_node
+from .nodes.gather_info import gather_info_node, should_continue_gathering
 from .nodes.send_to_desk import send_to_desk_node
 
 logger = logging.getLogger(__name__)
@@ -25,24 +25,27 @@ logger = logging.getLogger(__name__)
 
 def create_workflow(checkpointer, draw_diagram: bool = True):
     """
-    Create the Support Desk LangGraph workflow with classify-first approach.
+    Create the Support Desk LangGraph workflow with classify-first and iterative gathering.
     
-    This workflow implements an IT support agent flow with natural conversation flow:
+    This workflow implements an IT support agent flow with natural conversation and HITL:
     
-    Classify-First Flow:
-    classify_issue → [sufficient info?] → triage_issue → gather_info → send_to_desk
-         ↑               [no]
-         └─── clarify_issue ←──┘
+    Enhanced Flow with Iterative Gathering:
+    classify_issue → [sufficient info?] → triage_issue → gather_info ←──┐
+         ↑               [no]                                ↓         │ [need more info]
+         └─── clarify_issue ←──┘                    [complete?] ──────┘
+                                                           ↓ [yes]
+                                                      send_to_desk
     
     Natural Flow Behavior:
     - classify_issue attempts classification first
-    - If insufficient information: routes to clarify_issue for questions
+    - If insufficient information: routes to clarify_issue for questions  
     - clarify_issue asks for details and returns to classification
-    - Loops until sufficient information is gathered
-    - No interrupt() calls needed - just natural conditional flow
+    - triage_issue assigns support team once classification is confident
+    - gather_info asks targeted questions one at a time (HITL loop)
+    - send_to_desk creates comprehensive ticket once information is complete
     
-    This approach provides a more intuitive user experience by attempting to help
-    immediately and falling back to clarification only when necessary.
+    This approach provides natural conversation rhythm with human-in-the-loop interactions
+    at key decision points, avoiding overwhelming walls of text.
     
     Args:
         checkpointer: The checkpointer to use for persisting graph state.
@@ -80,9 +83,19 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Clarification loops back to classification
     workflow.add_edge("clarify_issue", "classify_issue")
     
-    # Continue with remaining linear flow
+    # Continue with remaining flow
     workflow.add_edge("triage_issue", "gather_info")
-    workflow.add_edge("gather_info", "send_to_desk")
+    
+    # Conditional edge from gather_info: either continue gathering or proceed to ticket creation
+    workflow.add_conditional_edges(
+        "gather_info",
+        should_continue_gathering,
+        {
+            True: "gather_info",      # Continue gathering information
+            False: "send_to_desk"     # Ready to create ticket
+        }
+    )
+    
     workflow.add_edge("send_to_desk", END)
     
     # Compile the workflow with the provided checkpointer
