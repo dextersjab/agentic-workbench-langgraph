@@ -14,7 +14,8 @@ from .state import SupportDeskState
 from .nodes.clarify_issue import clarify_issue_node, should_continue_to_triage
 from .nodes.classify_issue import classify_issue_node
 from .nodes.triage_issue import triage_issue_node
-from .nodes.gather_info import gather_info_node, should_continue_gathering
+from .nodes.has_sufficient_info import has_sufficient_info_node, has_sufficient_info
+from .nodes.gather_info import gather_info_node
 from .nodes.send_to_desk import send_to_desk_node
 
 logger = logging.getLogger(__name__)
@@ -29,19 +30,21 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     This workflow implements an IT support agent flow with natural conversation and HITL:
     
-    Enhanced Flow with Iterative Gathering:
-    classify_issue → [sufficient info?] → triage_issue → gather_info ←──┐
-         ↑               [no]                                ↓         │ [need more info]
-         └─── clarify_issue ←──┘                    [complete?] ──────┘
-                                                           ↓ [yes]
-                                                      send_to_desk
+    Enhanced Flow with Info Sufficiency Check:
+    classify_issue → [sufficient info?] → triage_issue → has_sufficient_info
+         ↑               [no]                                ↓ [False]        ↓ [True]
+         └─── clarify_issue ←──┘                      gather_info ←──┘    send_to_desk
+                                                           ↓ [asked question]
+                                                      has_sufficient_info
     
     Natural Flow Behavior:
     - classify_issue attempts classification first
     - If insufficient information: routes to clarify_issue for questions  
     - clarify_issue asks for details and returns to classification
     - triage_issue assigns support team once classification is confident
-    - gather_info asks targeted questions one at a time (HITL loop)
+    - has_sufficient_info determines if enough info exists (fast tool call)
+    - gather_info asks ONE targeted question using streaming (HITL)
+    - Loop: user responds → has_sufficient_info → gather_info (max 3 rounds)
     - send_to_desk creates comprehensive ticket once information is complete
     
     This approach provides natural conversation rhythm with human-in-the-loop interactions
@@ -64,6 +67,7 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     workflow.add_node("clarify_issue", clarify_issue_node)
     workflow.add_node("classify_issue", classify_issue_node)
     workflow.add_node("triage_issue", triage_issue_node)
+    workflow.add_node("has_sufficient_info", has_sufficient_info_node)
     workflow.add_node("gather_info", gather_info_node)
     workflow.add_node("send_to_desk", send_to_desk_node)
     
@@ -83,18 +87,21 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Clarification loops back to classification
     workflow.add_edge("clarify_issue", "classify_issue")
     
-    # Continue with remaining flow
-    workflow.add_edge("triage_issue", "gather_info")
+    # Continue with info sufficiency check after triage
+    workflow.add_edge("triage_issue", "has_sufficient_info")
     
-    # Conditional edge from gather_info: either continue gathering or proceed to ticket creation
+    # Conditional edge from info check: either create ticket or gather more info
     workflow.add_conditional_edges(
-        "gather_info",
-        should_continue_gathering,
+        "has_sufficient_info",
+        has_sufficient_info,
         {
-            True: "gather_info",      # Continue gathering information
-            False: "send_to_desk"     # Ready to create ticket
+            True: "send_to_desk",          # Sufficient info - create ticket
+            False: "gather_info"           # Need more information
         }
     )
+    
+    # After asking a question, check sufficiency again
+    workflow.add_edge("gather_info", "has_sufficient_info")
     
     workflow.add_edge("send_to_desk", END)
     

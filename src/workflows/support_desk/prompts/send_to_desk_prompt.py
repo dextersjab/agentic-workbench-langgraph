@@ -23,12 +23,12 @@ Create the final ticket and response:
 6. **Provide Contact Info**: How the user can follow up or get updates
 7. **Create Final Response**: Professional message with all ticket details
 
-The response should:
-- Confirm the ticket has been created with the ID
-- Explain which team will handle the issue and expected timeframe
-- Provide any immediate suggestions or workarounds if applicable
-- Give clear next steps and contact information
-- Thank the user and instill confidence in resolution
+Create a professional final response that includes:
+- Ticket creation confirmation with a generated ID
+- Team assignment and expected resolution timeframe
+- Any immediate suggestions or workarounds if applicable
+- Clear next steps and contact information
+- Professional closing that instills confidence
 
-Use the {tool_name} tool to create the final ticket and response.
+Respond directly with the complete final message to the user - no tool prefixes needed.
 """

@@ -6,94 +6,9 @@ from typing import Dict, Any, Optional, Callable, List, Type
 import aiohttp
 from pydantic import BaseModel
 from src.workflows.support_desk.utils.state_logger import GREY, RESET
+from .schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 
 logger = logging.getLogger(__name__)
-
-def pydantic_to_openai_tool(model_class: Type[BaseModel], tool_name: str) -> Dict[str, Any]:
-    """
-    Convert a Pydantic model to OpenAI tool format.
-    
-    Args:
-        model_class: Pydantic model class
-        tool_name: Name for the tool
-        
-    Returns:
-        OpenAI tool specification
-    """
-    return {
-        "type": "function",
-        "function": {
-            "name": tool_name,
-            "description": model_class.__doc__ or f"Use this tool to provide {tool_name} output",
-            "parameters": model_class.model_json_schema()
-        }
-    }
-
-
-def extract_tool_call_args(response: Dict[str, Any], expected_tool_name: str = None) -> Dict[str, Any]:
-    """
-    Safely extract and parse tool call arguments from LLM response.
-    
-    Args:
-        response: LLM response containing tool calls
-        expected_tool_name: Optional tool name to validate against
-        
-    Returns:
-        Parsed tool call arguments as dict
-        
-    Raises:
-        ValueError: If tool calls are missing, malformed, or arguments are invalid JSON
-    """
-    # Check if response exists
-    if not response:
-        raise ValueError("Response is None or empty")
-    
-    # Check if tool_calls exist
-    tool_calls = response.get("tool_calls")
-    if not tool_calls:
-        raise ValueError("No tool_calls found in response")
-    
-    if not isinstance(tool_calls, list) or len(tool_calls) == 0:
-        raise ValueError("tool_calls is not a non-empty list")
-    
-    # Get first tool call
-    tool_call = tool_calls[0]
-    if not isinstance(tool_call, dict):
-        raise ValueError("tool_call is not a dictionary")
-    
-    # Check function exists
-    function = tool_call.get("function")
-    if not function:
-        raise ValueError("tool_call missing 'function' key")
-    
-    if not isinstance(function, dict):
-        raise ValueError("tool_call 'function' is not a dictionary")
-    
-    # Validate tool name if expected
-    if expected_tool_name:
-        actual_name = function.get("name", "")
-        if actual_name != expected_tool_name:
-            raise ValueError(f"Expected tool '{expected_tool_name}' but got '{actual_name}'")
-    
-    # Get arguments
-    args_json = function.get("arguments")
-    if args_json is None:
-        raise ValueError("tool_call function missing 'arguments' key")
-    
-    if not isinstance(args_json, str):
-        raise ValueError("tool_call arguments is not a string")
-    
-    # Parse JSON arguments
-    try:
-        args_dict = json.loads(args_json)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"tool_call arguments contain invalid JSON: {e}")
-    
-    if not isinstance(args_dict, dict):
-        raise ValueError("tool_call arguments JSON is not an object/dictionary")
-    
-    return args_dict
-
 
 class OpenRouterClient:
     """Client for interacting with OpenRouter API with streaming support."""
@@ -114,7 +29,9 @@ class OpenRouterClient:
         max_tokens: Optional[int] = None,
         stream_callback: Optional[Callable[[str], None]] = None,
         tools: Optional[List[Dict[str, Any]]] = None,
-        tool_choice: Optional[str] = None
+        tool_choice: Optional[str] = None,
+        response_format: Optional[Dict[str, Any]] = None,
+        use_streaming: bool = True
     ) -> Dict[str, Any]:
         """
         Process chat messages with OpenRouter LLM.
@@ -125,8 +42,10 @@ class OpenRouterClient:
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             stream_callback: Function to call with each streaming chunk
-            tools: List of tools available to the model
+            tools: List of tools available to the model (for non-streaming tool calls)
             tool_choice: How the model should choose tools ("auto", "required", or specific tool)
+            response_format: OpenRouter structured output format (for streaming)
+            use_streaming: Whether to use streaming (False for tool calls, True for structured outputs)
             
         Returns:
             Complete response from the LLM, including tool calls if any
@@ -144,16 +63,19 @@ class OpenRouterClient:
             "model": model,
             "messages": messages,
             "temperature": temperature,
-            "stream": True
+            "stream": use_streaming
         }
         
         if max_tokens:
             payload["max_tokens"] = max_tokens
             
+        # Handle tool calls (non-streaming) vs structured outputs (streaming)
         if tools:
             payload["tools"] = tools
             if tool_choice:
                 payload["tool_choice"] = tool_choice
+        elif response_format:
+            payload["response_format"] = response_format
         
         accumulated_content = ""
         tool_calls = []
@@ -172,6 +94,12 @@ class OpenRouterClient:
                         logger.error(f"OpenRouter API error: {response.status} - {error_text}")
                         raise Exception(f"OpenRouter API error: {response.status}")
                     
+                    # Handle non-streaming responses (tool calls)
+                    if not use_streaming:
+                        response_data = await response.json()
+                        return response_data.get("choices", [{}])[0].get("message", {})
+                    
+                    # Handle streaming responses (structured outputs)
                     buffer = ""
                     async for chunk in response.content:
                         if not chunk:

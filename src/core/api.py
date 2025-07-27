@@ -235,7 +235,8 @@ async def models_options():
 @v1_router.post("/chat/completions")
 async def chat_completions(request: ChatCompletionRequest):
     """Handle OpenAI-compatible chat completion requests."""
-    logger.info(f"{GREY}Chat completion request: {request}{RESET}")
+    logger.info(f"{GREY}Chat completion request - request: {request}{RESET}")
+    logger.info(f"{GREY}Chat completion request - model: {request.model}, stream: {request.stream}{RESET}")
     
     if request.stream:
         logger.info(f"{GREY}Starting streaming response{RESET}")

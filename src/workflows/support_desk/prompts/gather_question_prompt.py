@@ -32,11 +32,11 @@ For {issue_category} issues, prioritize:
 INSTRUCTIONS:
 1. Analyze the conversation to identify what information is MISSING
 2. If information is missing, ask ONE specific, targeted question
-3. If you have sufficient information for a comprehensive ticket, mark gathering as complete
+3. If you have sufficient information for a comprehensive ticket, respond with "I have enough information to proceed."
 4. Keep questions natural and conversational
 5. Be specific - ask for exact details rather than vague questions
 
 Current gathering round: {gathering_round}
 
-Use the {tool_name} tool to determine what to ask next.
+Respond directly with your question or completion statement - no prefixes or tool names needed.
 """

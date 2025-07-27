@@ -23,9 +23,9 @@ class GatherQuestionOutput(BaseModel):
         description="True if all necessary information has been gathered, False if more questions needed"
     )
     
-    gathered_info_summary: Optional[str] = Field(
-        default=None,
-        description="Summary of information gathered so far (only provided if gathering is complete)"
+    gathered_info_summary: str = Field(
+        default="",
+        description="Summary of information gathered so far (empty string if gathering not complete)"
     )
     
     confidence_score: float = Field(

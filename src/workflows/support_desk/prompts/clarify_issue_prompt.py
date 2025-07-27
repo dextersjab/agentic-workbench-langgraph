@@ -33,10 +33,13 @@ EXAMPLES of requests that NEED clarification:
 - "something is broken" → needs what is broken and how
 - "I can't log in" → might be sufficient if it's clear what they're trying to log into
 
-Only set needs_clarification=false if the user has provided:
+Only proceed without clarification if the user has provided:
 - A clear description of a specific technical problem
 - Information about what system/device is affected
 - Enough context to categorize and prioritize the issue
 
-Use the {tool_name} tool to provide your analysis and response.
+If clarification is needed, ask a specific question to gather the missing information. 
+If sufficient information is provided, respond with "I have enough information to proceed."
+
+Respond directly with your clarifying question or proceed statement - no prefixes needed.
 """
