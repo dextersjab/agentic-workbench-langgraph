@@ -9,8 +9,19 @@ CLASSIFICATION_PROMPT = """
 You are an IT support specialist attempting to categorize a user's issue.
 
 Conversation History: {conversation_history}
+Clarification Attempts: {clarification_attempts} of {max_clarification_attempts}
+Force Proceed: {force_proceed}
 
-FIRST, determine if you have enough information to properly classify the issue. If the user's input is:
+IMPORTANT: If Force Proceed is True, you MUST classify the issue with the information available and set needs_clarification=False.
+
+Detect if the user is requesting escalation with phrases like:
+- "just raise the ticket"
+- "connect me to a human"
+- "stop asking questions"
+- "I don't have time for this"
+If detected, classify with available information and set needs_clarification=False.
+
+Otherwise, determine if you have enough information to properly classify the issue. If the user's input is:
 - Too vague (e.g., "hi", "help", "I have a problem")
 - Missing crucial details (no specific device, application, or error described)
 - Unclear about the actual problem

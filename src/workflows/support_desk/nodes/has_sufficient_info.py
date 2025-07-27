@@ -44,6 +44,25 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
     support_team = state.get("support_team", "L1")
     gathering_round = state.get("gathering_round", 1)
     
+    # Check last user message for escalation phrases
+    last_user_message = ""
+    for msg in reversed(messages):
+        if msg.get("role") == "user":
+            last_user_message = msg.get("content", "").lower()
+            break
+    
+    escalation_phrases = [
+        "just raise the ticket",
+        "connect me to a human",
+        "send me to a human", 
+        "human please",
+        "stop asking",
+        "no more questions",
+        "raise the ticket"
+    ]
+    
+    user_requested_escalation = any(phrase in last_user_message for phrase in escalation_phrases)
+    
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
     
@@ -63,7 +82,11 @@ Issue Category: {issue_category}
 Issue Priority: {issue_priority}
 Assigned Team: {support_team}
 Gathering Round: {gathering_round}
+User Requested Escalation: {user_requested_escalation}
+Last User Message: {last_user_message}
 Conversation History: {conversation_history}
+
+IMPORTANT: If User Requested Escalation is True, you MUST set needs_more_info=False and proceed with ticket creation.
 
 REQUIRED INFORMATION CATEGORIES:
 1. **Device/System Details**: Specific hardware/software involved, models, versions
@@ -156,8 +179,31 @@ def has_sufficient_info(state: SupportDeskState) -> bool:
     gathering_round = state.get("gathering_round", 1)
     max_rounds = state.get("max_gathering_rounds", MAX_GATHERING_ROUNDS)
     
-    # Consider sufficient if we've hit max rounds or have enough info
-    if gathering_round >= max_rounds:
+    # Check for user escalation in messages
+    messages = state.get("messages", [])
+    last_user_message = ""
+    for msg in reversed(messages):
+        if msg.get("role") == "user":
+            last_user_message = msg.get("content", "").lower()
+            break
+    
+    escalation_phrases = [
+        "just raise the ticket",
+        "connect me to a human",
+        "send me to a human", 
+        "human please",
+        "stop asking",
+        "no more questions",
+        "raise the ticket"
+    ]
+    
+    user_requested_escalation = any(phrase in last_user_message for phrase in escalation_phrases)
+    
+    # Consider sufficient if user requested escalation, hit max rounds, or have enough info
+    if user_requested_escalation:
+        logger.info("→ user requested escalation, proceeding to ticket creation")
+        return True
+    elif gathering_round >= max_rounds:
         logger.info(f"→ max rounds reached ({max_rounds}), considering sufficient")
         return True
     elif not needs_more:

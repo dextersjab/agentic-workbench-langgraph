@@ -56,16 +56,78 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
     """Stream responses from the Support Desk workflow, managing interruptions."""
     logger.info(f"Streaming Support Desk workflow for thread_id: {thread_id}")
     
-    # Initial state for new conversations
-    state = create_initial_state()
-    if req.messages:
-        state["current_user_input"] = req.messages[-1].content
-        state["messages"] = [msg.model_dump() for msg in req.messages]
-
     config = {"configurable": {"thread_id": thread_id}}
     
+    # Check if there's existing state for this thread
     try:
-        # Stream workflow execution
+        existing_state = await workflow.aget_state(config)
+        if existing_state.values:
+            # Continuing conversation - update messages in persisted state and resume
+            logger.info(f"Continuing existing conversation for thread {thread_id}")
+            if req.messages:
+                # Update the persisted state with new user message
+                update_state = {
+                    "current_user_input": req.messages[-1].content,
+                    "messages": [msg.model_dump() for msg in req.messages]
+                }
+                await workflow.aupdate_state(config, update_state)
+            
+            # Resume from interrupt point with None input
+            async for chunk in workflow.astream(None, config=config, stream_mode="custom"):
+                logger.info(f"Received chunk from workflow: {chunk}")
+                
+                # Check for custom LLM chunks to stream back
+                if "custom_llm_chunk" in chunk:
+                    text = chunk.get("custom_llm_chunk")
+                    if text:
+                        logger.info(f"Yielding text: {text}")
+                        yield text
+                
+                # Handle LangGraph interrupt for human-in-the-loop
+                if "__interrupt__" in chunk:
+                    interrupts = chunk.get("__interrupt__", [])
+                    if interrupts:
+                        # For simplicity, handle the first interrupt
+                        interrupt_value = interrupts[0].value
+                        logger.info(f"Workflow interrupted: {interrupt_value}")
+                        return
+        else:
+            # New conversation - create initial state and start fresh
+            logger.info(f"Starting new conversation for thread {thread_id}")
+            state = create_initial_state()
+            if req.messages:
+                state["current_user_input"] = req.messages[-1].content
+                state["messages"] = [msg.model_dump() for msg in req.messages]
+            
+            # Start new workflow with initial state
+            async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
+                logger.info(f"Received chunk from workflow: {chunk}")
+                
+                # Check for custom LLM chunks to stream back
+                if "custom_llm_chunk" in chunk:
+                    text = chunk.get("custom_llm_chunk")
+                    if text:
+                        logger.info(f"Yielding text: {text}")
+                        yield text
+                
+                # Handle LangGraph interrupt for human-in-the-loop
+                if "__interrupt__" in chunk:
+                    interrupts = chunk.get("__interrupt__", [])
+                    if interrupts:
+                        # For simplicity, handle the first interrupt
+                        interrupt_value = interrupts[0].value
+                        logger.info(f"Workflow interrupted: {interrupt_value}")
+                        return
+                        
+    except Exception as e:
+        # Fallback to new conversation if state retrieval fails
+        logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
+        state = create_initial_state()
+        if req.messages:
+            state["current_user_input"] = req.messages[-1].content
+            state["messages"] = [msg.model_dump() for msg in req.messages]
+        
+        # Start new workflow with initial state
         async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
             logger.info(f"Received chunk from workflow: {chunk}")
             
@@ -162,32 +224,75 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
     try:
         workflow = WorkflowRegistry.get_workflow(req.model, checkpointer)
         
-        # Initial state for new conversations
-        state = create_initial_state()
-        if req.messages:
-            state["current_user_input"] = req.messages[-1].content
-            state["messages"] = [msg.model_dump() for msg in req.messages]
-            
         config = {"configurable": {"thread_id": thread_id}}
         
-        # Collect all workflow output
-        full_response = ""
-        final_state = None
-        async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-            if "custom_llm_chunk" in chunk:
-                text = chunk.get("custom_llm_chunk")
-                if text:
-                    full_response += text
-            if "__interrupt__" in chunk:
-                interrupts = chunk.get("__interrupt__", [])
-                if interrupts:
-                    interrupt_value = interrupts[0].value
-                    logger.info(f"Non-streaming: Received interrupt with value: {interrupt_value}")
-                    if interrupt_value:
-                        full_response += interrupt_value
-                    # Stop processing on interrupt
-                    break
-            final_state = chunk
+        # Check if there's existing state for this thread
+        try:
+            existing_state = await workflow.aget_state(config)
+            if existing_state.values:
+                # Continuing conversation - update messages in persisted state and resume
+                logger.info(f"Continuing existing conversation for thread {thread_id}")
+                if req.messages:
+                    # Update the persisted state with new user message
+                    update_state = {
+                        "current_user_input": req.messages[-1].content,
+                        "messages": [msg.model_dump() for msg in req.messages]
+                    }
+                    await workflow.aupdate_state(config, update_state)
+                
+                # Resume from interrupt point with None input
+                full_response = ""
+                final_state = None
+                async for chunk in workflow.astream(None, config=config, stream_mode="custom"):
+                    if "custom_llm_chunk" in chunk:
+                        text = chunk.get("custom_llm_chunk")
+                        if text:
+                            full_response += text
+                    
+                    # Update final state as we go
+                    if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
+                        final_state = chunk
+            else:
+                # New conversation - create initial state and start fresh
+                logger.info(f"Starting new conversation for thread {thread_id}")
+                state = create_initial_state()
+                if req.messages:
+                    state["current_user_input"] = req.messages[-1].content
+                    state["messages"] = [msg.model_dump() for msg in req.messages]
+                
+                # Start new workflow with initial state
+                full_response = ""
+                final_state = None
+                async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
+                    if "custom_llm_chunk" in chunk:
+                        text = chunk.get("custom_llm_chunk")
+                        if text:
+                            full_response += text
+                    
+                    # Update final state as we go
+                    if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
+                        final_state = chunk
+                        
+        except Exception as e:
+            # Fallback to new conversation if state retrieval fails
+            logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
+            state = create_initial_state()
+            if req.messages:
+                state["current_user_input"] = req.messages[-1].content
+                state["messages"] = [msg.model_dump() for msg in req.messages]
+            
+            # Start new workflow with initial state
+            full_response = ""
+            final_state = None
+            async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
+                if "custom_llm_chunk" in chunk:
+                    text = chunk.get("custom_llm_chunk")
+                    if text:
+                        full_response += text
+                
+                # Update final state as we go
+                if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
+                    final_state = chunk
 
         return ChatCompletionResponse(
             id=completion_id,

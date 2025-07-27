@@ -14,6 +14,20 @@ Clarification Attempt: {clarification_attempts} of {max_clarification_attempts}
 
 CRITICAL: You must determine if the user has provided enough information to proceed with support.
 
+FIRST, check if the user is requesting to escalate or bypass clarification:
+- "just raise the ticket"
+- "connect me to a human"
+- "stop asking questions"
+- "no, just raise the ticket or connect me to a human"
+- Any variation indicating frustration with questions
+
+If escalation is detected:
+- Set user_requested_escalation=True
+- Set needs_clarification=False
+- Set response="I'll proceed with creating your ticket with the information provided."
+
+Otherwise, evaluate if clarification is needed.
+
 ALWAYS NEED CLARIFICATION for requests like:
 - General greetings ("hi", "hello", "help me")
 - Vague questions ("how can you help?", "I need help", "what do you do?")
@@ -38,8 +52,15 @@ Only proceed without clarification if the user has provided:
 - Information about what system/device is affected
 - Enough context to categorize and prioritize the issue
 
-If clarification is needed, ask a specific question to gather the missing information. 
-If sufficient information is provided, respond with "I have enough information to proceed."
+NEVER respond with "I have enough information to proceed." as this is internal system information.
 
-Respond directly with your clarifying question or proceed statement - no prefixes needed.
+If clarification is needed:
+- Set needs_clarification=True
+- Set response to a specific question to gather missing information
+
+If sufficient information is provided OR escalation requested:
+- Set needs_clarification=False
+- Do NOT set a response - the workflow will continue silently
+
+Use the {tool_name} tool to structure your analysis.
 """

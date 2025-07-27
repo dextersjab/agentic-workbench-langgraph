@@ -54,55 +54,22 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     conversation_history = build_conversation_history(messages)
     
     try:
+        # Import the proper prompt
+        from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
+        
         # Create prompt for asking the next question
         missing_info_text = ", ".join(missing_categories) if missing_categories else "general details"
         
-        prompt = f"""
-You are a ServiceHub IT support agent asking a follow-up question to gather more information.
-
-{SERVICEHUB_SUPPORT_TICKET_POLICY}
-
-CURRENT TICKET CONTEXT:
-Issue Category: {issue_category}
-Issue Priority: {issue_priority}
-Assigned Team: {support_team}
-Gathering Round: {gathering_round}
-Missing Information: {missing_info_text}
-Conversation History: {conversation_history}
-
-REQUIRED INFORMATION CATEGORIES:
-1. **Device/System Details**: Specific hardware/software involved, models, versions
-2. **Timeline**: When did this start, frequency, patterns
-3. **User Impact**: How this affects work, urgency, business impact
-4. **Symptoms**: Specific error messages, behaviors, what exactly happens
-5. **Context**: What user was doing when issue occurred, recent changes
-6. **Environment**: User location, department, role (if relevant to issue)
-
-For {issue_category} issues, prioritize:
-- Hardware: Device models, physical symptoms, connectivity
-- Software: Application versions, error messages, affected workflows  
-- Access: Account names, systems, permission levels
-- Network: Connection types, locations, affected devices
-
-INSTRUCTIONS:
-Ask ONE specific, targeted question to gather the most important missing information.
-Focus on: {missing_info_text}
-
-Keep the question:
-- Natural and conversational using ServiceHub terminology ("Portal" not "system", "colleagues" not "users")
-- Specific rather than vague
-- Relevant to {issue_category} issues and ServiceHub's environment
-- Helpful for the {support_team} team to resolve the issue
-- Considerate of ServiceHub's business context and procedures
-
-Examples of good ServiceHub-specific questions:
-- "What web browser and version are you using to access the ServiceHub Portal?"
-- "Are other colleagues in your department experiencing the same Salesforce issue?"
-- "Which ServiceHub location are you working from today?"
-- "What specific error message do you see when accessing Dynamics 365?"
-
-Ask your question directly - no prefixes or explanations needed.
-"""
+        prompt = INFO_GATHERING_PROMPT.format(
+            servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY,
+            issue_category=issue_category,
+            issue_priority=issue_priority,
+            support_team=support_team,
+            conversation_history=conversation_history,
+            tool_name="gather_info_analysis",
+            gathering_round=gathering_round,
+            missing_info_text=missing_info_text
+        )
         
         # Get stream writer for streaming
         writer = get_stream_writer()
@@ -127,7 +94,8 @@ Ask your question directly - no prefixes or explanations needed.
         
         # Update state with the question
         state["current_response"] = response_content
-        state["gathering_round"] = gathering_round + 1
+        new_round = gathering_round + 1
+        state["gathering_round"] = new_round
         
         # Add question to conversation history
         state["messages"].append({
@@ -135,7 +103,7 @@ Ask your question directly - no prefixes or explanations needed.
             "content": response_content
         })
         
-        logger.info(f"→ asked question (round {gathering_round})")
+        logger.info(f"→ asked question (moving to round {new_round})")
         
     except Exception as e:
         logger.error(f"Error in gather_info_node: {e}")
@@ -144,7 +112,7 @@ Ask your question directly - no prefixes or explanations needed.
     # Log what this node wrote to state
     log_node_complete("gather_info", state_before, state)
     
-    # Use interrupt to pause and wait for user response
+    # Use interrupt to pause and wait for user response (outside try-except)
     interrupt("Waiting for user response to information gathering question")
     
     return state

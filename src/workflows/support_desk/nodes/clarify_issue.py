@@ -1,5 +1,5 @@
 """
-Clarify Issue node for Support Desk workflow - Simple streaming version.
+Clarify Issue node for Support Desk workflow - Tool-based version.
 
 This node analyzes user input and asks clarifying questions when needed.
 """
@@ -7,10 +7,11 @@ import logging
 from copy import deepcopy
 
 from ..state import SupportDeskState
+from ..models.clarify_output import ClarifyOutput
 from ..prompts.clarify_issue_prompt import CLARIFICATION_PROMPT
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
-from src.core.llm_client import client
+from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
 
@@ -19,15 +20,15 @@ logger = logging.getLogger(__name__)
 
 async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Ask a clarifying question to gather more information.
+    Analyze if clarification is needed and ask questions or proceed silently.
     
-    This simplified node uses regular streaming for natural user experience.
+    Uses tool calls for decision making, only streams actual questions.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with clarifying question
+        Updated state with clarifying question or silent progression
     """
     
     state_before = deepcopy(state)
@@ -40,64 +41,102 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     clarification_attempts = state.get("clarification_attempts", 0)
     max_attempts = state.get("max_clarification_attempts", 3)
     
+    # Check if we're resuming after user responded to our clarifying question
+    # If the last message is from the user and we have clarification_attempts > 0,
+    # then we're resuming and should proceed to classify, not ask another question
+    last_message = messages[-1] if messages else None
+    is_resuming_after_user_response = (
+        last_message and 
+        last_message.get("role") == "user" and 
+        clarification_attempts > 0
+    )
+    
+    if is_resuming_after_user_response:
+        logger.info("→ resuming after user response, proceeding to classification")
+        # Don't ask another question, just return state to continue to classify_issue
+        log_node_complete("clarify_issue", state_before, state)
+        return state
+    
     # Build conversation history for context
-    conversation_history = build_conversation_history(messages, last_n_messages=5)
+    conversation_history = build_conversation_history(messages)
+    
+    # Set up the tool for structured output
+    tool_name = "clarify_analysis"
+    tools = [pydantic_to_openai_tool(ClarifyOutput, tool_name)]
     
     try:
-        # Create prompt for clarification
+        # Create prompt for clarification analysis
         prompt = CLARIFICATION_PROMPT.format(
             user_input=state.get("current_user_input", ""),
             conversation_history=conversation_history,
             clarification_attempts=clarification_attempts,
             max_clarification_attempts=max_attempts,
-            tool_name="clarify_analysis"
+            tool_name=tool_name
         )
         
-        # Get stream writer for streaming
-        writer = get_stream_writer()
-        
-        # Stream callback to emit chunks as they come in
-        def stream_callback(chunk: str):
-            writer({"custom_llm_chunk": chunk})
-        
-        # Call LLM with regular streaming
+        # Call LLM with tools for structured decision
         response = await client.chat_completion(
             messages=[
                 {"role": "system", "content": prompt}
             ],
             model="openai/gpt-4.1",
             temperature=0.3,
-            stream_callback=stream_callback,
-            use_streaming=True
+            tools=tools,
+            tool_choice="required"
         )
         
-        # Use the streamed response directly
-        response_content = response.get("content", "")
+        # Extract structured output
+        output_data = extract_tool_call_args(response, tool_name)
+        clarify_output = ClarifyOutput(**output_data)
         
-        logger.info("→ clarifying question")
+        logger.info(f"→ needs_clarification: {clarify_output.needs_clarification}, escalation: {clarify_output.user_requested_escalation}")
         
-        # Add clarifying question to conversation
-        state["messages"].append({
-            "role": "assistant",
-            "content": response_content
-        })
-        
-        # Update state for next iteration
-        state["clarification_attempts"] = clarification_attempts + 1
-        state["current_response"] = response_content
+        # Handle based on decision
+        if clarify_output.user_requested_escalation:
+            # User wants to escalate - silently proceed without streaming
+            logger.info("→ user requested escalation, proceeding silently")
+            # Don't update messages or stream anything
+            # Just return to continue workflow
+        elif clarify_output.needs_clarification:
+            # Need clarification - stream the question
+            logger.info("→ streaming clarifying question")
+            
+            # Get stream writer for streaming
+            writer = get_stream_writer()
+            
+            # Stream the clarifying question
+            for chunk in clarify_output.response:
+                writer({"custom_llm_chunk": chunk})
+            
+            # Add clarifying question to conversation
+            state["messages"].append({
+                "role": "assistant",
+                "content": clarify_output.response
+            })
+            
+            # Update state for next iteration
+            state["clarification_attempts"] = clarification_attempts + 1
+            state["current_response"] = clarify_output.response
+            
+            # Log what this node wrote to state
+            log_node_complete("clarify_issue", state_before, state)
+            
+            # Use interrupt to pause and wait for user input
+            interrupt("Waiting for user response")
+        else:
+            # Sufficient info - proceed silently without streaming
+            logger.info("→ sufficient information, proceeding silently")
+            # Don't stream anything or add to messages
+            # Just return to continue workflow
+            
+            # Log what this node wrote to state
+            log_node_complete("clarify_issue", state_before, state)
         
     except Exception as e:
         logger.error(f"Error in clarify_issue_node: {e}")
         # Don't mask the real error with fallback messages
         # Let the error propagate for clean error handling
         raise
-    
-    # Log what this node wrote to state
-    log_node_complete("clarify_issue", state_before, state)
-    
-    # Use interrupt to pause and wait for user input - outside try/catch
-    # Don't pass the question to interrupt() since we already streamed it
-    interrupt("Waiting for user response")
     
     return state
 

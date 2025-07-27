@@ -42,6 +42,11 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     messages = state.get("messages", [])
     conversation_history = build_conversation_history(messages)
     
+    # Check if we've exhausted clarification attempts
+    clarification_attempts = state.get("clarification_attempts", 0)
+    max_attempts = state.get("max_clarification_attempts", 3)
+    force_proceed = clarification_attempts >= max_attempts
+    
     # Set up the tool for structured output
     tool_name = "classify_issue"
     tools = [pydantic_to_openai_tool(ClassifyOutput, tool_name)]
@@ -50,7 +55,10 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
         # Create prompt with tool calling instruction
         prompt = CLASSIFICATION_PROMPT.format(
             conversation_history=conversation_history,
-            tool_name=tool_name
+            tool_name=tool_name,
+            clarification_attempts=clarification_attempts,
+            max_clarification_attempts=max_attempts,
+            force_proceed=force_proceed
         )
         
         # Get stream writer for custom streaming
@@ -79,8 +87,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             
             logger.info(f"→ {classify_output.category}/{classify_output.priority} (conf: {classify_output.confidence})")
             
-            # Check if clarification is needed
-            if classify_output.needs_clarification:
+            # Check if clarification is needed (unless we've hit the limit)
+            if classify_output.needs_clarification and not force_proceed:
                 logger.info("→ needs clarification")
                 state["needs_clarification"] = True
                 state["current_response"] = classify_output.response

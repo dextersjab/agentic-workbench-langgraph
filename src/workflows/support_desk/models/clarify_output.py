@@ -27,3 +27,8 @@ class ClarifyOutput(BaseModel):
         ge=0.0, le=1.0,
         description="Confidence level in the clarity assessment (0.0 to 1.0)"
     )
+    
+    user_requested_escalation: bool = Field(
+        default=False,
+        description="Whether the user requested to escalate or skip clarification"
+    )
