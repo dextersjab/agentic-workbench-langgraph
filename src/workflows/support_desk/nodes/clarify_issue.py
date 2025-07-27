@@ -97,25 +97,9 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         
     except Exception as e:
         logger.error(f"Error in clarify_issue_node: {e}")
-        # Fallback clarifying question
-        fallback_question = ("Could you please provide more specific details about the problem you're experiencing? "
-                           "For example, what device or application is involved, and what exactly isn't working?")
-        
-        # Stream fallback question BEFORE interrupting
-        writer = get_stream_writer()
-        writer({"custom_llm_chunk": fallback_question})
-        
-        state["messages"].append({
-            "role": "assistant",
-            "content": fallback_question
-        })
-        
-        state["clarification_attempts"] = clarification_attempts + 1
-        state["current_response"] = fallback_question
-        
-        # Use interrupt to pause and wait for user input - outside try/catch
-        interrupt("Waiting for user response")
-        return state
+        # Don't mask the real error with fallback messages
+        # Let the error propagate for clean error handling
+        raise
     
     # Use interrupt to pause and wait for user input - outside try/catch
     # Don't pass the question to interrupt() since we already streamed it

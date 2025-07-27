@@ -107,31 +107,8 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
         
     except Exception as e:
         logger.error(f"Error in triage_issue_node: {e}")
-        # Fallback triage
-        error_response = "I'm determining the priority of your issue and routing it to the appropriate team."
-        
-        # Stream the error response
-        writer = get_stream_writer()
-        writer({"custom_llm_chunk": error_response})
-        
-        # Default team based on category
-        fallback_team = "L1"  # Default to L1 support
-        if issue_priority == "P1":
-            fallback_team = "escalation"
-        elif issue_category in ["software", "network"]:
-            fallback_team = "L2"
-        elif issue_category == "access":
-            fallback_team = "specialist"
-            
-        state["support_team"] = fallback_team
-        state["estimated_resolution_time"] = "4-8 hours"  # Default SLA
-        state["escalation_path"] = "L2 -> Specialist -> Manager"
-        state["current_response"] = error_response
-        
-        # Add fallback response to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": error_response
-        })
+        # Don't mask the real error with fallback messages
+        # Let the error propagate for clean error handling
+        raise
     
     return state

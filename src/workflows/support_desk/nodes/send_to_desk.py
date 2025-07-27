@@ -110,28 +110,8 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         
     except Exception as e:
         logger.error(f"Error in send_to_desk_node: {e}")
-        # Fallback ticket creation
-        error_response = f"Your support ticket has been created. A support agent from {support_team} will assist you shortly."
-        
-        # Generate a fallback ticket ID
-        fallback_ticket_id = f"DESK-{int(time.time())}-ERROR"
-        
-        # Stream the error response
-        writer = get_stream_writer()
-        writer({"custom_llm_chunk": error_response})
-        
-        state["ticket_id"] = fallback_ticket_id
-        state["ticket_status"] = "created_with_errors"
-        state["assigned_team"] = support_team
-        state["sla_commitment"] = "4-8 hours"
-        state["next_steps"] = "A support agent will contact you shortly"
-        state["contact_information"] = {"email": "support@company.com", "phone": "(555) 123-4567"}
-        state["current_response"] = error_response
-        
-        # Add fallback response to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": error_response
-        })
+        # Don't mask the real error with fallback messages
+        # Let the error propagate for clean error handling
+        raise
     
     return state

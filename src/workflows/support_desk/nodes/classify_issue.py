@@ -111,20 +111,8 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
         
     except Exception as e:
         logger.error(f"Error in classify_issue_node: {e}")
-        # Fallback: ask for clarification when error occurs
-        error_response = "I'm having trouble understanding your issue. Could you please provide more specific details about what problem you're experiencing?"
-        
-        # Stream the error response
-        writer = get_stream_writer()
-        writer({"custom_llm_chunk": error_response})
-        
-        state["needs_clarification"] = True
-        state["current_response"] = error_response
-        
-        # Add fallback clarification to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": error_response
-        })
+        # Don't mask the real error with fallback messages
+        # Let the error propagate for clean error handling
+        raise
     
     return state

@@ -98,8 +98,8 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    # Use thread_id from request if provided, otherwise create a new one
-    thread_id = req.thread_id or str(uuid.uuid4())
+    # Use thread_id from request if provided, otherwise use default thread for consistency
+    thread_id = req.thread_id or "default-thread"
     logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
     try:
@@ -153,8 +153,8 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    # Use thread_id from request if provided, otherwise create a new one
-    thread_id = req.thread_id or str(uuid.uuid4())
+    # Use thread_id from request if provided, otherwise use default thread for consistency
+    thread_id = req.thread_id or "default-thread"
     logger.info(f"Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
     try:

@@ -120,35 +120,8 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         
     except Exception as e:
         logger.error(f"Error in gather_info_node: {e}")
-        # Fallback information gathering
-        error_response = "I'm gathering the necessary information for your support ticket."
-        
-        # Stream the error response
-        writer = get_stream_writer()
-        writer({"custom_llm_chunk": error_response})
-        
-        # Create minimal ticket information
-        ticket_info = {
-            "category": issue_category,
-            "priority": issue_priority,
-            "support_team": support_team,
-            "summary": "IT Support Request",
-            "description": "Issue requires attention",
-            "affected_systems": [],
-            "user_impact": "To be determined",
-            "reproduction_steps": [],
-            "metadata": {},
-            "timestamp": time.time(),
-            "status": "new"
-        }
-        
-        state["ticket_info"] = ticket_info
-        state["current_response"] = error_response
-        
-        # Add fallback response to conversation history
-        state["messages"].append({
-            "role": "assistant",
-            "content": error_response
-        })
+        # Don't mask the real error with fallback messages
+        # Let the error propagate for clean error handling
+        raise
     
     return state
