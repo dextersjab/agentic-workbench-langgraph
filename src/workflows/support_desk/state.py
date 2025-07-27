@@ -28,6 +28,13 @@ class SupportDeskState(TypedDict):
     support_team: Optional[str]     # L1 support, specialist, escalation
     ticket_info: Dict[str, Any]     # Complete ticket information
     
+    # Information gathering tracking
+    gathering_round: int            # Current round of info gathering
+    max_gathering_rounds: int       # Maximum rounds allowed
+    needs_more_info: bool          # Whether more info is needed
+    info_completeness_confidence: Optional[float]  # Confidence in completeness
+    missing_categories: List[str]   # Categories still missing info
+    
     # User context
     user_context: Dict[str, Any]    # User info (role, department, etc.)
     
@@ -64,6 +71,11 @@ def create_initial_state() -> SupportDeskState:
         issue_priority=None,
         support_team=None,
         ticket_info={},
+        gathering_round=1,
+        max_gathering_rounds=3,
+        needs_more_info=True,
+        info_completeness_confidence=None,
+        missing_categories=[],
         user_context={},
         current_response="",
         custom_llm_chunk=None,

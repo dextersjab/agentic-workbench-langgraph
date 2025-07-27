@@ -20,15 +20,15 @@ logger = logging.getLogger(__name__)
 
 async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Analyze if clarification is needed and ask questions or proceed silently.
+    Analyze if clarification is needed and ask questions.
     
-    Uses tool calls for decision making, only streams actual questions.
+    Uses tool calls for decision making, streams questions when needed.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with clarifying question or silent progression
+        Updated state with clarifying question if needed
     """
     
     state_before = deepcopy(state)
@@ -41,19 +41,19 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     clarification_attempts = state.get("clarification_attempts", 0)
     max_attempts = state.get("max_clarification_attempts", 3)
     
-    # Check if we're resuming after user responded to our clarifying question
-    # If the last message is from the user and we have clarification_attempts > 0,
-    # then we're resuming and should proceed to classify, not ask another question
-    last_message = messages[-1] if messages else None
-    is_resuming_after_user_response = (
-        last_message and 
-        last_message.get("role") == "user" and 
-        clarification_attempts > 0
-    )
-    
-    if is_resuming_after_user_response:
-        logger.info("→ resuming after user response, proceeding to classification")
-        # Don't ask another question, just return state to continue to classify_issue
+    # Check if we're resuming (last message is our clarifying question)
+    last_msg = messages[-1] if messages else None
+    if last_msg and last_msg.get("role") == "assistant" and clarification_attempts > 0:
+        # This is a resume - the interrupt will immediately return the user's response
+        logger.info("→ resuming from interrupt")
+        user_response = interrupt("Waiting for user response to clarification")
+        
+        # Now we can safely increment the attempts
+        new_attempts = clarification_attempts + 1
+        state["clarification_attempts"] = new_attempts
+        logger.info(f"→ received user response, now at {new_attempts} attempts")
+        
+        # Log and return the updated state
         log_node_complete("clarify_issue", state_before, state)
         return state
     
@@ -93,10 +93,11 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         
         # Handle based on decision
         if clarify_output.user_requested_escalation:
-            # User wants to escalate - silently proceed without streaming
-            logger.info("→ user requested escalation, proceeding silently")
-            # Don't update messages or stream anything
-            # Just return to continue workflow
+            # User wants to escalate - proceed without asking more questions
+            logger.info("→ user requested escalation, proceeding to classification")
+            # Don't ask questions, just return
+            log_node_complete("clarify_issue", state_before, state)
+            return state
         elif clarify_output.needs_clarification:
             # Need clarification - stream the question
             logger.info("→ streaming clarifying question")
@@ -114,22 +115,28 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
                 "content": clarify_output.response
             })
             
-            # Update state for next iteration
-            state["clarification_attempts"] = clarification_attempts + 1
+            # Update state with the response
             state["current_response"] = clarify_output.response
             
-            # Log what this node wrote to state
+            # Log what this node wrote to state before interrupt
             log_node_complete("clarify_issue", state_before, state)
             
-            # Use interrupt to pause and wait for user input
-            interrupt("Waiting for user response")
+            # Interrupt and wait for user response
+            # When resumed, this will return the user's input
+            user_response = interrupt("Waiting for user response to clarification")
+            
+            # This code only executes on resume
+            # Now we can safely increment the attempts
+            new_attempts = clarification_attempts + 1
+            state["clarification_attempts"] = new_attempts
+            logger.info(f"→ received user response, incremented to {new_attempts} attempts")
+            
+            return state
         else:
             # Sufficient info - proceed silently without streaming
-            logger.info("→ sufficient information, proceeding silently")
+            logger.info("→ sufficient information, proceeding to classification")
             # Don't stream anything or add to messages
             # Just return to continue workflow
-            
-            # Log what this node wrote to state
             log_node_complete("clarify_issue", state_before, state)
         
     except Exception as e:

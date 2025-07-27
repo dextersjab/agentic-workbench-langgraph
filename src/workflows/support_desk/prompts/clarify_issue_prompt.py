@@ -24,7 +24,7 @@ FIRST, check if the user is requesting to escalate or bypass clarification:
 If escalation is detected:
 - Set user_requested_escalation=True
 - Set needs_clarification=False
-- Set response="I'll proceed with creating your ticket with the information provided."
+- Do NOT set a response - the workflow will continue silently
 
 Otherwise, evaluate if clarification is needed.
 

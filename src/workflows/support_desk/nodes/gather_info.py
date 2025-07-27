@@ -50,6 +50,22 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     if "max_gathering_rounds" not in state:
         state["max_gathering_rounds"] = MAX_GATHERING_ROUNDS
     
+    # Check if we're resuming (last message is our question)
+    last_msg = messages[-1] if messages else None
+    if last_msg and last_msg.get("role") == "assistant":
+        # This is a resume - the interrupt will immediately return the user's response
+        logger.info("→ resuming from interrupt")
+        user_response = interrupt("Waiting for user response to information gathering")
+        
+        # Now we can safely increment the round
+        new_round = gathering_round + 1
+        state["gathering_round"] = new_round
+        logger.info(f"→ received user response, now on round {new_round}")
+        
+        # Log and return the updated state
+        log_node_complete("gather_info", state_before, state)
+        return state
+    
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
     
@@ -94,8 +110,6 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         
         # Update state with the question
         state["current_response"] = response_content
-        new_round = gathering_round + 1
-        state["gathering_round"] = new_round
         
         # Add question to conversation history
         state["messages"].append({
@@ -103,16 +117,23 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
             "content": response_content
         })
         
-        logger.info(f"→ asked question (moving to round {new_round})")
+        logger.info(f"→ asked question (will move to round {gathering_round + 1} on resume)")
         
     except Exception as e:
         logger.error(f"Error in gather_info_node: {e}")
         raise
     
-    # Log what this node wrote to state
+    # Log what this node wrote to state before interrupt
     log_node_complete("gather_info", state_before, state)
     
-    # Use interrupt to pause and wait for user response (outside try-except)
-    interrupt("Waiting for user response to information gathering question")
+    # Interrupt to wait for user response
+    # When resumed, this will return the user's input
+    user_response = interrupt("Waiting for user response to information gathering")
+    
+    # This code only executes on resume
+    # Now we can safely increment the round
+    new_round = gathering_round + 1
+    state["gathering_round"] = new_round
+    logger.info(f"→ received user response, incremented to round {new_round}")
     
     return state

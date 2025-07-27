@@ -12,7 +12,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.types import Interrupt
+from langgraph.types import Interrupt, Command
 
 from .models import (
     ChatCompletionRequest, 
@@ -72,8 +72,9 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                 }
                 await workflow.aupdate_state(config, update_state)
             
-            # Resume from interrupt point with None input
-            async for chunk in workflow.astream(None, config=config, stream_mode="custom"):
+            # Resume from interrupt point with user input
+            user_input = req.messages[-1].content if req.messages else ""
+            async for chunk in workflow.astream(Command(resume=user_input), config=config, stream_mode="custom"):
                 logger.info(f"Received chunk from workflow: {chunk}")
                 
                 # Check for custom LLM chunks to stream back
