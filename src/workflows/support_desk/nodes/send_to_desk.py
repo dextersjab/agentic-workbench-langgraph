@@ -1,21 +1,18 @@
 """
-Send to Desk node for Support Desk workflow - Simple streaming version.
+Send to Desk node for Support Desk workflow - With HTML artifact support.
 
-This node formats the final response with ticket information.
+This node generates a brief summary and creates an HTML artifact for ticket display.
 """
 import logging
-import time
-import random
-import json
 from copy import deepcopy
 from typing import Dict, Any
 
-from ..state import SupportDeskState, update_state_from_output
-from ..models.send_to_desk_output import SendToDeskOutput
+from ..state import SupportDeskState
 from ..prompts.send_to_desk_prompt import FINAL_RESPONSE_PROMPT
 from ..utils.state_logger import log_node_start, log_node_complete
+from ..utils.ticket_generator import generate_ticket_data
+from ..templates.ticket_template import generate_ticket_html
 from src.core.llm_client import client
-from src.core.schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
@@ -23,10 +20,12 @@ logger = logging.getLogger(__name__)
 
 async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Create final ticket and response using regular streaming for user experience.
+    Create final ticket with HTML artifact and brief summary response.
     
-    This node streams the final response naturally while using tool calls
-    for structured ticket data if needed.
+    This node:
+    1. Generates a brief natural language summary
+    2. Creates structured ticket data deterministically
+    3. Streams an HTML artifact for visual ticket display
     
     Args:
         state: Current workflow state
@@ -48,59 +47,78 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     support_team = state.get("support_team", "L1")
     
     try:
-        # Create prompt for final response
+        # Create prompt for brief summary response
         prompt = FINAL_RESPONSE_PROMPT.format(
             issue_category=issue_category,
             issue_priority=issue_priority,
-            support_team=support_team,
-            ticket_info=json.dumps(ticket_info, indent=2),
-            tool_name="send_to_desk"
+            support_team=support_team
         )
         
         # Get stream writer for streaming
         writer = get_stream_writer()
         
-        # Stream callback to emit chunks as they come in
+        # Buffer to collect the summary response
+        summary_buffer = []
+        
+        # Stream callback to emit chunks and collect them
         def stream_callback(chunk: str):
             writer({"custom_llm_chunk": chunk})
+            summary_buffer.append(chunk)
         
-        # Call LLM with regular streaming for user-facing response
-        response = await client.chat_completion(
+        # Call LLM for brief summary only
+        await client.chat_completion(
             messages=[
                 {"role": "system", "content": prompt}
             ],
             model="openai/gpt-4.1",
-            temperature=0.5,
+            temperature=0.7,
             stream_callback=stream_callback,
             use_streaming=True
         )
         
-        # Use the streamed response directly
-        try:
-            response_content = response.get("content", "")
-            
-            # Generate a simple ticket ID
-            ticket_id = f"TK-{random.randint(100000, 999999)}"
-            
-            logger.info(f"→ ticket {ticket_id} created")
-            
-            # Update state with basic ticket information
-            state["ticket_id"] = ticket_id
-            state["ticket_status"] = "submitted"
-            state["assigned_team"] = support_team
-            state["current_response"] = response_content
-            
-            # Add response to conversation history
-            state["messages"].append({
-                "role": "assistant",
-                "content": response_content
-            })
-            
-            logger.info("→ desk submission complete")
-            
-        except Exception as e:
-            logger.error(f"Error processing final response: {e}")
-            raise
+        # Get the complete summary
+        summary_content = "".join(summary_buffer)
+        
+        # Generate deterministic ticket data
+        ticket_data = generate_ticket_data(state)
+        
+        # Generate HTML artifact
+        ticket_html = generate_ticket_html(ticket_data)
+        
+        # Stream a newline separator
+        writer({"custom_llm_chunk": "\n\n"})
+        
+        # Stream the HTML artifact wrapped in code blocks
+        # Open WebUI will recognize this as an HTML artifact
+        writer({"custom_llm_chunk": "```html\n"})
+        writer({"custom_llm_chunk": ticket_html})
+        writer({"custom_llm_chunk": "\n```"})
+        
+        # Update state with ticket information
+        state["ticket_id"] = ticket_data["ticket_id"]
+        state["ticket_status"] = ticket_data["ticket_status"]
+        state["assigned_team"] = ticket_data["assigned_team"]
+        state["sla_commitment"] = ticket_data["sla_commitment"]
+        state["next_steps"] = ticket_data["next_steps"]
+        state["contact_information"] = {
+            "email": ticket_data["support_email"],
+            "phone": ticket_data["support_phone"],
+            "portal": ticket_data["ticket_portal"]
+        }
+        state["estimated_resolution_time"] = ticket_data.get("estimated_resolution")
+        
+        # Store the complete response (summary + HTML in code block)
+        complete_response = f"{summary_content}\n\n```html\n{ticket_html}\n```"
+        state["current_response"] = complete_response
+        
+        # Add response to conversation history
+        state["messages"].append({
+            "role": "assistant",
+            "content": complete_response
+        })
+        
+        logger.info(f"→ ticket {ticket_data['ticket_id']} created with HTML artifact")
+        logger.info("→ desk submission complete")
         
     except Exception as e:
         logger.error(f"Error in send_to_desk_node: {e}")
