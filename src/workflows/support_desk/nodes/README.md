@@ -82,16 +82,19 @@ graph TD
     class A,C context
 ```
 
-Routes the issue to the appropriate support team based on the category and priority.
+Internal routing node that assigns issues to the appropriate support team based on complexity and context. This node operates silently without user-facing output.
 
 **Reads from state:**
 - `issue_category` - Category determined by classification
 - `issue_priority` - Priority level for routing decisions
+- `messages` - Full conversation context for nuanced routing decisions
 
 **Updates state:**
-- `support_team` - Assigned team (L1 support, specialist, escalation)
-- `ticket_info` - Routing information and SLA expectations
-- `current_response` - Routing confirmation for the user
+- `support_team` - Assigned team (L1, L2, specialist, escalation)
+- `estimated_resolution_time` - Expected timeframe based on issue complexity
+- `escalation_path` - Next level if current team cannot resolve
+
+**Note:** This is an internal processing node. No user-facing messages are generated here.
 
 ### [gather_info.py](gather_info.py)
 

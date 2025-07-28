@@ -92,8 +92,7 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
             update_state_from_output(state, triage_output, {
                 'support_team': 'support_team',
                 'estimated_resolution_time': 'estimated_resolution_time',
-                'escalation_path': 'escalation_path',
-                'response': 'current_response'
+                'escalation_path': 'escalation_path'
             })
             
             # DON'T add to conversation history - this is internal routing

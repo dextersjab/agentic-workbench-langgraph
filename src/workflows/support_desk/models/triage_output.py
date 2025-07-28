@@ -2,7 +2,7 @@
 Pydantic model for triage_issue node output.
 """
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, Any
+from typing import Literal
 
 
 class TriageOutput(BaseModel):
@@ -21,13 +21,4 @@ class TriageOutput(BaseModel):
     
     escalation_path: str = Field(
         description="Next escalation level if L1 cannot resolve"
-    )
-    
-    routing_metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional routing information and SLA details"
-    )
-    
-    response: str = Field(
-        description="User-facing message about team assignment and expectations"
     )

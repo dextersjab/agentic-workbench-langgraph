@@ -21,9 +21,9 @@ The Support Desk workflow implements an IT support desk agent that:
 
 1. Clarifies user issues when needed (with conditional loop)
 2. Classifies issues into categories
-3. Triages issues to appropriate support teams
-4. Gathers additional information
-5. Creates support tickets
+3. Triages issues to appropriate support teams (internal routing only)
+4. Gathers additional information through targeted questions
+5. Creates support tickets with complete context
 
 ```mermaid
 graph TD;
@@ -75,9 +75,9 @@ Defines the `SupportDeskState` TypedDict that tracks conversation context, user 
 Contains the implementation of each node in the workflow:
 - `clarify_issue.py`: Analyses user input and asks clarifying questions
 - `classify_issue.py`: Categorises issues into predefined types
-- `triage_issue.py`: Routes issues to appropriate support teams
-- `gather_info.py`: Collects additional information
-- `send_to_desk.py`: Creates tickets and formats responses
+- `triage_issue.py`: Internal routing logic that assigns issues to support teams based on complexity
+- `gather_info.py`: Collects additional information through targeted user questions
+- `send_to_desk.py`: Creates tickets and formats final responses
 
 ### [prompts/](prompts/)
 
