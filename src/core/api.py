@@ -166,8 +166,14 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    # Use thread_id from request if provided, otherwise use default thread for consistency
-    thread_id = req.thread_id or "default-thread"
+    if not req.messages or len(req.messages) <= 1:
+        # New conversation - generate unique thread ID
+        thread_id = f"thread-{uuid.uuid4().hex}"
+        logger.info(f"New conversation detected, generated thread_id: {thread_id}")
+    else:
+        # Continuing conversation - use default for backwards compatibility
+        thread_id = req.thread_id
+    
     logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
     try:
@@ -221,8 +227,18 @@ async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatComp
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    # Use thread_id from request if provided, otherwise use default thread for consistency
-    thread_id = req.thread_id or "default-thread"
+    # Determine thread_id based on conversation context
+    if req.thread_id:
+        # Use explicitly provided thread_id
+        thread_id = req.thread_id
+    elif not req.messages or len(req.messages) <= 1:
+        # New conversation - generate unique thread ID
+        thread_id = f"thread-{uuid.uuid4().hex}"
+        logger.info(f"New conversation detected, generated thread_id: {thread_id}")
+    else:
+        # Continuing conversation - use default for backwards compatibility
+        thread_id = "default-thread"
+    
     logger.info(f"{GREY}Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}{RESET}")
     
     try:
