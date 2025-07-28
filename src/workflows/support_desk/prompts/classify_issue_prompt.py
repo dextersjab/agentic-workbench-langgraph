@@ -6,7 +6,11 @@ These prompts use tool calling to generate structured outputs.
 
 # Classification prompt using tool calling
 CLASSIFICATION_PROMPT = """
-You are an IT support specialist attempting to categorize a user's issue.
+# Objective
+
+You are part of an agentic system for IT Support Desk attempting to categorise a user's issue.
+
+# Context
 
 Conversation History: {conversation_history}
 Clarification Attempts: {clarification_attempts} of {max_clarification_attempts}
@@ -19,16 +23,19 @@ Detect if the user is requesting escalation with phrases like:
 - "connect me to a human"
 - "stop asking questions"
 - "I don't have time for this"
-If detected, classify with available information and set needs_clarification=False.
 
-Otherwise, determine if you have enough information to properly classify the issue. If the user's input is:
+If detected, Force Proceed is True, and you MUST classify the issue based on your best guess with the available information and set needs_clarification=False.
+
+Otherwise, determine if you have enough information to properly classify the issue.
+
+If the user's input is:
 - Too vague (e.g., "hi", "help", "I have a problem")
 - Missing crucial details (no specific device, application, or error described)
 - Unclear about the actual problem
 
-Then set needs_clarification=True and ask a clarifying question in the response.
+Then set `needs_clarification=True` and ask a clarifying question in the response.
 
-If you DO have sufficient information, categorize into one of these categories:
+If you DO have sufficient information, categorise into one of these categories:
 1. Hardware: Physical device issues (laptop, printer, phone, etc.)
 2. Software: Application problems, installation issues, crashes
 3. Access: Login problems, permissions, account issues

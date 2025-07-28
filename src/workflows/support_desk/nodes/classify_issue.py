@@ -1,7 +1,7 @@
 """
 Classify Issue node for Support Desk workflow.
 
-This node categorizes the IT issue into predefined categories.
+This node categorises the IT issue into predefined categories.
 """
 import logging
 from copy import deepcopy
@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Categorize the IT issue using structured outputs.
+    Categorise the IT issue using structured outputs.
     
     This node uses tool calling to generate structured ClassifyOutput responses
-    for reliable issue categorization and priority assignment.
+    for reliable issue categorisation and priority assignment.
     
     Args:
         state: Current workflow state
@@ -108,7 +108,7 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
                 state["issue_category"] = classify_output.category
                 state["issue_priority"] = classify_output.priority
                 state["needs_clarification"] = False
-                state["current_response"] = classify_output.response
+                # state["current_response"] = classify_output.response
                 
                 # DON'T add to conversation history - this is internal routing
                 # The user doesn't need to see "I've classified this as hardware..."
