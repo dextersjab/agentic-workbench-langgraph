@@ -20,15 +20,12 @@ class SupportDeskState(TypedDict):
     
     # Workflow tracking  
     needs_clarification: bool       # Whether more info is needed (set by clarify_check)
-    clarification_question: str     # Question to ask user (set by clarify_check)
     clarification_attempts: int     # Number of questions asked
     max_clarification_attempts: int # Limit on questions
     
     # Issue information (populated during workflow)
     issue_category: Optional[str]   # hardware, software, access, other
     issue_priority: Optional[str]   # high, medium, low
-    support_team: Optional[str]     # L1 support, specialist, escalation
-    ticket_info: Dict[str, Any]     # Complete ticket information
     
     # Information gathering tracking
     gathering_round: int            # Current round of info gathering
@@ -66,13 +63,10 @@ def create_initial_state() -> SupportDeskState:
         messages=[],
         current_user_input="",
         needs_clarification=False,
-        clarification_question="",
         clarification_attempts=0,
         max_clarification_attempts=3,
         issue_category=None,
         issue_priority=None,
-        support_team=None,
-        ticket_info={},
         gathering_round=1,
         max_gathering_rounds=MAX_GATHERING_ROUNDS,
         needs_more_info=True,

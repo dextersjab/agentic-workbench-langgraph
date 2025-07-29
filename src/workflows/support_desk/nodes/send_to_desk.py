@@ -38,20 +38,19 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     state = deepcopy(state)
     
     # Log what this node will read from state
-    log_node_start("send_to_desk", ["ticket_info", "support_team"])
+    log_node_start("send_to_desk", ["issue_category", "issue_priority", "assigned_team"])
     
     # Extract ticket information
-    ticket_info = state.get("ticket_info", {})
-    issue_category = ticket_info.get("category", "other")
-    issue_priority = ticket_info.get("priority", "P2")
-    support_team = state.get("support_team", "L1")
+    issue_category = state.get("issue_category", "other")
+    issue_priority = state.get("issue_priority", "P2")
+    assigned_team = state.get("assigned_team", "L1")
     
     try:
         # Create prompt for brief summary response
         prompt = FINAL_RESPONSE_PROMPT.format(
             issue_category=issue_category,
             issue_priority=issue_priority,
-            support_team=support_team
+            support_team=assigned_team
         )
         
         # Get stream writer for streaming

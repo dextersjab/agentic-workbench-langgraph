@@ -90,7 +90,7 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
             
             # Update state with structured triage information using helper
             update_state_from_output(state, triage_output, {
-                'support_team': 'support_team',
+                'support_team': 'assigned_team',
                 'estimated_resolution_time': 'estimated_resolution_time',
                 'escalation_path': 'escalation_path'
             })

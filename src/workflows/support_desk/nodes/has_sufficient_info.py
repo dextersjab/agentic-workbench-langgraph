@@ -34,13 +34,13 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
     state = deepcopy(state)
     
     # Log what this node will read from state
-    log_node_start("has_sufficient_info", ["messages", "issue_category", "issue_priority", "support_team", "gathering_round"])
+    log_node_start("has_sufficient_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round"])
     
     # Extract relevant information
     messages = state.get("messages", [])
     issue_category = state.get("issue_category", "other")
     issue_priority = state.get("issue_priority", "P2")
-    support_team = state.get("support_team", "L1")
+    assigned_team = state.get("assigned_team", "L1")
     gathering_round = state.get("gathering_round", 1)
     
     # Build conversation history for context
@@ -58,7 +58,7 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
             servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY,
             issue_category=issue_category,
             issue_priority=issue_priority,
-            support_team=support_team,
+            support_team=assigned_team,
             gathering_round=gathering_round,
             conversation_history=conversation_history,
             max_gathering_rounds=MAX_GATHERING_ROUNDS,

@@ -131,13 +131,12 @@ def generate_ticket_data(state: Dict[str, Any]) -> Dict[str, Any]:
         Dictionary with all ticket fields populated
     """
     # Extract info from state
-    ticket_info = state.get("ticket_info", {})
-    category = state.get("issue_category") or ticket_info.get("category", "other")
-    priority = state.get("issue_priority") or ticket_info.get("priority", "P2")
-    team = state.get("support_team", "L1")
+    category = state.get("issue_category", "other")
+    priority = state.get("issue_priority", "P2")
+    team = state.get("assigned_team", "L1")
     
     # Generate ticket ID
-    ticket_id = generate_ticket_id(ticket_info)
+    ticket_id = generate_ticket_id({"category": category, "priority": priority})
     
     # Get SLA and contact info
     sla_text, sla_hours = get_sla_commitment(priority)
@@ -146,9 +145,9 @@ def generate_ticket_data(state: Dict[str, Any]) -> Dict[str, Any]:
     # Calculate estimated resolution
     resolution_time = datetime.now() + timedelta(hours=sla_hours)
     
-    # Get issue summary from ticket info or messages
-    issue_summary = ticket_info.get("description", "")
-    if not issue_summary and state.get("messages"):
+    # Get issue summary from messages
+    issue_summary = ""
+    if state.get("messages"):
         # Use first user message as summary
         for msg in state["messages"]:
             if msg.get("role") == "user":
