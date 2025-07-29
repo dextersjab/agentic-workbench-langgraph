@@ -138,3 +138,6 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# LangGraph pickle files
+*.pckl
