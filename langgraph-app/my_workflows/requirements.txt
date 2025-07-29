@@ -1,0 +1,16 @@
+# Core LangGraph dependencies
+langgraph>=0.3.27
+langchain-core>=0.2.38
+langchain-openai>=0.1.0
+
+# Additional dependencies from original project
+aiohttp>=3.9.0
+httpx>=0.25.0
+pydantic>=2.5.0
+structlog>=23.2.0
+python-dotenv>=1.0.0
+
+# Optional: Add other providers as needed
+# langchain_anthropic
+# tavily-python
+# langchain_community

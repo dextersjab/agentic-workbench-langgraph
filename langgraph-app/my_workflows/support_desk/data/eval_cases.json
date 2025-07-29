@@ -1,0 +1,92 @@
+[
+  {
+    "id": "salesforce_outage_p1",
+    "input": "Sales team can't access Salesforce CRM - getting 'service unavailable' error. This is blocking our quarterly deal closure calls.",
+    "description": "ServiceHub-specific: Salesforce CRM issues auto-elevated to P1 during business hours per policy",
+    "expected_behavior": {
+      "category": "software",
+      "priority": "P1"
+    }
+  },
+  {
+    "id": "finance_system_month_end",
+    "input": "Dynamics 365 Finance is running slowly during month-end processing. Sarah from Finance says journal entries are timing out.",
+    "description": "ServiceHub-specific: Finance system issues during month-end automatically elevated to P2",
+    "expected_behavior": {
+      "category": "software",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "expensive_software_request",
+    "input": "I need Adobe Creative Suite installed for the new marketing campaign. I'm the graphic designer in Marketing.",
+    "description": "ServiceHub-specific: >£100 software requires business case and Marketing Director approval",
+    "expected_behavior": {
+      "category": "software",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "manchester_office_printer",
+    "input": "Manchester office shared printer is jammed and showing error E503. We have client presentations this afternoon.",
+    "description": "ServiceHub-specific: Location-specific procedure, Manchester shared printer pool",
+    "expected_behavior": {
+      "category": "hardware",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "remote_worker_vpn_policy",
+    "input": "I'm working from home and my VPN keeps disconnecting. Can you help me set up a backup internet connection?",
+    "description": "ServiceHub-specific: Remote worker policy excludes home broadband support",
+    "expected_behavior": {
+      "category": "network",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "gdpr_data_request",
+    "input": "An EU employee is requesting all their personal data held in our systems for a GDPR subject access request. How do I process this?",
+    "description": "ServiceHub-specific: GDPR compliance requires Data Protection Officer review and 72-hour SLA",
+    "expected_behavior": {
+      "category": "access",
+      "priority": "P2"
+    }
+  },
+  {
+    "id": "contractor_access_expiry",
+    "input": "Our 6-month contractor John Smith needs extended access to Azure DevOps for another 3 months on the same project.",
+    "description": "ServiceHub-specific: Contractor access limited to 6 months maximum, sponsor required",
+    "expected_behavior": {
+      "category": "access",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "engineering_repo_access",
+    "input": "I've been assigned to Project Phoenix and need access to the GitHub Enterprise repository. My technical lead is Sarah Williams.",
+    "description": "ServiceHub-specific: Engineering repo access tied to project assignments, technical lead approval",
+    "expected_behavior": {
+      "category": "access",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "password_reset_security_protocol",
+    "input": "I forgot my password and need a reset. My employee ID is SH001234 and I work in the Edinburgh office.",
+    "description": "ServiceHub-specific: Password reset requires employee ID + manager confirmation + security questions",
+    "expected_behavior": {
+      "category": "access",
+      "priority": "P3"
+    }
+  },
+  {
+    "id": "emergency_weekend_access",
+    "input": "It's Saturday evening and I need urgent access to Salesforce for a critical deal that's closing Monday morning.",
+    "description": "ServiceHub-specific: Emergency access requires on-call manager approval, 24-hour maximum",
+    "expected_behavior": {
+      "category": "access",
+      "priority": "P1"
+    }
+  }
+]
