@@ -114,13 +114,10 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             # Resume from interrupt point with user input
             user_input = req.messages[-1].content if req.messages else ""
             async for chunk in workflow.astream(Command(resume=user_input), config=config, stream_mode="custom"):
-                logger.info(f"Received chunk from workflow: {chunk}")
-                
                 # Check for custom LLM chunks to stream back
                 if "custom_llm_chunk" in chunk:
                     text = chunk.get("custom_llm_chunk")
                     if text:
-                        logger.info(f"Yielding text: {text}")
                         yield text
                 
                 # Handle LangGraph interrupt for human-in-the-loop
@@ -141,13 +138,10 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             
             # Start new workflow with initial state
             async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-                logger.info(f"Received chunk from workflow: {chunk}")
-                
                 # Check for custom LLM chunks to stream back
                 if "custom_llm_chunk" in chunk:
                     text = chunk.get("custom_llm_chunk")
                     if text:
-                        logger.info(f"Yielding text: {text}")
                         yield text
                 
                 # Handle LangGraph interrupt for human-in-the-loop
@@ -169,13 +163,10 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
         
         # Start new workflow with initial state
         async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-            logger.info(f"Received chunk from workflow: {chunk}")
-            
             # Check for custom LLM chunks to stream back
             if "custom_llm_chunk" in chunk:
                 text = chunk.get("custom_llm_chunk")
                 if text:
-                    logger.info(f"Yielding text: {text}")
                     yield text
             
             # Handle LangGraph interrupt for human-in-the-loop
@@ -213,8 +204,6 @@ async def _sse_generator(req: ChatCompletionRequest, request: Request) -> AsyncG
         
         first_chunk = True
         async for text in _support_desk_stream(req, workflow, thread_id):
-            logger.info(f"Received text from workflow: {text}")
-            
             # Create SSE chunk
             sse_chunk = create_sse_chunk(
                 completion_id=completion_id,
@@ -226,7 +215,6 @@ async def _sse_generator(req: ChatCompletionRequest, request: Request) -> AsyncG
             )
             
             first_chunk = False
-            logger.info(f"Sending SSE chunk")
             yield sse_chunk
         
         # Send final chunk if the graph hasn't been interrupted
