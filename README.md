@@ -47,9 +47,13 @@ agentic-workflow-workbench/
    cp .env.example .env
    ```
 
-2. **Add your OpenAI API key** to `.env`:
+2. **Configure API keys** in `.env`:
    ```bash
+   # Required for basic functionality
    OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Required for support-desk workflow
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
 
 3. **Start both services**:
@@ -173,6 +177,10 @@ Backend logs are available in `backend/logs/` directory and include:
 1. **Backend fails to start**: Check your `OPENAI_API_KEY` in `.env`
 2. **Frontend can't connect**: Verify backend is running on port 8000
 3. **Workflows not appearing**: Check backend logs for model registration errors
+4. **"Unknown workflow: support-desk" error**: 
+   - Ensure `OPENROUTER_API_KEY` is set in your `.env` file
+   - The `.env` file must be in the project root directory
+   - Restart containers after updating environment variables: `docker-compose restart`
 
 ### Health Check Commands
 
