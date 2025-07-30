@@ -3,7 +3,7 @@ Main entry point for the agentic workflows API.
 """
 import dotenv
 import logging
-from langchain.globals import set_debug, set_verbose
+from langchain_core.globals import set_debug, set_verbose
 
 # Import logging configuration (sets up file and console logging)
 from src.core import logging_config

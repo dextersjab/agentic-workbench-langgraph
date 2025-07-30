@@ -11,7 +11,7 @@ import logging
 from src.workflows.support_desk.utils.state_logger import GREY, RESET
 from typing import AsyncGenerator, Optional
 
-from fastapi import FastAPI, APIRouter, HTTPException, status
+from fastapi import FastAPI, APIRouter, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
@@ -53,6 +53,42 @@ app.add_middleware(
 
 # Create v1 router
 v1_router = APIRouter(prefix="/v1")
+
+
+def _extract_chat_id_from_headers(request: Request) -> Optional[str]:
+    """Extract chat ID from OpenWebUI headers for thread persistence."""
+    # OpenWebUI may send chat ID in various header formats
+    possible_headers = [
+        "x-chat-id",
+        "chat-id", 
+        "x-conversation-id",
+        "conversation-id"
+    ]
+    
+    for header in possible_headers:
+        chat_id = request.headers.get(header)
+        if chat_id:
+            logger.info(f"Found chat ID '{chat_id}' in header '{header}'")
+            return chat_id
+    
+    return None
+
+
+def _determine_thread_id(req: ChatCompletionRequest, request: Request) -> str:
+    """Determine the thread ID for conversation state persistence."""
+    # Priority 1: Chat ID from OpenWebUI headers
+    chat_id = _extract_chat_id_from_headers(request)
+    if chat_id:
+        return f"chat-{chat_id}"
+    
+    # Priority 2: Explicit thread_id in request body
+    if req.thread_id:
+        return req.thread_id
+    
+    # Priority 3: Generate new thread ID (always create unique ID)
+    thread_id = f"thread-{uuid.uuid4().hex}"
+    logger.info(f"Generated new thread_id: {thread_id}")
+    return thread_id
 
 
 async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: str) -> AsyncGenerator[str, None]:
@@ -161,18 +197,13 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
         yield f"Error processing request: {str(e)}"
 
 
-async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None]:
+async def _sse_generator(req: ChatCompletionRequest, request: Request) -> AsyncGenerator[str, None]:
     """Generate SSE messages for streaming chat completion, managing conversation state."""
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    if not req.messages or len(req.messages) <= 1:
-        # New conversation - generate unique thread ID
-        thread_id = f"thread-{uuid.uuid4().hex}"
-        logger.info(f"New conversation detected, generated thread_id: {thread_id}")
-    else:
-        # Continuing conversation - use default for backwards compatibility
-        thread_id = req.thread_id
+    # Use the new thread ID determination logic
+    thread_id = _determine_thread_id(req, request)
     
     logger.info(f"Starting chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}")
     
@@ -222,22 +253,13 @@ async def _sse_generator(req: ChatCompletionRequest) -> AsyncGenerator[str, None
         yield create_done_chunk()
 
 
-async def _create_non_streaming_response(req: ChatCompletionRequest) -> ChatCompletionResponse:
+async def _create_non_streaming_response(req: ChatCompletionRequest, request: Request) -> ChatCompletionResponse:
     """Create a non-streaming chat completion response, managing conversation state."""
     completion_id = f"chatcmpl-{uuid.uuid4().hex}"
     created = int(time.time())
     
-    # Determine thread_id based on conversation context
-    if req.thread_id:
-        # Use explicitly provided thread_id
-        thread_id = req.thread_id
-    elif not req.messages or len(req.messages) <= 1:
-        # New conversation - generate unique thread ID
-        thread_id = f"thread-{uuid.uuid4().hex}"
-        logger.info(f"New conversation detected, generated thread_id: {thread_id}")
-    else:
-        # Continuing conversation - use default for backwards compatibility
-        thread_id = "default-thread"
+    # Use the new thread ID determination logic
+    thread_id = _determine_thread_id(req, request)
     
     logger.info(f"{GREY}Creating non-streaming chat completion - ID: {completion_id}, Model: {req.model}, Thread ID: {thread_id}{RESET}")
     
@@ -358,15 +380,15 @@ async def models_options():
     return {"message": "OK"}
 
 @v1_router.post("/chat/completions")
-async def chat_completions(request: ChatCompletionRequest):
+async def chat_completions(chat_request: ChatCompletionRequest, request: Request):
     """Handle OpenAI-compatible chat completion requests."""
-    logger.info(f"{GREY}Chat completion request - request: {request}{RESET}")
-    logger.info(f"{GREY}Chat completion request - model: {request.model}, stream: {request.stream}{RESET}")
+    logger.info(f"{GREY}Chat completion request - chat_request: {chat_request}{RESET}")
+    logger.info(f"{GREY}Chat completion request - model: {chat_request.model}, stream: {chat_request.stream}{RESET}")
     
-    if request.stream:
+    if chat_request.stream:
         logger.info(f"{GREY}Starting streaming response{RESET}")
         return StreamingResponse(
-            _sse_generator(request),
+            _sse_generator(chat_request, request),
             media_type="text/event-stream",
             headers={
                 "Cache-Control": "no-cache",
@@ -376,7 +398,7 @@ async def chat_completions(request: ChatCompletionRequest):
         )
     else:
         logger.info(f"{GREY}Starting non-streaming response{RESET}")
-        return await _create_non_streaming_response(request)
+        return await _create_non_streaming_response(chat_request, request)
 
 
 # API information endpoint
