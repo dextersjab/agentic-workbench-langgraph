@@ -29,6 +29,8 @@ from .models import (
 from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
 from ..workflows.registry import WorkflowRegistry
 from ..workflows.support_desk.state import create_initial_state
+from ..api.graph_state import router as graph_state_router
+from ..workflows.base import track_node_from_stream
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -113,16 +115,33 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             
             # Resume from interrupt point with user input
             user_input = req.messages[-1].content if req.messages else ""
-            async for chunk in workflow.astream(Command(resume=user_input), config=config, stream_mode="custom"):
+            async for chunk in workflow.astream(Command(resume=user_input), config=config, stream_mode=["custom", "updates"]):
                 # Check for custom LLM chunks to stream back
                 if "custom_llm_chunk" in chunk:
                     text = chunk.get("custom_llm_chunk")
                     if text:
                         yield text
                 
-                # Handle LangGraph interrupt for human-in-the-loop
-                if "__interrupt__" in chunk:
-                    interrupts = chunk.get("__interrupt__", [])
+                # Handle node execution updates (new tracking capability)
+                for key, value in chunk.items():
+                    if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                        # Track node execution automatically from stream (non-blocking)
+                        try:
+                            await track_node_from_stream(key, value, config)
+                        except Exception as track_error:
+                            logger.error(f"Stream tracking failed for {key}: {track_error}")
+                
+                # Handle LangGraph interrupt for human-in-the-loop (resume section)
+                interrupt_data = None
+                if isinstance(chunk, tuple) and len(chunk) == 2:
+                    _, stream_data = chunk
+                    if isinstance(stream_data, dict):
+                        interrupt_data = stream_data.get("__interrupt__")
+                elif isinstance(chunk, dict):
+                    interrupt_data = chunk.get("__interrupt__")
+                
+                if interrupt_data:
+                    interrupts = interrupt_data
                     if interrupts:
                         # For simplicity, handle the first interrupt
                         interrupt_value = interrupts[0].value
@@ -137,16 +156,59 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                 state["messages"] = [msg.model_dump() for msg in req.messages]
             
             # Start new workflow with initial state
-            async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-                # Check for custom LLM chunks to stream back
-                if "custom_llm_chunk" in chunk:
-                    text = chunk.get("custom_llm_chunk")
-                    if text:
-                        yield text
+            async for chunk in workflow.astream(state, config=config, stream_mode=["custom", "updates"]):
+                # Handle both tuple format (stream_type, data) and direct dictionary format
+                if isinstance(chunk, tuple) and len(chunk) == 2:
+                    stream_type, stream_data = chunk
+                    logger.info(f"Stream chunk received: {stream_type} -> {list(stream_data.keys()) if isinstance(stream_data, dict) else type(stream_data)}")
+                    
+                    if stream_type == "custom":
+                        # Handle custom LLM chunks for user-facing streaming
+                        if isinstance(stream_data, dict) and "custom_llm_chunk" in stream_data:
+                            text = stream_data.get("custom_llm_chunk")
+                            if text:
+                                yield text
+                    
+                    elif stream_type == "updates":
+                        # Handle node execution updates for tracking
+                        if isinstance(stream_data, dict):
+                            for node_name, node_updates in stream_data.items():
+                                if node_updates is not None:
+                                    logger.info(f"Node execution update - {node_name}: {type(node_updates)}")
+                                    try:
+                                        await track_node_from_stream(node_name, node_updates, config)
+                                    except Exception as track_error:
+                                        logger.error(f"Stream tracking failed for {node_name}: {track_error}")
                 
-                # Handle LangGraph interrupt for human-in-the-loop
-                if "__interrupt__" in chunk:
-                    interrupts = chunk.get("__interrupt__", [])
+                elif isinstance(chunk, dict):
+                    # Fallback for direct dictionary format (backwards compatibility)
+                    logger.info(f"Direct chunk received: {list(chunk.keys())}")
+                    
+                    # Check for custom LLM chunks to stream back
+                    if "custom_llm_chunk" in chunk:
+                        text = chunk.get("custom_llm_chunk")
+                        if text:
+                            yield text
+                    
+                    # Handle node execution updates
+                    for key, value in chunk.items():
+                        if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                            try:
+                                await track_node_from_stream(key, value, config)
+                            except Exception as track_error:
+                                logger.error(f"Stream tracking failed for {key}: {track_error}")
+                
+                # Handle LangGraph interrupts (check both formats)
+                interrupt_data = None
+                if isinstance(chunk, tuple) and len(chunk) == 2:
+                    _, stream_data = chunk
+                    if isinstance(stream_data, dict):
+                        interrupt_data = stream_data.get("__interrupt__")
+                elif isinstance(chunk, dict):
+                    interrupt_data = chunk.get("__interrupt__")
+                
+                if interrupt_data:
+                    interrupts = interrupt_data
                     if interrupts:
                         # For simplicity, handle the first interrupt
                         interrupt_value = interrupts[0].value
@@ -162,12 +224,21 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             state["messages"] = [msg.model_dump() for msg in req.messages]
         
         # Start new workflow with initial state
-        async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
+        async for chunk in workflow.astream(state, config=config, stream_mode=["custom", "updates"]):
             # Check for custom LLM chunks to stream back
             if "custom_llm_chunk" in chunk:
                 text = chunk.get("custom_llm_chunk")
                 if text:
                     yield text
+            
+            # Handle node execution updates (new tracking capability)
+            for key, value in chunk.items():
+                if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                    # Track node execution automatically from stream (non-blocking)
+                    try:
+                        await track_node_from_stream(key, value, config)
+                    except Exception as track_error:
+                        logger.error(f"Stream tracking failed for {key}: {track_error}")
             
             # Handle LangGraph interrupt for human-in-the-loop
             if "__interrupt__" in chunk:
@@ -181,11 +252,6 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                         yield interrupt_value
                         # Stop streaming after an interrupt
                         return
-
-    except Exception as e:
-        logger.error(f"Error in workflow stream for thread {thread_id}: {e}")
-        logger.error(f"Stack trace: {traceback.format_exc()}")
-        yield f"Error processing request: {str(e)}"
 
 
 async def _sse_generator(req: ChatCompletionRequest, request: Request) -> AsyncGenerator[str, None]:
@@ -273,15 +339,50 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
                 # Resume from interrupt point with None input
                 full_response = ""
                 final_state = None
-                async for chunk in workflow.astream(None, config=config, stream_mode="custom"):
-                    if "custom_llm_chunk" in chunk:
-                        text = chunk.get("custom_llm_chunk")
-                        if text:
-                            full_response += text
+                async for chunk in workflow.astream(None, config=config, stream_mode=["custom", "updates"]):
+                    # Handle both tuple format (stream_type, data) and direct dictionary format
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        stream_type, stream_data = chunk
+                        if stream_type == "custom" and isinstance(stream_data, dict):
+                            if "custom_llm_chunk" in stream_data:
+                                text = stream_data.get("custom_llm_chunk")
+                                if text:
+                                    full_response += text
+                        elif stream_type == "updates" and isinstance(stream_data, dict):
+                            # Handle node execution updates for tracking
+                            for node_name, node_updates in stream_data.items():
+                                if node_updates is not None:
+                                    try:
+                                        await track_node_from_stream(node_name, node_updates, config)
+                                    except Exception as track_error:
+                                        logger.error(f"Stream tracking failed for {node_name}: {track_error}")
+                    elif isinstance(chunk, dict):
+                        # Fallback for direct dictionary format
+                        if "custom_llm_chunk" in chunk:
+                            text = chunk.get("custom_llm_chunk")
+                            if text:
+                                full_response += text
+                        
+                        # Handle node execution updates (background tracking)
+                        for key, value in chunk.items():
+                            if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                                # Track node execution automatically from stream (non-blocking)
+                                try:
+                                    await track_node_from_stream(key, value, config)
+                                except Exception as track_error:
+                                    logger.error(f"Stream tracking failed for {key}: {track_error}")
                     
                     # Update final state as we go
-                    if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
-                        final_state = chunk
+                    state_data = None
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        _, stream_data = chunk
+                        if isinstance(stream_data, dict):
+                            state_data = stream_data
+                    elif isinstance(chunk, dict):
+                        state_data = chunk
+                    
+                    if state_data and any(key for key in state_data.keys() if not key.startswith('__')):
+                        final_state = state_data
             else:
                 # New conversation - create initial state and start fresh
                 logger.info(f"Starting new conversation for thread {thread_id}")
@@ -293,15 +394,50 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
                 # Start new workflow with initial state
                 full_response = ""
                 final_state = None
-                async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-                    if "custom_llm_chunk" in chunk:
-                        text = chunk.get("custom_llm_chunk")
-                        if text:
-                            full_response += text
+                async for chunk in workflow.astream(state, config=config, stream_mode=["custom", "updates"]):
+                    # Handle both tuple format (stream_type, data) and direct dictionary format
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        stream_type, stream_data = chunk
+                        if stream_type == "custom" and isinstance(stream_data, dict):
+                            if "custom_llm_chunk" in stream_data:
+                                text = stream_data.get("custom_llm_chunk")
+                                if text:
+                                    full_response += text
+                        elif stream_type == "updates" and isinstance(stream_data, dict):
+                            # Handle node execution updates for tracking
+                            for node_name, node_updates in stream_data.items():
+                                if node_updates is not None:
+                                    try:
+                                        await track_node_from_stream(node_name, node_updates, config)
+                                    except Exception as track_error:
+                                        logger.error(f"Stream tracking failed for {node_name}: {track_error}")
+                    elif isinstance(chunk, dict):
+                        # Fallback for direct dictionary format
+                        if "custom_llm_chunk" in chunk:
+                            text = chunk.get("custom_llm_chunk")
+                            if text:
+                                full_response += text
+                        
+                        # Handle node execution updates (background tracking)
+                        for key, value in chunk.items():
+                            if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                                # Track node execution automatically from stream (non-blocking)
+                                try:
+                                    await track_node_from_stream(key, value, config)
+                                except Exception as track_error:
+                                    logger.error(f"Stream tracking failed for {key}: {track_error}")
                     
                     # Update final state as we go
-                    if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
-                        final_state = chunk
+                    state_data = None
+                    if isinstance(chunk, tuple) and len(chunk) == 2:
+                        _, stream_data = chunk
+                        if isinstance(stream_data, dict):
+                            state_data = stream_data
+                    elif isinstance(chunk, dict):
+                        state_data = chunk
+                    
+                    if state_data and any(key for key in state_data.keys() if not key.startswith('__')):
+                        final_state = state_data
                         
         except Exception as e:
             # Fallback to new conversation if state retrieval fails
@@ -314,15 +450,50 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
             # Start new workflow with initial state
             full_response = ""
             final_state = None
-            async for chunk in workflow.astream(state, config=config, stream_mode="custom"):
-                if "custom_llm_chunk" in chunk:
-                    text = chunk.get("custom_llm_chunk")
-                    if text:
-                        full_response += text
+            async for chunk in workflow.astream(state, config=config, stream_mode=["custom", "updates"]):
+                # Handle both tuple format (stream_type, data) and direct dictionary format
+                if isinstance(chunk, tuple) and len(chunk) == 2:
+                    stream_type, stream_data = chunk
+                    if stream_type == "custom" and isinstance(stream_data, dict):
+                        if "custom_llm_chunk" in stream_data:
+                            text = stream_data.get("custom_llm_chunk")
+                            if text:
+                                full_response += text
+                    elif stream_type == "updates" and isinstance(stream_data, dict):
+                        # Handle node execution updates for tracking
+                        for node_name, node_updates in stream_data.items():
+                            if node_updates is not None:
+                                try:
+                                    await track_node_from_stream(node_name, node_updates, config)
+                                except Exception as track_error:
+                                    logger.error(f"Stream tracking failed for {node_name}: {track_error}")
+                elif isinstance(chunk, dict):
+                    # Fallback for direct dictionary format
+                    if "custom_llm_chunk" in chunk:
+                        text = chunk.get("custom_llm_chunk")
+                        if text:
+                            full_response += text
+                    
+                    # Handle node execution updates (background tracking)
+                    for key, value in chunk.items():
+                        if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                            # Track node execution automatically from stream (non-blocking)
+                            try:
+                                await track_node_from_stream(key, value, config)
+                            except Exception as track_error:
+                                logger.error(f"Stream tracking failed for {key}: {track_error}")
                 
                 # Update final state as we go
-                if hasattr(chunk, 'get') and any(key for key in chunk.keys() if not key.startswith('__')):
-                    final_state = chunk
+                state_data = None
+                if isinstance(chunk, tuple) and len(chunk) == 2:
+                    _, stream_data = chunk
+                    if isinstance(stream_data, dict):
+                        state_data = stream_data
+                elif isinstance(chunk, dict):
+                    state_data = chunk
+                
+                if state_data and any(key for key in state_data.keys() if not key.startswith('__')):
+                    final_state = state_data
 
         return ChatCompletionResponse(
             id=completion_id,
@@ -417,3 +588,6 @@ async def root():
 
 # Include the v1 router in the main app
 app.include_router(v1_router)
+
+# Include the graph state router
+app.include_router(graph_state_router)

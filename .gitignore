@@ -141,3 +141,6 @@ logs/
 
 # LangGraph pickle files
 *.pckl
+
+# Local only
+local/

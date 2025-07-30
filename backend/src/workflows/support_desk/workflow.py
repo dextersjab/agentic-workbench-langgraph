@@ -17,6 +17,7 @@ from .nodes.triage_issue import triage_issue_node
 from .nodes.has_sufficient_info import has_sufficient_info_node, has_sufficient_info
 from .nodes.gather_info import gather_info_node
 from .nodes.send_to_desk import send_to_desk_node
+from ..base import initialize_workflow_tracking, extract_graph_structure
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,9 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     # Compile the workflow with the provided checkpointer
     compiled_workflow = workflow.compile(checkpointer=checkpointer)
+    
+    # Initialize workflow tracking for graph state management
+    initialize_workflow_tracking(compiled_workflow, "support_desk")
     
     # Generate mermaid diagram if requested
     if draw_diagram:
