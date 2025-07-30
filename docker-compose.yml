@@ -11,6 +11,8 @@ services:
       - PYTHONPATH=/app
     volumes:
       - ./backend/logs:/app/logs
+      - ./backend/src:/app/src
+      - ./backend/main.py:/app/main.py
     networks:
       - agentic-network
     healthcheck:

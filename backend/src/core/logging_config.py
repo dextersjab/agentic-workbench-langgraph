@@ -39,6 +39,10 @@ logging.basicConfig(
     force=True
 )
 
+# Suppress noisy loggers
+logging.getLogger("watchfiles.main").setLevel(logging.WARNING)
+logging.getLogger("watchfiles").setLevel(logging.WARNING)
+
 # Log startup message
 logger = logging.getLogger(__name__)
 logger.info(f"Logging initialized - writing to file: {log_filename}")
