@@ -58,20 +58,11 @@ v1_router = APIRouter(prefix="/v1")
 
 
 def _extract_chat_id_from_headers(request: Request) -> Optional[str]:
-    """Extract chat ID from OpenWebUI headers for thread persistence."""
-    # OpenWebUI may send chat ID in various header formats
-    possible_headers = [
-        "x-chat-id",
-        "chat-id", 
-        "x-conversation-id",
-        "conversation-id"
-    ]
-    
-    for header in possible_headers:
-        chat_id = request.headers.get(header)
-        if chat_id:
-            logger.info(f"Found chat ID '{chat_id}' in header '{header}'")
-            return chat_id
+    """Extract chat ID from Open WebUI standard header for thread persistence."""
+    chat_id = request.headers.get("X-OpenWebUI-Chat-Id")
+    if chat_id:
+        logger.info(f"Found chat ID '{chat_id}' in header 'X-OpenWebUI-Chat-Id'")
+        return chat_id
     
     return None
 
@@ -160,7 +151,7 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                 # Handle both tuple format (stream_type, data) and direct dictionary format
                 if isinstance(chunk, tuple) and len(chunk) == 2:
                     stream_type, stream_data = chunk
-                    logger.info(f"Stream chunk received: {stream_type} -> {list(stream_data.keys()) if isinstance(stream_data, dict) else type(stream_data)}")
+                    logger.debug(f"Stream chunk received: {stream_type} -> {list(stream_data.keys()) if isinstance(stream_data, dict) else type(stream_data)}")
                     
                     if stream_type == "custom":
                         # Handle custom LLM chunks for user-facing streaming
@@ -541,6 +532,7 @@ async def models_options():
 @v1_router.post("/chat/completions")
 async def chat_completions(chat_request: ChatCompletionRequest, request: Request):
     """Handle OpenAI-compatible chat completion requests."""
+    logger.info(f"{GREY}Chat completion request - headers: {dict(request.headers)}{RESET}")
     logger.info(f"{GREY}Chat completion request - chat_request: {chat_request}{RESET}")
     logger.info(f"{GREY}Chat completion request - model: {chat_request.model}, stream: {chat_request.stream}{RESET}")
     
