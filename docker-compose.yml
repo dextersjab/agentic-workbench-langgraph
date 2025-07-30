@@ -40,6 +40,7 @@ services:
       - DEFAULT_MODELS=support-desk
     volumes:
       - open-webui-data:/app/backend/data
+      - ./frontend/workflow-monitor.js:/workflow-monitor/workflow-monitor.js:ro
     depends_on:
       backend:
         condition: service_healthy

@@ -108,19 +108,20 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             user_input = req.messages[-1].content if req.messages else ""
             async for chunk in workflow.astream(Command(resume=user_input), config=config, stream_mode=["custom", "updates"]):
                 # Check for custom LLM chunks to stream back
-                if "custom_llm_chunk" in chunk:
+                if isinstance(chunk, dict) and "custom_llm_chunk" in chunk:
                     text = chunk.get("custom_llm_chunk")
                     if text:
                         yield text
                 
                 # Handle node execution updates (new tracking capability)
-                for key, value in chunk.items():
-                    if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
-                        # Track node execution automatically from stream (non-blocking)
-                        try:
-                            await track_node_from_stream(key, value, config)
-                        except Exception as track_error:
-                            logger.error(f"Stream tracking failed for {key}: {track_error}")
+                if isinstance(chunk, dict):
+                    for key, value in chunk.items():
+                        if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                            # Track node execution automatically from stream (non-blocking)
+                            try:
+                                await track_node_from_stream(key, value, config)
+                            except Exception as track_error:
+                                logger.error(f"Stream tracking failed for {key}: {track_error}")
                 
                 # Handle LangGraph interrupt for human-in-the-loop (resume section)
                 interrupt_data = None
@@ -217,22 +218,23 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
         # Start new workflow with initial state
         async for chunk in workflow.astream(state, config=config, stream_mode=["custom", "updates"]):
             # Check for custom LLM chunks to stream back
-            if "custom_llm_chunk" in chunk:
+            if isinstance(chunk, dict) and "custom_llm_chunk" in chunk:
                 text = chunk.get("custom_llm_chunk")
                 if text:
                     yield text
             
             # Handle node execution updates (new tracking capability)
-            for key, value in chunk.items():
-                if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
-                    # Track node execution automatically from stream (non-blocking)
-                    try:
-                        await track_node_from_stream(key, value, config)
-                    except Exception as track_error:
-                        logger.error(f"Stream tracking failed for {key}: {track_error}")
+            if isinstance(chunk, dict):
+                for key, value in chunk.items():
+                    if key not in ["custom_llm_chunk", "__interrupt__"] and value is not None:
+                        # Track node execution automatically from stream (non-blocking)
+                        try:
+                            await track_node_from_stream(key, value, config)
+                        except Exception as track_error:
+                            logger.error(f"Stream tracking failed for {key}: {track_error}")
             
             # Handle LangGraph interrupt for human-in-the-loop
-            if "__interrupt__" in chunk:
+            if isinstance(chunk, dict) and "__interrupt__" in chunk:
                 interrupts = chunk.get("__interrupt__", [])
                 if interrupts:
                     # For simplicity, handle the first interrupt

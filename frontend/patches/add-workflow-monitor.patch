@@ -1,0 +1,17 @@
+--- a/src/routes/(app)/c/[id]/+page.svelte
++++ b/src/routes/(app)/c/[id]/+page.svelte
+@@ -1,5 +1,6 @@
+ <script>
+ 	import { page } from '$app/stores';
++	import WorkflowMonitor from '$lib/components/WorkflowMonitor.svelte';
+ 	import { WEBUI_BASE_URL } from '$lib/constants';
+ 	import { user } from '$lib/stores';
+ 	import { onMount, getContext } from 'svelte';
+@@ -50,3 +51,7 @@
+ 		/>
+ 	{/if}
+ {/if}
++
++{#if $page.params.id}
++	<WorkflowMonitor chatId={$page.params.id} />
++{/if}
