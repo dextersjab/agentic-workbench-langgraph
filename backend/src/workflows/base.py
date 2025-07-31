@@ -138,7 +138,7 @@ def extract_thread_id(state: Dict[str, Any]) -> Optional[str]:
 
 async def track_node_from_stream(
     node_name: str,
-    node_updates: Dict[str, Any],
+    node_updates: Any,
     config: Dict[str, Any]
 ) -> None:
     """
@@ -146,7 +146,7 @@ async def track_node_from_stream(
     
     Args:
         node_name: Name of the executing node
-        node_updates: State updates from the node execution
+        node_updates: State updates from the node execution (dict, tuple, or other)
         config: Workflow configuration containing thread_id
     """
     try:
@@ -156,13 +156,39 @@ async def track_node_from_stream(
             logger.warning(f"No thread ID found in config for node {node_name}, skipping stream tracking")
             return
         
+        # Handle different types of node_updates
+        if isinstance(node_updates, dict):
+            # Standard dictionary format
+            updates_dict = node_updates
+        elif isinstance(node_updates, tuple):
+            # Handle tuple format - commonly used for interrupts and special data
+            logger.debug(f"Stream tracking received tuple for {node_name}: {type(node_updates)}")
+            # For tuples, we don't have standard state updates to track
+            # Skip tracking for special cases like interrupts
+            return
+        elif hasattr(node_updates, '__dict__'):
+            # Handle objects with attributes
+            updates_dict = node_updates.__dict__
+        else:
+            # Handle other types by converting to string representation
+            logger.debug(f"Stream tracking received {type(node_updates)} for {node_name}")
+            updates_dict = {"raw_data": str(node_updates)}
+        
+        # Skip tracking if node_name is a special control key
+        if node_name.startswith("__"):
+            logger.debug(f"Skipping tracking for control key: {node_name}")
+            return
+        
         # Filter relevant fields based on node type
-        relevant_data = extract_relevant_fields_for_node(node_name, node_updates)
+        relevant_data = extract_relevant_fields_for_node(node_name, updates_dict)
         
-        # Update graph state
-        update_graph_state(thread_id, node_name, relevant_data)
-        
-        logger.info(f"Stream tracking: {node_name} -> {relevant_data}")
+        # Only update if we have relevant data
+        if relevant_data:
+            # Update graph state
+            update_graph_state(thread_id, node_name, relevant_data)
+            logger.info(f"Stream tracking: {node_name} -> {relevant_data}")
+        else:
+            logger.debug(f"No relevant data found for {node_name}, skipping graph state update")
         
     except Exception as e:
         # Log error but don't fail the workflow

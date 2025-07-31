@@ -12,6 +12,7 @@
   let isDragging = false;
   let dragStart = { x: 0, y: 0 };
   let pollInterval = null;
+  let eventSource = null;
   let currentChatId = null;
   let graphState = null;
 
@@ -185,21 +186,78 @@
     return match ? match[1] : null;
   }
 
-  async function fetchGraphState() {
+  function connectSSE() {
     if (!currentChatId) return;
     
+    // Close existing connection
+    if (eventSource) {
+      eventSource.close();
+    }
+    
     try {
-      const response = await fetch(`${API_BASE}/v1/graph-state/chat-${currentChatId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch graph state: ${response.statusText}`);
-      }
+      const sseUrl = `${API_BASE}/v1/graph-state/stream/chat-${currentChatId}`;
+      console.log('Connecting to SSE:', sseUrl);
       
-      graphState = await response.json();
-      renderGraph();
-      updateBadge();
+      eventSource = new EventSource(sseUrl);
+      
+      eventSource.onopen = function(event) {
+        console.log('SSE connection opened for chat:', currentChatId);
+      };
+      
+      eventSource.onmessage = function(event) {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.status === 'heartbeat') {
+            // Just a heartbeat, keep connection alive
+            return;
+          }
+          
+          if (data.status === 'waiting') {
+            // No workflow state yet
+            graphState = null;
+            renderGraph();
+            updateBadge();
+            return;
+          }
+          
+          if (data.status === 'error') {
+            console.error('SSE error:', data.message);
+            return;
+          }
+          
+          // Regular graph state update
+          graphState = data;
+          renderGraph();
+          updateBadge();
+          
+        } catch (err) {
+          console.error('Error parsing SSE data:', err);
+        }
+      };
+      
+      eventSource.onerror = function(event) {
+        console.error('SSE connection error:', event);
+        
+        // Attempt to reconnect after delay
+        setTimeout(() => {
+          if (currentChatId && (!eventSource || eventSource.readyState === EventSource.CLOSED)) {
+            console.log('Attempting to reconnect SSE...');
+            connectSSE();
+          }
+        }, 5000);
+      };
+      
     } catch (err) {
-      console.error('Error fetching graph state:', err);
-      graphState = null;
+      console.error('Error setting up SSE connection:', err);
+    }
+  }
+  
+  function disconnectSSE() {
+    if (eventSource) {
+      console.log('Disconnecting SSE for chat:', currentChatId);
+      eventSource.close();
+      eventSource = null;
     }
   }
 
@@ -466,20 +524,12 @@
     window.addEventListener('mouseup', stopDrag);
   }
 
-  function startPolling() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-    }
-    
-    fetchGraphState();
-    pollInterval = setInterval(fetchGraphState, POLL_INTERVAL);
+  function startMonitoring() {
+    connectSSE();
   }
 
-  function stopPolling() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-      pollInterval = null;
-    }
+  function stopMonitoring() {
+    disconnectSSE();
   }
 
   // Initialize
@@ -494,8 +544,8 @@
     // Create minimized button
     createMinimizedButton();
     
-    // Start polling
-    startPolling();
+    // Start monitoring
+    startMonitoring();
     
     // Watch for URL changes
     let lastChatId = currentChatId;
@@ -505,9 +555,9 @@
         lastChatId = newChatId;
         currentChatId = newChatId;
         if (newChatId) {
-          startPolling();
+          startMonitoring();
         } else {
-          stopPolling();
+          stopMonitoring();
         }
       }
     }, 1000);

@@ -7,10 +7,13 @@ workflow execution state, current nodes, and traversal history.
 
 import logging
 import threading
+import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, AsyncGenerator
 from dataclasses import dataclass
 from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import StreamingResponse
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +53,9 @@ class GraphStateManager:
         self._states: Dict[str, GraphState] = {}
         self._lock = threading.RLock()
         self._cleanup_interval = timedelta(minutes=cleanup_interval_minutes)
+        # For SSE notifications
+        self._subscribers: Dict[str, List[asyncio.Queue]] = {}
+        self._subscriber_lock = threading.RLock()
         
     def update_graph_state(
         self, 
@@ -105,6 +111,9 @@ class GraphStateManager:
                 )
                 self._states[chat_id] = new_state
                 logger.info(f"Created new graph state for {chat_id}: {current_node}")
+            
+            # Notify subscribers about the state change
+            self._notify_subscribers(chat_id, self._states[chat_id])
     
     def get_graph_state(self, chat_id: str) -> Optional[GraphState]:
         """
@@ -168,12 +177,121 @@ class GraphStateManager:
         """Get list of all active chat IDs."""
         with self._lock:
             return list(self._states.keys())
+    
+    def _notify_subscribers(self, chat_id: str, graph_state: GraphState) -> None:
+        """Notify all subscribers for a chat about state changes."""
+        with self._subscriber_lock:
+            if chat_id in self._subscribers:
+                state_data = graph_state.to_dict()
+                # Notify all subscribers for this chat
+                for queue in self._subscribers[chat_id]:
+                    try:
+                        # Non-blocking put - if queue is full, skip
+                        queue.put_nowait(state_data)
+                    except asyncio.QueueFull:
+                        logger.warning(f"Subscriber queue full for chat {chat_id}, skipping update")
+    
+    def subscribe_to_chat(self, chat_id: str) -> asyncio.Queue:
+        """Subscribe to state changes for a specific chat."""
+        with self._subscriber_lock:
+            if chat_id not in self._subscribers:
+                self._subscribers[chat_id] = []
+            
+            # Create a queue for this subscriber
+            queue = asyncio.Queue(maxsize=50)  # Limit queue size to prevent memory issues
+            self._subscribers[chat_id].append(queue)
+            
+            logger.info(f"New subscriber for chat {chat_id}")
+            return queue
+    
+    def unsubscribe_from_chat(self, chat_id: str, queue: asyncio.Queue) -> None:
+        """Unsubscribe from state changes for a specific chat."""
+        with self._subscriber_lock:
+            if chat_id in self._subscribers:
+                try:
+                    self._subscribers[chat_id].remove(queue)
+                    if not self._subscribers[chat_id]:
+                        # Remove empty subscriber list
+                        del self._subscribers[chat_id]
+                    logger.info(f"Unsubscribed from chat {chat_id}")
+                except ValueError:
+                    pass  # Queue not in list
 
 # Global state manager instance
 state_manager = GraphStateManager()
 
 # FastAPI router for graph state endpoints
 router = APIRouter(prefix="/v1", tags=["graph-state"])
+
+async def _sse_generator(chat_id: str) -> AsyncGenerator[str, None]:
+    """
+    Generate Server-Sent Events for graph state changes.
+    
+    Args:
+        chat_id: The chat/conversation identifier to monitor
+        
+    Yields:
+        SSE formatted messages with graph state updates
+    """
+    queue = state_manager.subscribe_to_chat(chat_id)
+    
+    try:
+        # Send initial state if available
+        initial_state = state_manager.get_graph_state(chat_id)
+        if initial_state:
+            yield f"data: {json.dumps(initial_state.to_dict())}\n\n"
+        else:
+            # Send a "waiting" message
+            yield f"data: {json.dumps({'status': 'waiting', 'message': 'No workflow state yet'})}\n\n"
+        
+        # Keep connection alive and send updates
+        while True:
+            try:
+                # Wait for state update with timeout
+                state_data = await asyncio.wait_for(queue.get(), timeout=30.0)
+                yield f"data: {json.dumps(state_data)}\n\n"
+            except asyncio.TimeoutError:
+                # Send heartbeat to keep connection alive
+                yield f"data: {json.dumps({'status': 'heartbeat', 'timestamp': datetime.now().isoformat()})}\n\n"
+            except Exception as e:
+                logger.error(f"SSE error for chat {chat_id}: {e}")
+                yield f"data: {json.dumps({'status': 'error', 'message': str(e)})}\n\n"
+                break
+                
+    except asyncio.CancelledError:
+        logger.info(f"SSE connection cancelled for chat {chat_id}")
+        raise
+    except Exception as e:
+        logger.error(f"SSE generator error for chat {chat_id}: {e}")
+        yield f"data: {json.dumps({'status': 'error', 'message': str(e)})}\n\n"
+    finally:
+        # Clean up subscription
+        state_manager.unsubscribe_from_chat(chat_id, queue)
+
+@router.get("/graph-state/stream/{chat_id}")
+async def stream_graph_state(chat_id: str):
+    """
+    Stream real-time graph state updates using Server-Sent Events.
+    
+    Args:
+        chat_id: The chat/conversation identifier to monitor
+        
+    Returns:
+        StreamingResponse with SSE formatted graph state updates
+    """
+    logger.info(f"Starting SSE stream for chat {chat_id}")
+    
+    return StreamingResponse(
+        _sse_generator(chat_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET",
+            "Access-Control-Allow-Headers": "Cache-Control"
+        }
+    )
 
 @router.get("/graph-state/{chat_id}")
 async def get_graph_state(chat_id: str):
