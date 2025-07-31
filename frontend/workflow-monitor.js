@@ -3,7 +3,6 @@
   'use strict';
 
   // Configuration
-  const POLL_INTERVAL = 2000; // 2 seconds
   const API_BASE = 'http://localhost:8000';
 
   // State
@@ -11,7 +10,6 @@
   let position = { x: window.innerWidth - 320, y: window.innerHeight - 420 };
   let isDragging = false;
   let dragStart = { x: 0, y: 0 };
-  let pollInterval = null;
   let eventSource = null;
   let currentChatId = null;
   let graphState = null;
