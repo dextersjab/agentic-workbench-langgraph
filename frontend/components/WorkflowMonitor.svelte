@@ -1,6 +1,8 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import * as d3 from 'd3';
+  import { Svelvet, Node, Edge } from 'svelvet';
+  import dagre from 'dagre';
   
   export let chatId = '';
   

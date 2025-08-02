@@ -142,5 +142,8 @@ logs/
 # LangGraph pickle files
 *.pckl
 
+# Node.js dependencies
+node_modules/
+
 # Local only
 local/
