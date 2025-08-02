@@ -1,0 +1,25 @@
+{
+  "name": "agentic-workflow-monitor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Workflow monitor with Svelvet visualization",
+  "main": "dist/workflow-monitor.js",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.9.6",
+    "rollup-plugin-css-only": "^4.5.2",
+    "rollup-plugin-svelte": "^7.1.6",
+    "svelte": "^4.2.10"
+  },
+  "dependencies": {
+    "dagre": "^0.8.5",
+    "svelvet": "^11.0.5"
+  }
+}
