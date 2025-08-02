@@ -231,6 +231,29 @@
       .attr('fill', d => (d.current || d.visited) ? 'white' : '#374151');
   }
   
+  function convertGraphStateToSvelvet(graphState) {
+    if (!graphState || !graphState.nodes) return { nodes: [], edges: [] };
+    
+    // Convert nodes - using simple grid layout for now
+    const nodes = Object.entries(graphState.nodes).map(([nodeId, label], i) => ({
+      id: nodeId,
+      position: { 
+        x: 50 + (i % 3) * 80, 
+        y: 50 + Math.floor(i / 3) * 80 
+      },
+      data: { 
+        label: label,
+        isStart: nodeId === '__start__',
+        isEnd: nodeId === '__end__'
+      }
+    }));
+    
+    // Edges will be added in a later step
+    const edges = [];
+    
+    return { nodes, edges };
+  }
+  
   function startDrag(e) {
     isDragging = true;
     dragStart = {
@@ -321,6 +344,14 @@
         <div class="status-message">No workflow active</div>
       {:else}
         <div class="graph-container" bind:this={graphContainer}></div>
+        <!-- Svelvet container (temporarily hidden) -->
+        {#if false}  <!-- Will be enabled in later steps -->
+          <div class="svelvet-container">
+            <Svelvet width={280} height={300} fitView controls>
+              <!-- Nodes and edges will be added here -->
+            </Svelvet>
+          </div>
+        {/if}
         <div class="graph-info">
           <div class="info-row">
             <span class="info-label">Current:</span>
@@ -438,6 +469,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #fafafa;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  
+  .svelvet-container {
+    flex: 1;
     background: #fafafa;
     border-radius: 4px;
     margin-bottom: 12px;
