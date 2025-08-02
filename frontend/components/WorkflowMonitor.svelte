@@ -11,8 +11,10 @@
   let graphState = null;
   let error = null;
   let loading = false;
-  let pollInterval = null;
+  let eventSource = null;
   let graphContainer;
+  let reconnectAttempts = 0;
+  let maxReconnectAttempts = 5;
   
   // Initialize position on mount
   onMount(() => {
@@ -21,60 +23,115 @@
       y: window.innerHeight - 420 
     };
     
-    // Start polling when component mounts
-    startPolling();
+    // Start SSE connection when component mounts
+    connectSSE();
     
     return () => {
-      stopPolling();
+      disconnectSSE();
     };
   });
   
   onDestroy(() => {
-    stopPolling();
+    disconnectSSE();
   });
   
-  function startPolling() {
+  function connectSSE() {
     if (!chatId) return;
     
-    // Fetch immediately
-    fetchGraphState();
-    
-    // Then poll every 2 seconds
-    pollInterval = setInterval(fetchGraphState, 2000);
-  }
-  
-  function stopPolling() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-      pollInterval = null;
+    // Don't connect if already connected
+    if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
+      return;
     }
-  }
-  
-  async function fetchGraphState() {
-    if (!chatId) return;
     
     try {
       loading = true;
       error = null;
       
-      const response = await fetch(`http://localhost:5001/api/graph-state/${chatId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch graph state: ${response.statusText}`);
-      }
+      eventSource = new EventSource(`http://localhost:5001/v1/graph-state/stream/${chatId}`);
       
-      const data = await response.json();
-      graphState = data;
+      eventSource.onopen = () => {
+        console.log('SSE connection opened for chat:', chatId);
+        reconnectAttempts = 0;  // Reset reconnect attempts on successful connection
+        loading = false;
+      };
       
-      // Render graph if expanded
-      if (!isMinimized && graphContainer) {
-        renderGraph();
-      }
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          
+          if (data.status === 'heartbeat') {
+            // Just a keepalive, ignore
+            return;
+          }
+          
+          if (data.status === 'waiting') {
+            // No workflow state yet
+            graphState = null;
+            return;
+          }
+          
+          if (data.status === 'error') {
+            console.error('SSE error from server:', data.message);
+            error = data.message;
+            return;
+          }
+          
+          // Update graph state with new data
+          graphState = data;
+          
+          // Render graph if expanded
+          if (!isMinimized && graphContainer) {
+            renderGraph();
+          }
+        } catch (err) {
+          console.error('Error parsing SSE data:', err, 'Raw data:', event.data);
+          error = 'Failed to parse server data';
+        }
+      };
+      
+      eventSource.onerror = (event) => {
+        console.error('SSE connection error:', event);
+        
+        if (eventSource.readyState === EventSource.CLOSED) {
+          // Connection was closed, attempt to reconnect
+          handleReconnect();
+        } else {
+          error = 'Connection error occurred';
+        }
+        loading = false;
+      };
+      
     } catch (err) {
-      console.error('Error fetching graph state:', err);
+      console.error('Error creating SSE connection:', err);
       error = err.message;
-    } finally {
       loading = false;
     }
+  }
+  
+  function disconnectSSE() {
+    if (eventSource) {
+      eventSource.close();
+      eventSource = null;
+    }
+  }
+  
+  function handleReconnect() {
+    if (reconnectAttempts >= maxReconnectAttempts) {
+      error = `Connection lost. Failed to reconnect after ${maxReconnectAttempts} attempts.`;
+      return;
+    }
+    
+    reconnectAttempts++;
+    console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+    
+    // Exponential backoff: wait 2^attempts seconds
+    const delay = Math.pow(2, reconnectAttempts) * 1000;
+    
+    setTimeout(() => {
+      if (chatId) {  // Only reconnect if we still have a chatId
+        connectSSE();
+      }
+    }, delay);
   }
   
   function renderGraph() {
@@ -206,6 +263,12 @@
     }
   }
   
+  // Reactive statement to handle chatId changes
+  $: if (chatId) {
+    disconnectSSE();  // Close existing connection
+    connectSSE();     // Start new connection with new chatId
+  }
+
   $: currentNodeLabel = graphState?.current_node ? 
     (graphState.nodes[graphState.current_node] || graphState.current_node) : 
     'No workflow';
@@ -250,7 +313,7 @@
       {:else if error}
         <div class="error-message">
           <p>Error: {error}</p>
-          <button class="retry-btn" on:click={fetchGraphState}>Retry</button>
+          <button class="retry-btn" on:click={connectSSE}>Retry</button>
         </div>
       {:else if !graphState}
         <div class="status-message">No workflow active</div>
