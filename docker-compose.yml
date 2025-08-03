@@ -33,6 +33,7 @@ services:
       - OPENAI_API_BASE_URL=http://backend:8000/v1
       - OPENAI_API_KEY=dummy-key-not-used
       - WEBUI_NAME=Agentic Workflow Workbench
+      - ENABLE_FORWARD_USER_INFO_HEADERS=true
       - ENABLE_TAGS_GENERATION=false
       - ENABLE_TITLE_GENERATION=false
       - ENABLE_FOLLOW_UP_GENERATION=false
