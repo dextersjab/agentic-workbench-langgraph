@@ -6,14 +6,14 @@ workflow-specific categorizations and rules.
 """
 
 from typing import Literal
-from src.business_context import COMPANY_SUPPORT_TEAMS, BASE_SLA_POLICIES
+from src.business_context import COMPANY_SUPPORT_TEAMS, BASE_SLA_POLICIES, PRIORITY_DEFINITIONS, BUSINESS_HOURS_MULTIPLIER
 
 # Maximum number of information gathering rounds before proceeding to ticket creation
 MAX_GATHERING_ROUNDS = 2
 
 # Type definitions for issue classification
 IssueCategoryType = Literal["hardware", "software", "access", "network", "other"]
-IssuePriorityType = Literal["P1", "P2", "P3"]
+IssuePriorityType = Literal["P1", "P2", "P3", "P4"]
 
 # Workflow-specific issue categorizations
 ISSUE_CATEGORIES = {
@@ -68,3 +68,35 @@ KB_CATEGORIES = [
     "how_to_guides",
     "policies"
 ]
+
+# Workflow-specific SLA commitments (derived from company policies)
+def get_sla_commitment(priority: str) -> tuple[str, int]:
+    """
+    Get SLA commitment for support desk based on priority and company policies.
+    
+    Args:
+        priority: Issue priority (P1, P2, P3, P4)
+        
+    Returns:
+        Tuple of (SLA description, hours)
+    """
+    if priority not in PRIORITY_DEFINITIONS:
+        priority = "P3"  # Default to medium priority
+    
+    priority_info = PRIORITY_DEFINITIONS[priority]
+    base_hours = priority_info["resolution_time_hours"]
+    multiplier = BUSINESS_HOURS_MULTIPLIER.get(priority, 2.0)
+    
+    # Apply business hours multiplier for non-critical issues
+    if priority != "P1":
+        adjusted_hours = int(base_hours * multiplier / 2.0)  # Normalize multiplier
+    else:
+        adjusted_hours = base_hours  # Critical issues get full 24/7 commitment
+    
+    return (f"{adjusted_hours} hours", adjusted_hours)
+
+# SLA mapping for backward compatibility and quick lookup
+SLA_COMMITMENTS = {
+    priority: get_sla_commitment(priority) 
+    for priority in PRIORITY_DEFINITIONS.keys()
+}

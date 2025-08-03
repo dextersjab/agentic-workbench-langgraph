@@ -7,6 +7,8 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
+from ..business_context import get_sla_commitment
+
 
 def generate_ticket_id(issue_info: Dict[str, Any]) -> str:
     """
@@ -29,24 +31,7 @@ def generate_ticket_id(issue_info: Dict[str, Any]) -> str:
     return f"DESK-{date_str}-{hash_num:04d}"
 
 
-def get_sla_commitment(priority: str) -> tuple[str, int]:
-    """
-    Get SLA commitment based on priority.
-    
-    Args:
-        priority: Issue priority (P1, P2, P3, etc.)
-        
-    Returns:
-        Tuple of (SLA text, hours)
-    """
-    sla_map = {
-        "P1": ("4 hours", 4),
-        "P2": ("24 hours", 24),
-        "P3": ("48 hours", 48),
-        "P4": ("72 hours", 72)
-    }
-    
-    return sla_map.get(priority.upper(), ("48 hours", 48))
+# SLA commitment function imported from business_context
 
 
 def get_team_contact_info(team: str) -> Dict[str, str]:
