@@ -75,11 +75,11 @@ The agentic workflows will appear in the OpenWebUI model selector dropdown.
 We provide convenient Makefile commands for development:
 
 ```bash
-make setup          # Setup both services
+make setup           # Setup both services
 make start           # Start both services  
 make start-backend   # Start only backend
 make start-frontend  # Start only frontend
-make stop            # Stop all services
+make stop            # Stop both services
 make clean           # Clean up containers and volumes
 ```
 
