@@ -7,7 +7,8 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
-from ..business_context import get_sla_commitment
+from ..business_context import get_sla_commitment, SUPPORT_TEAMS
+from src.business_context import COMPANY_INFO
 
 
 def generate_ticket_id(issue_info: Dict[str, Any]) -> str:
@@ -36,7 +37,7 @@ def generate_ticket_id(issue_info: Dict[str, Any]) -> str:
 
 def get_team_contact_info(team: str) -> Dict[str, str]:
     """
-    Get contact information based on assigned team.
+    Get contact information based on assigned team from business context.
     
     Args:
         team: Assigned support team
@@ -44,44 +45,16 @@ def get_team_contact_info(team: str) -> Dict[str, str]:
     Returns:
         Dictionary with contact details
     """
-    contact_map = {
-        "L1": {
-            "email": "helpdesk@company.com",
-            "phone": "1-800-HELP-001",
-            "portal": "https://support.company.com/helpdesk"
-        },
-        "L2": {
-            "email": "technical@company.com", 
-            "phone": "1-800-TECH-002",
-            "portal": "https://support.company.com/technical"
-        },
-        "L3": {
-            "email": "escalations@company.com",
-            "phone": "1-800-ESCL-003", 
-            "portal": "https://support.company.com/escalations"
-        },
-        "Hardware": {
-            "email": "hardware@company.com",
-            "phone": "1-800-HDWR-004",
-            "portal": "https://support.company.com/hardware"
-        },
-        "Software": {
-            "email": "software@company.com",
-            "phone": "1-800-SOFT-005",
-            "portal": "https://support.company.com/software"
-        },
-        "Network": {
-            "email": "network@company.com",
-            "phone": "1-800-NETW-006",
-            "portal": "https://support.company.com/network"
-        }
-    }
+    # Get team info from business context
+    if team in SUPPORT_TEAMS and "contact" in SUPPORT_TEAMS[team]:
+        return SUPPORT_TEAMS[team]["contact"]
     
-    return contact_map.get(team, {
-        "email": "support@company.com",
-        "phone": "1-800-SUPPORT",
-        "portal": "https://support.company.com"
-    })
+    # Fallback to company default contact info
+    return {
+        "email": COMPANY_INFO["support_email"],
+        "phone": COMPANY_INFO["support_phone"],
+        "portal": COMPANY_INFO["ticket_portal"]
+    }
 
 
 def get_next_steps(priority: str, category: str) -> str:

@@ -1,5 +1,7 @@
 """Company-wide information and context"""
 
+SCHEMA_VERSION = "1.0"
+
 COMPANY_INFO = {
     "name": "Example Corp",
     "support_hours": "24/7",

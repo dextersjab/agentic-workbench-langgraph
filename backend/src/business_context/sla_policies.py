@@ -1,5 +1,7 @@
 """Company-wide SLA policies and commitments"""
 
+SCHEMA_VERSION = "1.0"
+
 BASE_SLA_POLICIES = {
     "priority_multipliers": {
         "P1": 1.0,   # Critical - no multiplier

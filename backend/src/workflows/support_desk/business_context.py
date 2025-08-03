@@ -5,8 +5,10 @@ the IT Support Desk workflow. It extends company-wide definitions with
 workflow-specific categorizations and rules.
 """
 
+SCHEMA_VERSION = "1.0"
+
 from typing import Literal
-from src.business_context import COMPANY_SUPPORT_TEAMS, BASE_SLA_POLICIES, PRIORITY_DEFINITIONS, BUSINESS_HOURS_MULTIPLIER
+from src.business_context import COMPANY_SUPPORT_TEAMS, BASE_SLA_POLICIES, PRIORITY_CONFIG
 
 # Maximum number of information gathering rounds before proceeding to ticket creation
 MAX_GATHERING_ROUNDS = 2
@@ -80,12 +82,12 @@ def get_sla_commitment(priority: str) -> tuple[str, int]:
     Returns:
         Tuple of (SLA description, hours)
     """
-    if priority not in PRIORITY_DEFINITIONS:
+    if priority not in PRIORITY_CONFIG:
         priority = "P3"  # Default to medium priority
     
-    priority_info = PRIORITY_DEFINITIONS[priority]
-    base_hours = priority_info["resolution_time_hours"]
-    multiplier = BUSINESS_HOURS_MULTIPLIER.get(priority, 2.0)
+    priority_info = PRIORITY_CONFIG[priority]
+    base_hours = priority_info["resolution_hours"]
+    multiplier = priority_info["multiplier"]
     
     # Apply business hours multiplier for non-critical issues
     if priority != "P1":
@@ -95,8 +97,8 @@ def get_sla_commitment(priority: str) -> tuple[str, int]:
     
     return (f"{adjusted_hours} hours", adjusted_hours)
 
-# SLA mapping for backward compatibility and quick lookup
+# SLA mapping for quick lookup
 SLA_COMMITMENTS = {
     priority: get_sla_commitment(priority) 
-    for priority in PRIORITY_DEFINITIONS.keys()
+    for priority in PRIORITY_CONFIG.keys()
 }
