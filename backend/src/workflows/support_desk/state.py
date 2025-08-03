@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Type, TypeVar
 from typing_extensions import TypedDict
 from pydantic import BaseModel
 
-from src.workflows.support_desk.constants import MAX_GATHERING_ROUNDS
+from src.workflows.support_desk.constants import MAX_GATHERING_ROUNDS, IssueCategoryType, IssuePriorityType
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -24,8 +24,8 @@ class SupportDeskState(TypedDict):
     max_clarification_attempts: int # Limit on questions
     
     # Issue information (populated during workflow)
-    issue_category: Optional[str]   # hardware, software, access, other
-    issue_priority: Optional[str]   # high, medium, low
+    issue_category: Optional[IssueCategoryType]   # hardware, software, access, network, other
+    issue_priority: Optional[IssuePriorityType]   # P1, P2, P3
     
     # Information gathering tracking
     gathering_round: int            # Current round of info gathering

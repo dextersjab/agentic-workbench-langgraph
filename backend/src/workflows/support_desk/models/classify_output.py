@@ -2,7 +2,7 @@
 Pydantic model for classify_issue node output.
 """
 from pydantic import BaseModel, Field
-from typing import Literal
+from src.workflows.support_desk.constants import IssueCategoryType, IssuePriorityType
 
 
 class ClassifyOutput(BaseModel):
@@ -16,11 +16,11 @@ class ClassifyOutput(BaseModel):
         description="Whether more information is needed to properly classify the issue"
     )
     
-    category: Literal["hardware", "software", "access", "network", "other"] = Field(
+    category: IssueCategoryType = Field(
         description="Primary category of the IT issue"
     )
     
-    priority: Literal["P1", "P2", "P3"] = Field(
+    priority: IssuePriorityType = Field(
         description="Priority level based on urgency and impact"
     )
     
