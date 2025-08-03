@@ -13,137 +13,139 @@ TICKET_HTML_TEMPLATE = """
     <title>Support Ticket</title>
     <style>
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Inter', -apple-system, 'Helvetica Neue', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 40px 20px;
+            background-color: #faf8f6;
+            color: #2c2c2c;
         }}
         .ticket-container {{
-            max-width: 600px;
+            max-width: 640px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             overflow: hidden;
         }}
         .ticket-header {{
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 28px 24px;
-            text-align: center;
-            position: relative;
-        }}
-        .ticket-header::before {{
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="90" cy="20" r="1.5" fill="%23ffffff" opacity="0.15"/><circle cx="20" cy="80" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="80" cy="90" r="1.2" fill="%23ffffff" opacity="0.12"/></svg>');
-            pointer-events: none;
+            background: #f7f5f3;
+            padding: 48px 40px;
+            border-bottom: 1px solid #e8e4e0;
+            text-align: left;
         }}
         .ticket-label {{
-            font-size: 14px;
-            font-weight: 500;
-            opacity: 0.9;
-            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 400;
+            color: #8b7c6f;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            margin-bottom: 16px;
         }}
         .ticket-id {{
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 300;
             margin: 0;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: -0.5px;
+            color: #2c2c2c;
         }}
         .ticket-status {{
             display: inline-block;
-            background-color: rgba(255, 255, 255, 0.25);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 12px;
+            background-color: #2c2c2c;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 400;
+            margin-top: 16px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            letter-spacing: 1.5px;
         }}
         .ticket-body {{
-            padding: 24px;
+            padding: 48px 40px;
         }}
         .info-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 24px;
+            gap: 32px;
+            margin-bottom: 48px;
         }}
         .info-item {{
-            background-color: #f8f9fa;
-            padding: 16px;
-            border-radius: 6px;
-            border-left: 3px solid #667eea;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e8e4e0;
         }}
         .info-label {{
-            font-size: 12px;
-            color: #6c757d;
+            font-size: 11px;
+            color: #8b7c6f;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 400;
         }}
         .info-value {{
             font-size: 16px;
-            font-weight: 600;
-            color: #212529;
+            font-weight: 400;
+            color: #2c2c2c;
+            letter-spacing: -0.2px;
         }}
         .priority-high {{
-            color: #dc3545;
+            color: #d04437;
         }}
         .priority-medium {{
-            color: #ffc107;
+            color: #daa520;
         }}
         .priority-low {{
-            color: #28a745;
+            color: #5e7a5e;
         }}
         .issue-details {{
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background-color: #faf8f6;
+            border-radius: 2px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid #e8e4e0;
         }}
         .section-title {{
-            font-size: 14px;
-            font-weight: 600;
-            color: #495057;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c2c2c;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-bottom: 16px;
         }}
         .issue-text {{
-            color: #212529;
-            line-height: 1.6;
+            color: #4a4a4a;
+            line-height: 1.7;
+            font-size: 14px;
+            font-weight: 300;
         }}
         .next-steps {{
-            background-color: #e7f3ff;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 3px solid #007bff;
+            background-color: #f7f5f3;
+            border-radius: 2px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid #e8e4e0;
         }}
         .contact-info {{
-            background-color: #fff3cd;
-            border-radius: 6px;
-            padding: 20px;
-            border-left: 3px solid #ffc107;
+            background-color: transparent;
+            padding: 32px 0;
+            border-top: 1px solid #e8e4e0;
+        }}
+        .contact-info .issue-text {{
+            font-size: 13px;
+            line-height: 2;
+        }}
+        .contact-info strong {{
+            font-weight: 500;
+            color: #2c2c2c;
         }}
         .timestamp {{
             text-align: center;
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
+            color: #8b7c6f;
+            font-size: 11px;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid #e8e4e0;
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }}
     </style>
 </head>
