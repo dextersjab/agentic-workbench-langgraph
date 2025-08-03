@@ -145,14 +145,21 @@ def generate_ticket_data(state: Dict[str, Any]) -> Dict[str, Any]:
     # Calculate estimated resolution
     resolution_time = datetime.now() + timedelta(hours=sla_hours)
     
-    # Get issue summary from messages
+    # Get issue summary from messages - find the most substantive user message
     issue_summary = ""
     if state.get("messages"):
-        # Use first user message as summary
-        for msg in state["messages"]:
-            if msg.get("role") == "user":
-                issue_summary = msg.get("content", "")[:200]  # First 200 chars
-                break
+        user_messages = [msg.get("content", "") for msg in state["messages"] 
+                        if msg.get("role") == "user" and len(msg.get("content", "").strip()) > 10]
+        
+        if user_messages:
+            # Use the longest user message as it's likely the most descriptive
+            issue_summary = max(user_messages, key=len)[:200]
+        else:
+            # Fallback to first user message if all are short
+            for msg in state["messages"]:
+                if msg.get("role") == "user":
+                    issue_summary = msg.get("content", "")[:200]
+                    break
     
     return {
         "ticket_id": ticket_id,

@@ -29,24 +29,46 @@ TICKET_HTML_TEMPLATE = """
         .ticket-header {{
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 24px;
+            padding: 28px 24px;
             text-align: center;
+            position: relative;
+        }}
+        .ticket-header::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="90" cy="20" r="1.5" fill="%23ffffff" opacity="0.15"/><circle cx="20" cy="80" r="1" fill="%23ffffff" opacity="0.1"/><circle cx="80" cy="90" r="1.2" fill="%23ffffff" opacity="0.12"/></svg>');
+            pointer-events: none;
+        }}
+        .ticket-label {{
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }}
         .ticket-id {{
-            font-size: 24px;
-            font-weight: 600;
+            font-size: 28px;
+            font-weight: 700;
             margin: 0;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }}
         .ticket-status {{
             display: inline-block;
-            background-color: rgba(255, 255, 255, 0.2);
-            padding: 4px 12px;
-            border-radius: 12px;
+            background-color: rgba(255, 255, 255, 0.25);
+            padding: 6px 16px;
+            border-radius: 20px;
             font-size: 12px;
-            font-weight: 500;
-            margin-top: 8px;
+            font-weight: 600;
+            margin-top: 12px;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }}
         .ticket-body {{
             padding: 24px;
@@ -128,6 +150,7 @@ TICKET_HTML_TEMPLATE = """
 <body>
     <div class="ticket-container">
         <div class="ticket-header">
+            <div class="ticket-label">Support Ticket</div>
             <h1 class="ticket-id">{ticket_id}</h1>
             <span class="ticket-status">{ticket_status}</span>
         </div>
