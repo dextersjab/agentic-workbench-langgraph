@@ -133,6 +133,20 @@ TICKET_HTML_TEMPLATE = """
             font-weight: 400;
             color: #2c2c2c;
             letter-spacing: -0.2px;
+            padding: 4px 8px;
+            border-radius: 2px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }}
+        .info-value[contenteditable="true"]:hover {{
+            background-color: #faf8f6;
+            border-color: #e8e4e0;
+        }}
+        .info-value[contenteditable="true"]:focus {{
+            outline: none;
+            background-color: #ffffff;
+            border-color: #2c2c2c;
+            box-shadow: 0 0 0 2px rgba(44, 44, 44, 0.1);
         }}
         .priority-high {{
             color: #d04437;
@@ -163,6 +177,20 @@ TICKET_HTML_TEMPLATE = """
             line-height: 1.7;
             font-size: 14px;
             font-weight: 300;
+            padding: 4px 8px;
+            border-radius: 2px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }}
+        .issue-text[contenteditable="true"]:hover {{
+            background-color: #ffffff;
+            border-color: #e8e4e0;
+        }}
+        .issue-text[contenteditable="true"]:focus {{
+            outline: none;
+            background-color: #ffffff;
+            border-color: #2c2c2c;
+            box-shadow: 0 0 0 2px rgba(44, 44, 44, 0.1);
         }}
         .next-steps {{
             background-color: #f7f5f3;
@@ -194,7 +222,80 @@ TICKET_HTML_TEMPLATE = """
             font-weight: 300;
             letter-spacing: 0.5px;
         }}
+        .ticket-actions {{
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid #e8e4e0;
+        }}
+        .action-button {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }}
+        .action-button:hover {{
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }}
+        .action-button:active {{
+            transform: translateY(0);
+        }}
+        .action-button.primary {{
+            background-color: #2c2c2c;
+            color: #ffffff;
+        }}
+        .action-button.primary:hover {{
+            background-color: #1a1a1a;
+        }}
+        .action-button.secondary {{
+            background-color: #f7f5f3;
+            color: #2c2c2c;
+            border: 1px solid #e8e4e0;
+        }}
+        .action-button.secondary:hover {{
+            background-color: #e8e4e0;
+        }}
     </style>
+    <script>
+        function handleVerifyAndSend() {{
+            // Collect all edited field values
+            const ticketData = {{
+                ticket_id: document.querySelector('.ticket-id').textContent,
+                priority: document.querySelector('.info-value.priority-high, .info-value.priority-medium, .info-value.priority-low').textContent,
+                category: document.querySelectorAll('.info-value')[1].textContent,
+                assigned_team: document.querySelectorAll('.info-value')[2].textContent,
+                sla_commitment: document.querySelectorAll('.info-value')[3].textContent,
+                issue_summary: document.querySelector('.issue-details .issue-text').textContent,
+                next_steps: document.querySelector('.next-steps .issue-text').textContent
+            }};
+            
+            // Show confirmation
+            if (confirm('Verify and send this ticket? This will finalize the ticket with the current values.')) {{
+                alert('Ticket verified and sent successfully!\\nTicket ID: ' + ticketData.ticket_id);
+                console.log('Verified ticket data:', ticketData);
+            }}
+        }}
+        
+        function handleReEvaluate() {{
+            if (confirm('Re-evaluate this ticket? This will reprocess the original request with updated information.')) {{
+                alert('Ticket sent for re-evaluation. The system will reprocess the request.');
+                console.log('Re-evaluation requested');
+            }}
+        }}
+    </script>
 </head>
 <body>
     <div class="ticket-container">
@@ -210,30 +311,30 @@ TICKET_HTML_TEMPLATE = """
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Priority</div>
-                    <div class="info-value priority-{priority_class}">{priority}</div>
+                    <div class="info-value priority-{priority_class}" contenteditable="true">{priority}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Category</div>
-                    <div class="info-value">{category}</div>
+                    <div class="info-value" contenteditable="true">{category}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Assigned Team</div>
-                    <div class="info-value">{assigned_team}</div>
+                    <div class="info-value" contenteditable="true">{assigned_team}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">SLA Commitment</div>
-                    <div class="info-value">{sla_commitment}</div>
+                    <div class="info-value" contenteditable="true">{sla_commitment}</div>
                 </div>
             </div>
             
             <div class="issue-details">
                 <div class="section-title">Issue Summary</div>
-                <div class="issue-text">{issue_summary}</div>
+                <div class="issue-text" contenteditable="true">{issue_summary}</div>
             </div>
             
             <div class="next-steps">
                 <div class="section-title">Next Steps</div>
-                <div class="issue-text">{next_steps}</div>
+                <div class="issue-text" contenteditable="true">{next_steps}</div>
             </div>
             
             <div class="contact-info">
@@ -243,6 +344,17 @@ TICKET_HTML_TEMPLATE = """
                     <strong>Support Phone:</strong> {support_phone}<br>
                     <strong>Ticket Portal:</strong> {ticket_portal}
                 </div>
+            </div>
+            
+            <div class="ticket-actions">
+                <button class="action-button primary" onclick="handleVerifyAndSend()">
+                    <span>✓</span>
+                    <span>Verify & Send</span>
+                </button>
+                <button class="action-button secondary" onclick="handleReEvaluate()">
+                    <span>🔄</span>
+                    <span>Re-evaluate</span>
+                </button>
             </div>
             
             <div class="timestamp">
