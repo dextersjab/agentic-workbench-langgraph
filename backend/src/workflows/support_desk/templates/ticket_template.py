@@ -32,23 +32,11 @@ TICKET_HTML_TEMPLATE = """
             content: '';
             position: absolute;
             top: 0;
-            left: 0;
+            left: 8px;
             bottom: 0;
-            width: 24px;
-            background-image: repeating-linear-gradient(
-                0deg,
-                rgba(232, 228, 224, 0.6) 0px,
-                rgba(232, 228, 224, 0.6) 2px,
-                transparent 2px,
-                transparent 10px,
-                rgba(232, 228, 224, 0.6) 10px,
-                rgba(232, 228, 224, 0.6) 12px,
-                transparent 12px,
-                transparent 20px
-            );
-            background-size: 24px 20px;
-            background-position: 0 0;
-            background-repeat: repeat-y;
+            width: 0;
+            border-left: 2px dashed rgba(232, 228, 224, 0.6);
+            border-spacing: 6px;
         }}
         .ticket-container::after {{
             content: '';
