@@ -26,12 +26,49 @@ TICKET_HTML_TEMPLATE = """
             border-radius: 2px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
             overflow: hidden;
+            position: relative;
+        }}
+        .ticket-container::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 24px;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 6px,
+                #e8e4e0 6px,
+                #e8e4e0 12px,
+                transparent 12px,
+                transparent 18px
+            );
+            background-size: 24px 18px;
+            background-position: 0 0;
+            background-repeat: repeat-y;
+        }}
+        .ticket-container::after {{
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #faf8f6;
+            box-shadow: inset 0 0 0 1px #e8e4e0;
         }}
         .ticket-header {{
             background: #f7f5f3;
-            padding: 48px 40px;
+            padding: 48px 40px 48px 56px;
             border-bottom: 1px solid #e8e4e0;
             text-align: left;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }}
         .ticket-label {{
             font-size: 11px;
@@ -40,6 +77,14 @@ TICKET_HTML_TEMPLATE = """
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }}
+        .ticket-label::before {{
+            content: '✦';
+            font-size: 16px;
+            opacity: 0.5;
         }}
         .ticket-id {{
             font-size: 24px;
@@ -47,6 +92,18 @@ TICKET_HTML_TEMPLATE = """
             margin: 0;
             letter-spacing: -0.5px;
             color: #2c2c2c;
+            position: relative;
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #faf8f6;
+            border: 1px solid #e8e4e0;
+            border-radius: 2px;
+            margin-left: -16px;
+        }}
+        .ticket-id-row {{
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }}
         .ticket-status {{
             display: inline-block;
@@ -56,12 +113,12 @@ TICKET_HTML_TEMPLATE = """
             border-radius: 2px;
             font-size: 10px;
             font-weight: 400;
-            margin-top: 16px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
+            align-self: center;
         }}
         .ticket-body {{
-            padding: 48px 40px;
+            padding: 48px 40px 48px 56px;
         }}
         .info-grid {{
             display: grid;
@@ -153,8 +210,10 @@ TICKET_HTML_TEMPLATE = """
     <div class="ticket-container">
         <div class="ticket-header">
             <div class="ticket-label">Support Ticket</div>
-            <h1 class="ticket-id">{ticket_id}</h1>
-            <span class="ticket-status">{ticket_status}</span>
+            <div class="ticket-id-row">
+                <h1 class="ticket-id">{ticket_id}</h1>
+                <span class="ticket-status">{ticket_status}</span>
+            </div>
         </div>
         
         <div class="ticket-body">
