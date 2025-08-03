@@ -38,10 +38,10 @@ TICKET_HTML_TEMPLATE = """
             background-image: repeating-linear-gradient(
                 0deg,
                 transparent 0px,
-                transparent 6px,
-                #e8e4e0 6px,
-                #e8e4e0 12px,
-                transparent 12px,
+                transparent 8px,
+                rgba(232, 228, 224, 0.6) 8px,
+                rgba(232, 228, 224, 0.6) 10px,
+                transparent 10px,
                 transparent 18px
             );
             background-size: 24px 18px;
