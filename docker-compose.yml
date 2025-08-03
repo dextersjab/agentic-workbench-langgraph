@@ -9,10 +9,11 @@ services:
       - .env
     environment:
       - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
     volumes:
-      - ./backend/logs:/app/logs
-      - ./backend/src:/app/src
-      - ./backend/main.py:/app/main.py
+      - ./backend:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
     networks:
       - agentic-network
     healthcheck:
