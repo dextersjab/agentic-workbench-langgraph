@@ -201,7 +201,7 @@ def generate_ticket_html(ticket_data: dict) -> str:
         priority=ticket_data.get('priority', 'Medium').upper(),
         priority_class=priority_class,
         category=ticket_data.get('category', 'General').title(),
-        assigned_team=ticket_data.get('assigned_team', 'Support Team'),
+        assigned_team=ticket_data.get('assigned_team', 'Support Team').capitalize(),
         sla_commitment=ticket_data.get('sla_commitment', '24 hours'),
         issue_summary=ticket_data.get('issue_summary', 'No summary provided'),
         next_steps=ticket_data.get('next_steps', 'Your ticket has been received and will be processed according to the SLA.'),
