@@ -20,8 +20,8 @@ support_desk/
 The Support Desk workflow implements an IT support desk agent that:
 
 1. Clarifies user issues when needed (with conditional loop)
-2. Classifies issues into categories
-3. Triages issues to appropriate support teams (internal routing only)
+2. Classifies issues into categories ([`hardware, software, access, network, other`](models/classify_output.py#L19))
+3. Triages issues to appropriate support teams ([`L1, L2, specialist, escalation`](models/triage_output.py#L14)) (internal routing only)
 4. Gathers additional information through targeted questions
 5. Creates support tickets with complete context
 
@@ -74,8 +74,8 @@ Defines the `SupportDeskState` TypedDict that tracks conversation context, user 
 
 Contains the implementation of each node in the workflow:
 - `clarify_issue.py`: Analyses user input and asks clarifying questions
-- `classify_issue.py`: Categorises issues into predefined types
-- `triage_issue.py`: Internal routing logic that assigns issues to support teams based on complexity
+- `classify_issue.py`: Categorises issues into predefined types ([`hardware, software, access, network, other`](models/classify_output.py#L19))
+- `triage_issue.py`: Internal routing logic that assigns issues to support teams ([`L1, L2, specialist, escalation`](models/triage_output.py#L14)) based on complexity
 - `gather_info.py`: Collects additional information through targeted user questions
 - `send_to_desk.py`: Creates tickets and formats final responses
 

@@ -58,15 +58,15 @@ graph TD
     class A,C context
 ```
 
-Categorises the IT issue into one of the predefined categories: hardware, software, access, or other.
+Categorises the IT issue into one of the predefined categories: [`hardware, software, access, network, other`](../models/classify_output.py#L19).
 
 **Reads from state:**
 - `current_user_input` - The issue description to classify
 - `messages` - Full conversation context for better classification
 
 **Updates state:**
-- `issue_category` - Assigned category (hardware, software, access, other)
-- `issue_priority` - Priority level based on urgency keywords
+- `issue_category` - Assigned category ([`hardware, software, access, network, other`](../models/classify_output.py#L19))
+- `issue_priority` - Priority level based on urgency keywords ([`P1, P2, P3`](../models/classify_output.py#L23))
 - `current_response` - Classification summary for the user
 
 ### [triage_issue.py](triage_issue.py)
@@ -90,7 +90,7 @@ Internal routing node that assigns issues to the appropriate support team based 
 - `messages` - Full conversation context for nuanced routing decisions
 
 **Updates state:**
-- `support_team` - Assigned team (L1, L2, specialist, escalation)
+- `support_team` - Assigned team ([`L1, L2, specialist, escalation`](../models/triage_output.py#L14))
 - `estimated_resolution_time` - Expected timeframe based on issue complexity
 - `escalation_path` - Next level if current team cannot resolve
 

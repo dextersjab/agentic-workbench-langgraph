@@ -24,8 +24,8 @@ class SupportDeskState(TypedDict):
     max_clarification_attempts: int # Limit on questions
     
     # Issue information (populated during workflow)
-    issue_category: Optional[str]   # hardware, software, access, other
-    issue_priority: Optional[str]   # high, medium, low
+    issue_category: Optional[str]   # See models/classify_output.py for valid values
+    issue_priority: Optional[str]   # See models/classify_output.py for valid values
     
     # Information gathering tracking
     gathering_round: int            # Current round of info gathering
