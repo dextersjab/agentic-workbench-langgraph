@@ -8,6 +8,8 @@ This is part of the context engineering approach to provide domain-specific grou
 for AI agents operating in business environments.
 """
 
+from ..business_context import KB_CATEGORIES
+
 SERVICEHUB_SUPPORT_TICKET_POLICY = """
 ## ServiceHub IT Support Policy & Procedures
 

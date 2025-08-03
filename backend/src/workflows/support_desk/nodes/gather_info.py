@@ -9,7 +9,7 @@ from copy import deepcopy
 from ..state import SupportDeskState
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
-from ..constants import MAX_GATHERING_ROUNDS
+from ..business_context import MAX_GATHERING_ROUNDS
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from src.core.llm_client import client
 from langgraph.config import get_stream_writer

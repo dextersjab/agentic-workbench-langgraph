@@ -5,7 +5,7 @@ These prompts use tool calling to generate structured outputs.
 """
 
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
-from ..constants import MAX_GATHERING_ROUNDS
+from ..business_context import MAX_GATHERING_ROUNDS
 
 # Has sufficient info prompt using tool calling
 HAS_SUFFICIENT_INFO_PROMPT = """

@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Type, TypeVar
 from typing_extensions import TypedDict
 from pydantic import BaseModel
 
-from src.workflows.support_desk.constants import MAX_GATHERING_ROUNDS, IssueCategoryType, IssuePriorityType
+from src.workflows.support_desk.business_context import MAX_GATHERING_ROUNDS, IssueCategoryType, IssuePriorityType
 
 T = TypeVar('T', bound=BaseModel)
 

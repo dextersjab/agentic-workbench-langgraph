@@ -2,7 +2,7 @@
 Pydantic model for classify_issue node output.
 """
 from pydantic import BaseModel, Field
-from src.workflows.support_desk.constants import IssueCategoryType, IssuePriorityType
+from src.workflows.support_desk.business_context import IssueCategoryType, IssuePriorityType
 
 
 class ClassifyOutput(BaseModel):
