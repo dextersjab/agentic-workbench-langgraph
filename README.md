@@ -79,7 +79,7 @@ make setup           # Setup both services
 make start           # Start both services  
 make start-backend   # Start only backend
 make start-frontend  # Start only frontend
-make stop            # Stop both services
+make stop            # Stop all services
 make clean           # Clean up containers and volumes
 ```
 
@@ -120,7 +120,7 @@ Copy `.env.example` to `.env` and configure:
 
 ```bash
 # Required
-OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # Optional
 BACKEND_PORT=8000
@@ -174,7 +174,7 @@ Backend logs are available in `backend/logs/` directory and include:
 
 ### Common Issues
 
-1. **Backend fails to start**: Check your `OPENAI_API_KEY` in `.env`
+1. **Backend fails to start**: Check your `OPENROUTER_API_KEY` in `.env`
 2. **Frontend can't connect**: Verify backend is running on port 8000
 3. **Workflows not appearing**: Check backend logs for model registration errors
 4. **"Unknown workflow: support-desk" error**: 
