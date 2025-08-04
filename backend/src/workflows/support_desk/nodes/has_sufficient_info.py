@@ -36,12 +36,12 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("has_sufficient_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round"])
     
-    # Extract relevant information
-    messages = state.get("messages", [])
-    issue_category = state.get("issue_category", "other")
-    issue_priority = state.get("issue_priority", "P2")
-    assigned_team = state.get("assigned_team", "L1")
-    gathering_round = state.get("gathering_round", 1)
+    # Extract relevant information from nested state
+    messages = state.get("conversation", {}).get("messages", [])
+    issue_category = state.get("classification", {}).get("issue_category", "other")
+    issue_priority = state.get("classification", {}).get("issue_priority", "P2")
+    assigned_team = state.get("classification", {}).get("assigned_team", "L1")
+    gathering_round = state.get("gathering", {}).get("gathering_round", 1)
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
@@ -85,9 +85,12 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
             logger.info(f"→ info check: needs_more={completeness_output.needs_more_info} (conf: {completeness_output.confidence})")
             
             # Update state with assessment
-            state["needs_more_info"] = completeness_output.needs_more_info
-            state["info_completeness_confidence"] = completeness_output.confidence
-            state["missing_categories"] = completeness_output.missing_categories
+            # Update gathering state
+            if "gathering" not in state:
+                state["gathering"] = {}
+            state["gathering"]["needs_more_info"] = completeness_output.needs_more_info
+            state["gathering"]["info_completeness_confidence"] = completeness_output.confidence
+            state["gathering"]["missing_categories"] = completeness_output.missing_categories
             # state["current_response"] = completeness_output.response
             
         except ValueError as e:
@@ -117,9 +120,9 @@ def has_sufficient_info(state: SupportDeskState) -> bool:
     Returns:
         True if sufficient info exists, False if need to gather more
     """
-    needs_more = state.get("needs_more_info", True)
-    gathering_round = state.get("gathering_round", 1)
-    max_rounds = state.get("max_gathering_rounds", MAX_GATHERING_ROUNDS)
+    needs_more = state.get("gathering", {}).get("needs_more_info", True)
+    gathering_round = state.get("gathering", {}).get("gathering_round", 1)
+    max_rounds = state.get("gathering", {}).get("max_gathering_rounds", MAX_GATHERING_ROUNDS)
     
     # Consider sufficient if we've hit max rounds or have enough info
     if gathering_round >= max_rounds:

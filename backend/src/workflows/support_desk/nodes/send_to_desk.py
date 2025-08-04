@@ -40,10 +40,10 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("send_to_desk", ["issue_category", "issue_priority", "assigned_team"])
     
-    # Extract ticket information
-    issue_category = state.get("issue_category", "other")
-    issue_priority = state.get("issue_priority", "P2")
-    assigned_team = state.get("assigned_team", "L1")
+    # Extract ticket information from nested state
+    issue_category = state.get("classification", {}).get("issue_category", "other")
+    issue_priority = state.get("classification", {}).get("issue_priority", "P2")
+    assigned_team = state.get("classification", {}).get("assigned_team", "L1")
     
     try:
         # Create prompt for brief summary response
@@ -93,25 +93,40 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         writer({"custom_llm_chunk": ticket_html})
         writer({"custom_llm_chunk": "\n```"})
         
+        # Send a completion signal to ensure the artifact is fully processed
+        writer({"custom_llm_chunk": ""})
+        
         # Update state with ticket information
-        state["ticket_id"] = ticket_data["ticket_id"]
-        state["ticket_status"] = ticket_data["ticket_status"]
-        state["assigned_team"] = ticket_data["assigned_team"]
-        state["sla_commitment"] = ticket_data["sla_commitment"]
-        state["next_steps"] = ticket_data["next_steps"]
-        state["contact_information"] = {
+        if "ticket" not in state:
+            state["ticket"] = {}
+        state["ticket"]["ticket_id"] = ticket_data["ticket_id"]
+        state["ticket"]["ticket_status"] = ticket_data["ticket_status"]
+        state["ticket"]["sla_commitment"] = ticket_data["sla_commitment"]
+        state["ticket"]["next_steps"] = ticket_data["next_steps"]
+        state["ticket"]["contact_information"] = {
             "email": ticket_data["support_email"],
             "phone": ticket_data["support_phone"],
             "portal": ticket_data["ticket_portal"]
         }
-        state["estimated_resolution_time"] = ticket_data.get("estimated_resolution")
+        state["ticket"]["estimated_resolution_time"] = ticket_data.get("estimated_resolution")
+        
+        # Update classification state with assigned team
+        if "classification" not in state:
+            state["classification"] = {}
+        state["classification"]["assigned_team"] = ticket_data["assigned_team"]
         
         # Store the complete response (summary + HTML in code block)
         complete_response = f"{summary_content}\n\n```html\n{ticket_html}\n```"
-        state["current_response"] = complete_response
+        
+        # Update conversation state
+        if "conversation" not in state:
+            state["conversation"] = {}
+        state["conversation"]["current_response"] = complete_response
         
         # Add response to conversation history
-        state["messages"].append({
+        if "messages" not in state["conversation"]:
+            state["conversation"]["messages"] = []
+        state["conversation"]["messages"].append({
             "role": "assistant",
             "content": complete_response
         })

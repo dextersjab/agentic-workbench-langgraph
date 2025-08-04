@@ -39,12 +39,12 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     log_node_start("classify_issue", ["messages"])
     
     # Extract conversation history for context
-    messages = state.get("messages", [])
+    messages = state.get("conversation", {}).get("messages", [])
     conversation_history = build_conversation_history(messages)
     
     # Check if we've exhausted clarification attempts
-    clarification_attempts = state.get("clarification_attempts", 0)
-    max_attempts = state.get("max_clarification_attempts", 3)
+    clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
+    max_attempts = state.get("gathering", {}).get("max_clarification_attempts", 3)
     force_proceed = clarification_attempts >= max_attempts
     
     # Set up the tool for structured output
@@ -90,11 +90,21 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             # Check if clarification is needed (unless we've hit the limit)
             if classify_output.needs_clarification and not force_proceed:
                 logger.info("→ needs clarification")
-                state["needs_clarification"] = True
-                state["current_response"] = classify_output.response
+                
+                # Update gathering state
+                if "gathering" not in state:
+                    state["gathering"] = {}
+                state["gathering"]["needs_clarification"] = True
+                
+                # Update conversation state
+                if "conversation" not in state:
+                    state["conversation"] = {}
+                state["conversation"]["current_response"] = classify_output.response
                 
                 # Add clarifying question to conversation
-                state["messages"].append({
+                if "messages" not in state["conversation"]:
+                    state["conversation"]["messages"] = []
+                state["conversation"]["messages"].append({
                     "role": "assistant",
                     "content": classify_output.response
                 })
@@ -105,9 +115,14 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
                 # Classification happens silently and routes to triage
                 
                 # Update state with structured classification information
-                state["issue_category"] = classify_output.category
-                state["issue_priority"] = classify_output.priority
-                state["needs_clarification"] = False
+                if "classification" not in state:
+                    state["classification"] = {}
+                state["classification"]["issue_category"] = classify_output.category
+                state["classification"]["issue_priority"] = classify_output.priority
+                
+                if "gathering" not in state:
+                    state["gathering"] = {}
+                state["gathering"]["needs_clarification"] = False
                 # state["current_response"] = classify_output.response
                 
                 # DON'T add to conversation history - this is internal routing

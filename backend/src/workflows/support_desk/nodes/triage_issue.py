@@ -38,10 +38,10 @@ async def triage_issue_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("triage_issue", ["issue_category", "issue_priority", "messages"])
     
-    # Extract relevant information
-    issue_category = state.get("issue_category", "other")
-    issue_priority = state.get("issue_priority", "P2")
-    messages = state.get("messages", [])
+    # Extract relevant information from nested state
+    issue_category = state.get("classification", {}).get("issue_category", "other")
+    issue_priority = state.get("classification", {}).get("issue_priority", "P2")
+    messages = state.get("conversation", {}).get("messages", [])
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)

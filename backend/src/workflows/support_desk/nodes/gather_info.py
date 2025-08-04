@@ -38,33 +38,43 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("gather_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round", "missing_categories"])
     
-    # Extract relevant information
-    messages = state.get("messages", [])
-    issue_category = state.get("issue_category", "other")
-    issue_priority = state.get("issue_priority", "P2")
-    assigned_team = state.get("assigned_team", "L1")
-    gathering_round = state.get("gathering_round", 1)
-    missing_categories = state.get("missing_categories", ["device_details", "timeline"])
+    # Extract relevant information from nested state
+    messages = state.get("conversation", {}).get("messages", [])
+    issue_category = state.get("classification", {}).get("issue_category", "other")
+    issue_priority = state.get("classification", {}).get("issue_priority", "P2")
+    assigned_team = state.get("classification", {}).get("assigned_team", "L1")
+    gathering_round = state.get("gathering", {}).get("gathering_round", 1)
+    missing_categories = state.get("gathering", {}).get("missing_categories", ["device_details", "timeline"])
     
     # Initialize max_gathering_rounds if not set
-    if "max_gathering_rounds" not in state:
-        state["max_gathering_rounds"] = MAX_GATHERING_ROUNDS
+    if "gathering" not in state:
+        state["gathering"] = {}
+    if "max_gathering_rounds" not in state["gathering"]:
+        state["gathering"]["max_gathering_rounds"] = MAX_GATHERING_ROUNDS
     
-    # Check if we're resuming (last message is our question)
-    last_msg = messages[-1] if messages else None
-    if last_msg and last_msg.get("role") == "assistant":
-        # This is a resume - the interrupt will immediately return the user's response
-        logger.info("→ resuming from interrupt")
-        user_response = interrupt("Waiting for user response to information gathering")
+    # Check if we're resuming from a previous gather_info question
+    # Look for the pattern: assistant message, then user message as the last two messages
+    if len(messages) >= 2:
+        second_last = messages[-2]
+        last_msg = messages[-1]
         
-        # Now we can safely increment the round
-        new_round = gathering_round + 1
-        state["gathering_round"] = new_round
-        logger.info(f"→ received user response, now on round {new_round}")
-        
-        # Log and return the updated state
-        log_node_complete("gather_info", state_before, state)
-        return state
+        # We're resuming if: second-to-last is assistant, last is user, and we've been here before
+        if (second_last.get("role") == "assistant" and 
+            last_msg.get("role") == "user" and
+            gathering_round > 1):
+            # This is a resume - we've received the user's response to our previous question
+            logger.info("→ resuming from interrupt - processing user response")
+            
+            # Increment the round since we got a response
+            new_round = gathering_round + 1
+            if "gathering" not in state:
+                state["gathering"] = {}
+            state["gathering"]["gathering_round"] = new_round
+            logger.info(f"→ received user response, now on round {new_round}")
+            
+            # Log and return the updated state
+            log_node_complete("gather_info", state_before, state)
+            return state
     
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
@@ -109,10 +119,14 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         response_content = response.get("content", "")
         
         # Update state with the question
-        state["current_response"] = response_content
+        if "conversation" not in state:
+            state["conversation"] = {}
+        state["conversation"]["current_response"] = response_content
         
         # Add question to conversation history
-        state["messages"].append({
+        if "messages" not in state["conversation"]:
+            state["conversation"]["messages"] = []
+        state["conversation"]["messages"].append({
             "role": "assistant",
             "content": response_content
         })
@@ -134,7 +148,9 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     # This code only executes on resume
     # Now we can safely increment the round
     new_round = gathering_round + 1
-    state["gathering_round"] = new_round
+    if "gathering" not in state:
+        state["gathering"] = {}
+    state["gathering"]["gathering_round"] = new_round
     logger.info(f"→ received user response, incremented to round {new_round}")
     
     return state

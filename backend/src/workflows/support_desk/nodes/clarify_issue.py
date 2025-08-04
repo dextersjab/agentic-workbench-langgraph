@@ -37,9 +37,9 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("clarify_issue", ["messages", "clarification_attempts", "max_clarification_attempts", "current_user_input"])
     
-    messages = state.get("messages", [])
-    clarification_attempts = state.get("clarification_attempts", 0)
-    max_attempts = state.get("max_clarification_attempts", 3)
+    messages = state.get("conversation", {}).get("messages", [])
+    clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
+    max_attempts = state.get("gathering", {}).get("max_clarification_attempts", 3)
     
     # Check if we're resuming (last message is our clarifying question)
     last_msg = messages[-1] if messages else None
@@ -50,7 +50,9 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
         
         # Now we can safely increment the attempts
         new_attempts = clarification_attempts + 1
-        state["clarification_attempts"] = new_attempts
+        if "gathering" not in state:
+            state["gathering"] = {}
+        state["gathering"]["clarification_attempts"] = new_attempts
         logger.info(f"→ received user response, now at {new_attempts} attempts")
         
         # Log and return the updated state
@@ -110,13 +112,17 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
                 writer({"custom_llm_chunk": chunk})
             
             # Add clarifying question to conversation
-            state["messages"].append({
+            if "conversation" not in state:
+                state["conversation"] = {}
+            if "messages" not in state["conversation"]:
+                state["conversation"]["messages"] = []
+            state["conversation"]["messages"].append({
                 "role": "assistant",
                 "content": clarify_output.response
             })
             
             # Update state with the response
-            state["current_response"] = clarify_output.response
+            state["conversation"]["current_response"] = clarify_output.response
             
             # Log what this node wrote to state before interrupt
             log_node_complete("clarify_issue", state_before, state)
