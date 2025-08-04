@@ -1,19 +1,24 @@
 """
-Gather Info node for Support Desk workflow - Tool-based version.
+Gather Info node for Support Desk workflow - Two-stage real streaming version.
 
 This node analyzes if more information is needed and asks targeted questions when required.
+Uses a two-stage approach:
+1. Structured output for decision-making (needs_more_info, missing_categories, etc.)
+2. Real-time streaming LLM call for question generation when needed
 """
+import json
 import logging
 from copy import deepcopy
 
 from ..state import SupportDeskState
-from ..models.gather_info_output import GatherInfoOutput
-from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT
+from ..models.gather_info_output import GatherInfoOutput, GatherInfoDecision
+from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT, QUESTION_GENERATION_PROMPT
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
 from ..business_context import MAX_GATHERING_ROUNDS
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
-from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
+from src.core.llm_client import client
+from src.core.schema_utils import pydantic_to_json_schema
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
 from langgraph.errors import GraphInterrupt
@@ -72,9 +77,9 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     # Build conversation history for context
     conversation_history = build_conversation_history(messages)
     
-    # Set up the tool for structured output
-    tool_name = "gather_info_analysis"
-    tools = [pydantic_to_openai_tool(GatherInfoOutput, tool_name)]
+    # Set up response format for decision-only structured output
+    schema_name = "gather_info_decision"
+    response_format = pydantic_to_json_schema(GatherInfoDecision, schema_name)
     
     try:
         # Create prompt for information gathering analysis
@@ -86,66 +91,97 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
             issue_priority=issue_priority,
             support_team=assigned_team,
             conversation_history=conversation_history,
-            tool_name=tool_name,
+            tool_name=schema_name,
             gathering_round=gathering_round,
             missing_info_text=missing_info_text
         )
         
-        # Call LLM with tools for structured decision
+        # Call LLM with structured output format (non-streaming for decision)
         response = await client.chat_completion(
             messages=[
                 {"role": "system", "content": prompt}
             ],
             model="openai/gpt-4.1",
             temperature=0.3,
-            tools=tools,
-            tool_choice="required"
+            response_format=response_format,
+            use_streaming=False
         )
         
-        # Extract structured output
-        output_data = extract_tool_call_args(response, tool_name)
-        gather_output = GatherInfoOutput(**output_data)
+        # Parse JSON response and validate with Pydantic
+        try:
+            output_data = json.loads(response["content"])
+            decision_output = GatherInfoDecision(**output_data)
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            logger.error(f"Failed to parse structured output: {e}")
+            logger.error(f"Response content: {response.get('content', 'No content')}")
+            raise
         
-        logger.info(f"→ needs_more_info: {gather_output.needs_more_info}, gathering_complete: {gather_output.gathering_complete}")
+        logger.info(f"→ needs_more_info: {decision_output.needs_more_info}, gathering_complete: {decision_output.gathering_complete}")
         
         # Handle based on decision
-        if gather_output.gathering_complete or not gather_output.needs_more_info:
+        if decision_output.gathering_complete or not decision_output.needs_more_info:
             # Sufficient info - proceed silently without streaming
             logger.info("→ sufficient information, proceeding to next step")
             # Update missing categories in state
-            state["gathering"]["missing_categories"] = gather_output.missing_categories
+            state["gathering"]["missing_categories"] = decision_output.missing_categories
             # Don't stream anything or add to messages
             # Just return to continue workflow
             log_node_complete("gather_info", state_before, state)
             return state
         
-        # Need more info - stream the question
-        logger.info("→ streaming information gathering question")
+        # Need more info - generate and stream the question in real-time
+        logger.info("→ generating and streaming information gathering question")
         
-        # Get stream writer for streaming
+        # Prepare question generation prompt
+        missing_info_text = ", ".join(decision_output.missing_categories) if decision_output.missing_categories else "general details"
+        question_prompt = QUESTION_GENERATION_PROMPT.format(
+            servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY,
+            issue_category=issue_category,
+            issue_priority=issue_priority,
+            support_team=assigned_team,
+            conversation_history=conversation_history,
+            gathering_round=gathering_round,
+            missing_info_text=missing_info_text
+        )
+        
+        # Set up streaming callback
         writer = get_stream_writer()
+        streamed_content = []
         
-        # Stream the question if response is not None
-        if gather_output.response:
-            for chunk in gather_output.response:
-                writer({"custom_llm_chunk": chunk})
+        def stream_callback(chunk: str):
+            writer({"custom_llm_chunk": chunk})
+            streamed_content.append(chunk)
         
-        # Add question to conversation if response exists
-        if gather_output.response:
+        # Generate question with real-time streaming
+        question_response = await client.chat_completion(
+            messages=[
+                {"role": "system", "content": question_prompt}
+            ],
+            model="openai/gpt-4.1",
+            temperature=0.7,
+            stream_callback=stream_callback,
+            use_streaming=True
+        )
+        
+        # Get the full streamed question
+        streamed_question = "".join(streamed_content)
+        
+        # Add streamed question to conversation
+        if streamed_question:
             if "conversation" not in state:
                 state["conversation"] = {}
             if "messages" not in state["conversation"]:
                 state["conversation"]["messages"] = []
             state["conversation"]["messages"].append({
                 "role": "assistant",
-                "content": gather_output.response
+                "content": streamed_question
             })
             
             # Update state with the response
-            state["conversation"]["current_response"] = gather_output.response
+            state["conversation"]["current_response"] = streamed_question
         
-        # Update missing categories regardless of response
-        state["gathering"]["missing_categories"] = gather_output.missing_categories
+        # Update missing categories from decision
+        state["gathering"]["missing_categories"] = decision_output.missing_categories
         
         # Log what this node wrote to state before interrupt
         log_node_complete("gather_info", state_before, state)

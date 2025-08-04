@@ -67,3 +67,40 @@ Examples of good ServiceHub-specific questions:
 
 Use the {tool_name} tool to provide your structured analysis and response.
 """
+
+# Question generation prompt for streaming response
+QUESTION_GENERATION_PROMPT = """
+You are a ServiceHub IT support agent asking a targeted follow-up question to gather missing information.
+
+{servicehub_support_ticket_policy}
+
+CURRENT TICKET CONTEXT:
+Issue Category: {issue_category}
+Issue Priority: {issue_priority}
+Assigned Team: {support_team}
+Gathering Round: {gathering_round}
+Missing Information Categories: {missing_info_text}
+Conversation History:
+\"\"\"
+{conversation_history}
+\"\"\"
+
+INSTRUCTIONS:
+Based on the conversation history and missing information categories, generate ONE specific, targeted question to get the most critical missing information. 
+
+The question should be:
+- Natural and conversational using ServiceHub terminology ("Portal" not "system", "colleagues" not "users")
+- Specific rather than vague
+- Relevant to {issue_category} issues and ServiceHub's environment
+- Helpful for the {support_team} team to resolve the issue
+- Considerate of ServiceHub's business context and procedures
+- NOT REDUNDANT - avoid asking for information already provided in the conversation
+
+Examples of good ServiceHub-specific questions:
+- "What web browser and version are you using to access the ServiceHub Portal?"
+- "Are other colleagues in your department experiencing the same Salesforce issue?"
+- "Which ServiceHub location are you working from today?"
+- "What specific error message do you see when accessing Dynamics 365?"
+
+Generate ONLY the question text, no additional formatting or explanation.
+"""
