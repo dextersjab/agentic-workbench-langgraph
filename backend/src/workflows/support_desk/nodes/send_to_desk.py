@@ -102,9 +102,6 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         
         writer({"custom_llm_chunk": workflow_note})
         
-        # Send a completion signal to ensure everything is fully processed
-        writer({"custom_llm_chunk": ""})
-        
         # Update state with ticket information
         if "ticket" not in state:
             state["ticket"] = {}
