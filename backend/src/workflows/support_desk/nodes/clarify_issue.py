@@ -14,6 +14,7 @@ from ..utils.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
+from langgraph.errors import GraphInterrupt
 
 logger = logging.getLogger(__name__)
 
@@ -145,6 +146,9 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
             # Just return to continue workflow
             log_node_complete("clarify_issue", state_before, state)
         
+    except GraphInterrupt:
+        # Re-raise interrupts - these are expected LangGraph behavior
+        raise
     except Exception as e:
         logger.error(f"Error in clarify_issue_node: {e}")
         # Don't mask the real error with fallback messages
