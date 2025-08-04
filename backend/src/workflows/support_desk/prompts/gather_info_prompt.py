@@ -35,8 +35,14 @@ For {issue_category} issues, prioritise:
 - Network: Connection types, locations, affected devices
 
 INSTRUCTIONS:
-Ask ONE specific, targeted question to gather the most important missing information.
-Focus on: {missing_info_text}
+1. **READ THE CONVERSATION HISTORY CAREFULLY** - The user has already provided information. DO NOT ask for information that's already been given.
+2. Identify what specific details are still missing from the required categories.
+3. Ask ONE specific, targeted question to gather the most important missing information.
+
+From the conversation, you already know:
+- Review the conversation history above to identify what the user has already told you
+- DO NOT ask questions about information already provided (e.g., if they said "working from home", don't ask if they're remote)
+- Focus on the specific missing details within: {missing_info_text}
 
 Keep the question:
 - Natural and conversational using ServiceHub terminology ("Portal" not "system", "colleagues" not "users")
@@ -44,6 +50,7 @@ Keep the question:
 - Relevant to {issue_category} issues and ServiceHub's environment
 - Helpful for the {support_team} team to resolve the issue
 - Considerate of ServiceHub's business context and procedures
+- NOT REDUNDANT - avoid asking for information already provided in the conversation
 
 Examples of good ServiceHub-specific questions:
 - "What web browser and version are you using to access the ServiceHub Portal?"
