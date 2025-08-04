@@ -4,7 +4,7 @@ Prompts for final response node in Support Desk workflow.
 These prompts use tool calling to generate structured outputs.
 """
 
-# Final response prompt - simplified for summary only
+# Final response prompt - brief acknowledgment only
 FINAL_RESPONSE_PROMPT = """
 You are an IT support agent providing a brief acknowledgment that a support ticket has been created.
 

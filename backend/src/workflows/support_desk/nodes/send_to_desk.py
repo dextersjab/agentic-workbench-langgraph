@@ -93,7 +93,16 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         writer({"custom_llm_chunk": ticket_html})
         writer({"custom_llm_chunk": "\n```"})
         
-        # Send a completion signal to ensure the artifact is fully processed
+        # Add fixed workflow note after the artifact
+        workflow_note = """
+
+---
+
+**Workflow complete**: Start a new conversation to test a different scenario."""
+        
+        writer({"custom_llm_chunk": workflow_note})
+        
+        # Send a completion signal to ensure everything is fully processed
         writer({"custom_llm_chunk": ""})
         
         # Update state with ticket information
@@ -115,8 +124,8 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
             state["classification"] = {}
         state["classification"]["assigned_team"] = ticket_data["assigned_team"]
         
-        # Store the complete response (summary + HTML in code block)
-        complete_response = f"{summary_content}\n\n```html\n{ticket_html}\n```"
+        # Store the complete response (summary + HTML + workflow note)
+        complete_response = f"{summary_content}\n\n```html\n{ticket_html}\n```{workflow_note}"
         
         # Update conversation state
         if "conversation" not in state:
