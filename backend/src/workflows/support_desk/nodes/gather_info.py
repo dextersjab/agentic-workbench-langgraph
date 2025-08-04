@@ -125,22 +125,26 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         # Get stream writer for streaming
         writer = get_stream_writer()
         
-        # Stream the question
-        for chunk in gather_output.response:
-            writer({"custom_llm_chunk": chunk})
+        # Stream the question if response is not None
+        if gather_output.response:
+            for chunk in gather_output.response:
+                writer({"custom_llm_chunk": chunk})
         
-        # Add question to conversation
-        if "conversation" not in state:
-            state["conversation"] = {}
-        if "messages" not in state["conversation"]:
-            state["conversation"]["messages"] = []
-        state["conversation"]["messages"].append({
-            "role": "assistant",
-            "content": gather_output.response
-        })
+        # Add question to conversation if response exists
+        if gather_output.response:
+            if "conversation" not in state:
+                state["conversation"] = {}
+            if "messages" not in state["conversation"]:
+                state["conversation"]["messages"] = []
+            state["conversation"]["messages"].append({
+                "role": "assistant",
+                "content": gather_output.response
+            })
+            
+            # Update state with the response
+            state["conversation"]["current_response"] = gather_output.response
         
-        # Update state with the response and missing categories
-        state["conversation"]["current_response"] = gather_output.response
+        # Update missing categories regardless of response
         state["gathering"]["missing_categories"] = gather_output.missing_categories
         
         # Log what this node wrote to state before interrupt

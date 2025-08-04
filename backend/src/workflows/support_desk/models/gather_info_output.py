@@ -16,8 +16,9 @@ class GatherInfoOutput(BaseModel):
         description="Whether more information is needed from the user"
     )
     
-    response: str = Field(
-        description="Either a targeted question or confirmation that info is sufficient"
+    response: str | None = Field(
+        default=None,
+        description="Targeted question when more info is needed, None when sufficient info is available"
     )
     
     reasoning: str = Field(

@@ -18,7 +18,10 @@ Issue Priority: {issue_priority}
 Assigned Team: {support_team}
 Gathering Round: {gathering_round}
 Missing Information: {missing_info_text}
-Conversation History: {conversation_history}
+Conversation History:
+\"\"\"
+{conversation_history}
+\"\"\"
 
 REQUIRED INFORMATION CATEGORIES:
 1. **Device/System Details**: Specific hardware/software involved, models, versions
@@ -45,6 +48,8 @@ DECISION CRITERIA:
 - **needs_more_info = False** if you have sufficient information to proceed
 - **gathering_complete = True** if you have comprehensive information or reached max rounds
 - **gathering_complete = False** if more rounds of questioning would be beneficial
+- **response = null** when needs_more_info is False (no question needed)
+- **response = "question text"** when needs_more_info is True (provide the specific question)
 
 QUESTION GUIDELINES (when needs_more_info = True):
 - Natural and conversational using ServiceHub terminology ("Portal" not "system", "colleagues" not "users")
