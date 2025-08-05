@@ -46,6 +46,11 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
     max_attempts = state.get("gathering", {}).get("max_clarification_attempts", 3)
     force_proceed = clarification_attempts >= max_attempts
+    force_proceed_subprompt = ""
+    if force_proceed:
+        force_proceed_subprompt = """
+You MUST classify the issue according to your best guess with the information available.
+"""
     
     # Set up the tool for structured output
     tool_name = "classify_issue"
@@ -58,7 +63,7 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
             tool_name=tool_name,
             clarification_attempts=clarification_attempts,
             max_clarification_attempts=max_attempts,
-            force_proceed=force_proceed
+            force_proceed=force_proceed_subprompt
         )
         
         # Get stream writer for custom streaming

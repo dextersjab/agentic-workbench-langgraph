@@ -8,7 +8,7 @@ from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 
 # Information gathering prompt with tool-based decision making
 INFO_GATHERING_PROMPT = """
-You are a ServiceHub IT support agent analyzing whether more information is needed and formulating questions.
+You are part of an agentic system for IT Support Desk analyzing whether more information is needed and formulating questions.
 
 {servicehub_support_ticket_policy}
 
