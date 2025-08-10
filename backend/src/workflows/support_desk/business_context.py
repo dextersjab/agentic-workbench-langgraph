@@ -8,7 +8,8 @@ workflow-specific categorizations and rules.
 SCHEMA_VERSION = "1.0"
 
 from typing import Literal
-from src.business_context import COMPANY_SUPPORT_TEAMS, BASE_SLA_POLICIES, PRIORITY_CONFIG
+from .config.company_config import COMPANY_SUPPORT_TEAMS
+from .utils import load_ontologies, get_sla_commitment as ontology_get_sla_commitment
 
 # Maximum number of information gathering rounds before proceeding to ticket creation
 MAX_GATHERING_ROUNDS = 2
@@ -71,10 +72,13 @@ KB_CATEGORIES = [
     "policies"
 ]
 
-# Workflow-specific SLA commitments (derived from company policies)
+# Load priority ontology for SLA calculations
+_, priorities_ontology, _ = load_ontologies()
+
+# Workflow-specific SLA commitments (using priority ontology)
 def get_sla_commitment(priority: str) -> tuple[str, int]:
     """
-    Get SLA commitment for support desk based on priority and company policies.
+    Get SLA commitment for support desk based on priority ontology.
     
     Args:
         priority: Issue priority (P1, P2, P3, P4)
@@ -82,23 +86,10 @@ def get_sla_commitment(priority: str) -> tuple[str, int]:
     Returns:
         Tuple of (SLA description, hours)
     """
-    if priority not in PRIORITY_CONFIG:
-        priority = "P3"  # Default to medium priority
-    
-    priority_info = PRIORITY_CONFIG[priority]
-    base_hours = priority_info["resolution_hours"]
-    multiplier = priority_info["multiplier"]
-    
-    # Apply business hours multiplier for non-critical issues
-    if priority != "P1":
-        adjusted_hours = int(base_hours * multiplier / 2.0)  # Normalize multiplier
-    else:
-        adjusted_hours = base_hours  # Critical issues get full 24/7 commitment
-    
-    return (f"{adjusted_hours} hours", adjusted_hours)
+    return ontology_get_sla_commitment(priorities_ontology, priority)
 
 # SLA mapping for quick lookup
 SLA_COMMITMENTS = {
-    priority: get_sla_commitment(priority) 
-    for priority in PRIORITY_CONFIG.keys()
+    f"P{i}": get_sla_commitment(f"P{i}") 
+    for i in range(1, 5)
 }

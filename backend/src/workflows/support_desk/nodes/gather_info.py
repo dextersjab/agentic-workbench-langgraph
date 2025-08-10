@@ -12,7 +12,7 @@ from copy import deepcopy
 
 from ..state import SupportDeskState
 from ..models.gather_info_output import GatherInfoOutput, GatherInfoDecision
-from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT, QUESTION_GENERATION_PROMPT
+from ..prompts.gather_info_prompt import INFO_GATHERING_PROMPT, QUESTION_GENERATION_PROMPT, REQUIRED_INFO_CATEGORIES, get_formatted_category_priorities
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
 from ..business_context import MAX_GATHERING_ROUNDS
@@ -93,7 +93,9 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
             conversation_history=conversation_history,
             tool_name=schema_name,
             gathering_round=gathering_round,
-            missing_info_text=missing_info_text
+            missing_info_text=missing_info_text,
+            required_info_categories=REQUIRED_INFO_CATEGORIES,
+            category_priorities=get_formatted_category_priorities(issue_category)
         )
         
         # Call LLM with structured output format (non-streaming for decision)

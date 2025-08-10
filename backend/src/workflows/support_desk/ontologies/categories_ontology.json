@@ -1,0 +1,74 @@
+{
+  "issue_categories": {
+    "hardware": {
+      "id": "hardware",
+      "name": "Hardware",
+      "description": "Physical device issues including problems with laptops, desktop computers, printers, phones, tablets, monitors, keyboards, mice, and other physical equipment. This category covers hardware failures, damage, connectivity issues with physical devices, and requests for new hardware.",
+      "examples": [
+        "Laptop won't turn on",
+        "Printer not working",
+        "Phone screen cracked",
+        "Keyboard keys stuck",
+        "Monitor flickering",
+        "Mouse not responding"
+      ],
+      "keywords": ["device", "laptop", "printer", "phone", "computer", "monitor", "keyboard", "mouse", "hardware", "physical", "equipment"]
+    },
+    "software": {
+      "id": "software",
+      "name": "Software",
+      "description": "Application-related problems including software crashes, installation issues, updates, compatibility problems, and general application malfunctions. This covers both system software and third-party applications.",
+      "examples": [
+        "Application keeps crashing",
+        "Can't install software",
+        "Software update failed",
+        "Program not responding",
+        "Application error messages",
+        "Software compatibility issues"
+      ],
+      "keywords": ["application", "software", "program", "install", "crash", "error", "update", "app", "system", "compatibility"]
+    },
+    "access": {
+      "id": "access",
+      "name": "Access",
+      "description": "Authentication and authorization issues including login problems, password resets, account lockouts, permission errors, and access requests. This category handles all issues related to user credentials and system access.",
+      "examples": [
+        "Can't login to system",
+        "Password reset needed",
+        "Account locked out",
+        "Permission denied errors",
+        "Need access to shared folder",
+        "Two-factor authentication issues"
+      ],
+      "keywords": ["login", "password", "access", "permission", "account", "authentication", "locked", "credentials", "authorize", "reset"]
+    },
+    "network": {
+      "id": "network",
+      "name": "Network",
+      "description": "Connectivity and network-related issues including WiFi problems, VPN connections, internet access, network drives, and general network performance issues. This covers both wired and wireless network problems.",
+      "examples": [
+        "Can't connect to WiFi",
+        "VPN not working",
+        "Internet connection slow",
+        "Can't access network drives",
+        "Network timeout errors",
+        "WiFi keeps disconnecting"
+      ],
+      "keywords": ["network", "wifi", "internet", "vpn", "connection", "connectivity", "ethernet", "wireless", "bandwidth", "disconnected"]
+    },
+    "other": {
+      "id": "other",
+      "name": "Other",
+      "description": "Issues that don't clearly fit into the hardware, software, access, or network categories. This includes general inquiries, training requests, policy questions, and miscellaneous IT-related matters.",
+      "examples": [
+        "Need IT training",
+        "Question about IT policies",
+        "Request for new feature",
+        "General IT consultation",
+        "Data recovery request",
+        "Unclear technical issue"
+      ],
+      "keywords": ["other", "general", "misc", "training", "policy", "question", "request", "help", "support", "inquiry"]
+    }
+  }
+}

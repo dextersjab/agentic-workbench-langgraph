@@ -1,7 +1,18 @@
-"""Company-wide support team definitions"""
+"""
+Basic company configuration for Support Desk workflow.
 
-SCHEMA_VERSION = "1.0"
+This contains only the minimal company information needed that doesn't belong in ontologies.
+"""
 
+COMPANY_INFO = {
+    "name": "Example Corp",
+    "support_hours": "24/7",
+    "support_email": "support@company.com",
+    "support_phone": "1-800-SUPPORT",
+    "ticket_portal": "https://support.company.com"
+}
+
+# Support team contact information (extends ontology-based team definitions)
 COMPANY_SUPPORT_TEAMS = {
     "L1": {
         "name": "Level 1 Support",

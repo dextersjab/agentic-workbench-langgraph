@@ -5,6 +5,17 @@ These prompts use tool calling to generate structured outputs.
 """
 
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
+from ..utils import load_ontologies, format_required_info_for_prompt, get_category_priorities
+
+# Load ontologies at module level
+_, _, required_info_ontology = load_ontologies()
+
+# Format required info categories at module level
+REQUIRED_INFO_CATEGORIES = format_required_info_for_prompt(required_info_ontology)
+
+# Helper function to get category priorities dynamically
+def get_formatted_category_priorities(issue_category: str) -> str:
+    return get_category_priorities(required_info_ontology, issue_category)
 
 # Information gathering prompt with tool-based decision making
 INFO_GATHERING_PROMPT = """
@@ -24,18 +35,10 @@ Conversation History:
 \"\"\"
 
 REQUIRED INFORMATION CATEGORIES:
-1. **Device/System Details**: Specific hardware/software involved, models, versions
-2. **Timeline**: When did this start, frequency, patterns
-3. **User Impact**: How this affects work, urgency, business impact
-4. **Symptoms**: Specific error messages, behaviors, what exactly happens
-5. **Context**: What user was doing when issue occurred, recent changes
-6. **Environment**: User location, department, role (if relevant to issue)
+{required_info_categories}
 
 For {issue_category} issues, prioritise:
-- Hardware: Device models, physical symptoms, connectivity
-- Software: Application versions, error messages, affected workflows  
-- Access: Account names, systems, permission levels
-- Network: Connection types, locations, affected devices
+{category_priorities}
 
 ANALYSIS INSTRUCTIONS:
 1. **READ THE CONVERSATION HISTORY CAREFULLY** - The user has already provided information. DO NOT ask for information that's already been given.

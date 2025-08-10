@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 
 from ..business_context import get_sla_commitment, SUPPORT_TEAMS
-from src.business_context import COMPANY_INFO
+from ..config.company_config import COMPANY_INFO
 
 
 def generate_ticket_id(issue_info: Dict[str, Any]) -> str:

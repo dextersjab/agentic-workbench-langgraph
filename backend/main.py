@@ -11,7 +11,7 @@ from src.core import logging_config
 # App is imported as string for reload functionality below
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.DEBUG)
 
 if __name__ == "__main__":
     logger.info("Starting Agentic Workflow Workbench API server")

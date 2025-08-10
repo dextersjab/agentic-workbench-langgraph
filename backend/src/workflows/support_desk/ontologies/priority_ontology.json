@@ -1,0 +1,134 @@
+{
+  "priority_levels": {
+    "p1": {
+      "id": "p1",
+      "name": "P1 - Critical",
+      "description": "Critical issues with severe business impact including complete system outages, security breaches, data loss risks, and problems affecting multiple users or critical business operations. These issues require immediate attention and escalation.",
+      "response_time": "1 hour",
+      "resolution_time": "4 hours",
+      "response_hours": 1,
+      "resolution_hours": 4,
+      "multiplier": 1.0,
+      "criteria": [
+        "Complete system or service outage",
+        "Security breach or vulnerability actively being exploited",
+        "Data loss or corruption affecting business operations",
+        "Critical business process completely blocked",
+        "Issue affecting more than 50 users",
+        "Revenue-impacting system failure"
+      ],
+      "examples": [
+        "Email system down for entire company",
+        "Active security breach detected",
+        "Database corruption affecting production",
+        "Payment processing system failure",
+        "Company website completely inaccessible",
+        "Critical application crash affecting all users"
+      ],
+      "keywords": ["critical", "outage", "security", "breach", "down", "emergency", "urgent", "company-wide", "all users", "data loss"]
+    },
+    "p2": {
+      "id": "p2",
+      "name": "P2 - High",
+      "description": "High-priority issues causing significant impact to individual or team productivity. These issues seriously impair work but don't completely prevent it, affecting a moderate number of users or important business functions with limited workarounds.",
+      "response_time": "4 hours",
+      "resolution_time": "24 hours",
+      "response_hours": 4,
+      "resolution_hours": 24,
+      "multiplier": 1.5,
+      "criteria": [
+        "Significant degradation of service performance",
+        "Important feature not working properly",
+        "Issue affecting 10-50 users",
+        "Work significantly impaired but not completely blocked",
+        "Limited or difficult workaround available",
+        "Recurring issue affecting productivity"
+      ],
+      "examples": [
+        "Department printer not working",
+        "Application running very slowly",
+        "Cannot access important shared drive",
+        "VPN connection intermittently failing",
+        "Key software feature malfunctioning",
+        "Email delays affecting team communication"
+      ],
+      "keywords": ["high", "significant", "team", "department", "slow", "degraded", "important", "productivity", "multiple users", "impaired"]
+    },
+    "p3": {
+      "id": "p3",
+      "name": "P3 - Low",
+      "description": "Low-priority issues causing minor inconvenience with minimal business impact. These issues have easy workarounds available, affect individual users, or are non-urgent requests that can be addressed during normal business operations.",
+      "response_time": "24 hours",
+      "resolution_time": "72 hours",
+      "response_hours": 24,
+      "resolution_hours": 72,
+      "multiplier": 2.0,
+      "criteria": [
+        "Minor inconvenience with easy workaround",
+        "Cosmetic or non-critical issues",
+        "Single user affected",
+        "Feature requests or enhancements",
+        "General questions or training requests",
+        "Non-urgent administrative tasks"
+      ],
+      "examples": [
+        "Request for software installation",
+        "Mouse scroll wheel not working smoothly",
+        "Non-critical application feature request",
+        "Password reset for non-urgent system",
+        "Request for larger monitor",
+        "General IT training inquiry"
+      ],
+      "keywords": ["low", "minor", "inconvenience", "workaround", "single user", "request", "enhancement", "training", "non-urgent", "cosmetic"]
+    },
+    "p4": {
+      "id": "p4",
+      "name": "P4 - Info/Request",
+      "description": "Informational requests and non-issue inquiries that require no urgency. These include general questions, information gathering for future projects, access requests for non-critical systems, and other administrative tasks that can be handled as time permits.",
+      "response_time": "48 hours",
+      "resolution_time": "5 business days",
+      "response_hours": 48,
+      "resolution_hours": 120,
+      "multiplier": 3.0,
+      "criteria": [
+        "Information-only requests",
+        "Future planning inquiries",
+        "Non-critical access requests",
+        "Documentation requests",
+        "General administrative tasks",
+        "No immediate business impact"
+      ],
+      "examples": [
+        "Request for system documentation",
+        "Information about future upgrades",
+        "Access request for development environment",
+        "General IT policy questions",
+        "Hardware specifications inquiry",
+        "Software license information request"
+      ],
+      "keywords": ["info", "information", "request", "inquiry", "question", "documentation", "future", "planning", "administrative"]
+    }
+  },
+  "escalation_matrix": {
+    "p1": {
+      "initial_contact": "Help Desk",
+      "escalation_path": ["Senior Technician", "IT Manager", "CTO"],
+      "notification_list": ["IT Manager", "Department Head", "Executive Team"]
+    },
+    "p2": {
+      "initial_contact": "Help Desk",
+      "escalation_path": ["Senior Technician", "Team Lead", "IT Manager"],
+      "notification_list": ["Team Lead", "Department Head"]
+    },
+    "p3": {
+      "initial_contact": "Help Desk",
+      "escalation_path": ["Senior Technician", "Team Lead"],
+      "notification_list": ["Team Lead"]
+    },
+    "p4": {
+      "initial_contact": "Help Desk",
+      "escalation_path": ["Senior Technician"],
+      "notification_list": []
+    }
+  }
+}

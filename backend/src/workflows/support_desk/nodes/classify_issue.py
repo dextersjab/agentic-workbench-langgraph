@@ -3,19 +3,24 @@ Classify Issue node for Support Desk workflow.
 
 This node categorises the IT issue into predefined categories.
 """
+import json
 import logging
 from copy import deepcopy
 from typing import Dict, Any
+from pathlib import Path
 
 from ..state import SupportDeskState
 from ..models.classify_output import ClassifyOutput
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
-from ..utils import build_conversation_history
+from ..utils import build_conversation_history, load_ontologies, format_categories_for_prompt, format_priorities_for_prompt
 from ..utils.state_logger import log_node_start, log_node_complete
+from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
+
+
 
 
 async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
@@ -57,13 +62,25 @@ You MUST classify the issue according to your best guess with the information av
     tools = [pydantic_to_openai_tool(ClassifyOutput, tool_name)]
     
     try:
+        # Load ontologies (now includes required_info)
+        categories, priorities, _ = load_ontologies()
+        
+        # Format ontologies for prompt
+        issue_categories = format_categories_for_prompt(categories)
+        priority_levels = format_priorities_for_prompt(priorities)
+        
+        logger.debug(f"formatted {issue_categories=}")
+        logger.debug(f"formatted {priority_levels=}")
         # Create prompt with tool calling instruction
         prompt = CLASSIFICATION_PROMPT.format(
             conversation_history=conversation_history,
             tool_name=tool_name,
             clarification_attempts=clarification_attempts,
             max_clarification_attempts=max_attempts,
-            force_proceed=force_proceed_subprompt
+            force_proceed_subprompt=force_proceed_subprompt,
+            issue_categories=issue_categories,
+            priority_levels=priority_levels,
+            servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY
         )
         
         # Get stream writer for custom streaming
