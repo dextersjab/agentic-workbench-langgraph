@@ -45,7 +45,12 @@ class WorkflowRegistry:
             cls._try_load_workflow(name, checkpointer)
         
         if name not in cls._workflows:
-            raise ValueError(f"Unknown workflow: {name}")
+            logger.error(f"Unknown workflow: {name}")
+            registered = list(cls._workflows.keys())
+            if registered:
+                raise ValueError(f"Unknown workflow: {name}. Registered workflows: {str(registered)[:200]}...")
+            else:
+                raise ValueError(f"No registered workflows found (searched for name '{name}')")
             
         # The factory is now a compiled graph instance from _try_load_workflow
         workflow = cls._workflows[name]
