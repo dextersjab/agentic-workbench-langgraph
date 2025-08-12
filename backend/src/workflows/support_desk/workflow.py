@@ -11,8 +11,8 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from .state import SupportDeskState
-from .nodes.clarify_issue import clarify_issue_node, should_continue_to_triage
-from .nodes.classify_issue import classify_issue_node
+from .nodes.clarify_issue import clarify_issue_node
+from .nodes.classify_issue import classify_issue_node, should_continue_to_triage
 from .nodes.triage_issue import triage_issue_node
 from .nodes.has_sufficient_info import has_sufficient_info_node, has_sufficient_info
 from .nodes.gather_info import gather_info_node
@@ -74,13 +74,14 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Set entry point to classification
     workflow.set_entry_point("classify_issue")
     
-    # Conditional edge from classification: either proceed or ask for clarification
+    # Conditional edge from classification: clarify, triage, or escalate
     workflow.add_conditional_edges(
         "classify_issue",
         should_continue_to_triage,
         {
-            False: "clarify_issue",    # Need clarification
-            True: "triage_issue"       # Ready to proceed
+            "clarify": "clarify_issue",    # Need clarification
+            "triage": "triage_issue",       # Ready to proceed with triage
+            "escalate": "send_to_desk"      # User requested escalation
         }
     )
     

@@ -22,22 +22,28 @@ This is clarification attempt #{clarification_attempts} of {max_clarification_at
 
 {additional_context}
 
-IMPORTANT: if the user is requesting escalation with phrases like:
+## Escalation Detection
+
+First, check if the user is requesting escalation with phrases like:
 - "just raise the ticket"
 - "connect me to a human"
-- "stop asking questions"
+- "stop asking questions"  
 - "I don't have time for this"
+- "let me speak to someone"
+- "escalate this"
 
-If detected, set Force Proceed to True, and you MUST classify the issue based on your best guess with the available information and set needs_clarification=False.
+If escalation is detected, set `user_requested_escalation=True` and attempt to classify with best guess.
 
-Otherwise, determine if you have enough information to properly classify the issue.
+## Classification Logic
+
+If NOT escalating, determine if you have enough information to properly classify the issue.
 
 If the user's input is:
 - Too vague (e.g., "hi", "help", "I have a problem")
 - Missing crucial details (no specific device, application, or error described)
 - Unclear about the actual problem
 
-Then set `needs_clarification=True` and ask a clarifying question in the response.
+Then set `needs_clarification=True`. You may leave category and priority as None if uncertain.
 
 If you DO have sufficient information, categorise into one of these categories:
 {issue_categories}
@@ -45,9 +51,22 @@ If you DO have sufficient information, categorise into one of these categories:
 Priority levels:
 {priority_levels}
 
-Decision logic:
-- If needs_clarification=True: Ask a specific question to gather more details
-- If needs_clarification=False: Provide classification summary and next steps
+## Decision Summary
+
+- If user_requested_escalation=True: Set category/priority to best guess (can be None), needs_clarification=False, no response needed
+- If needs_clarification=True: Category/priority can be None if uncertain, **MUST set response to a specific clarifying question**
+- If confident in classification: Set category/priority appropriately, needs_clarification=False, no response needed
+
+## Clarifying Questions
+
+When needs_clarification=True, generate a helpful clarifying question in the `response` field:
+- Be specific about what information you need
+- Ask one clear question at a time
+- Be friendly and professional
+- Examples:
+  - "Could you describe what specific error message you're seeing?"
+  - "Which application or system are you having trouble accessing?"
+  - "When did this issue first start occurring?"
 
 This is the full conversation history between the IT Support Desk agentic system until now:
 \"\"\"

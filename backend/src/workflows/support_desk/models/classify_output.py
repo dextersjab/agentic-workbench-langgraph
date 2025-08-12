@@ -2,6 +2,7 @@
 Pydantic model for classify_issue node output.
 """
 from pydantic import BaseModel, Field
+from typing import Optional
 from src.workflows.support_desk.business_context import IssueCategoryType, IssuePriorityType
 
 
@@ -16,12 +17,19 @@ class ClassifyOutput(BaseModel):
         description="Whether more information is needed to properly classify the issue"
     )
     
-    category: IssueCategoryType = Field(
-        description="Primary category of the IT issue"
+    user_requested_escalation: bool = Field(
+        default=False,
+        description="Whether the user has requested to speak to a human or escalate the issue"
     )
     
-    priority: IssuePriorityType = Field(
-        description="Priority level based on urgency and impact"
+    category: Optional[IssueCategoryType] = Field(
+        default=None,
+        description="Primary category of the IT issue (None if uncertain)"
+    )
+    
+    priority: Optional[IssuePriorityType] = Field(
+        default=None,
+        description="Priority level based on urgency and impact (None if uncertain)"
     )
     
     confidence: float = Field(
@@ -31,5 +39,10 @@ class ClassifyOutput(BaseModel):
     
     reasoning: str = Field(
         description="Brief explanation of the classification decision"
+    )
+    
+    response: Optional[str] = Field(
+        default=None,
+        description="Clarifying question to ask the user (only set when needs_clarification=True)"
     )
     

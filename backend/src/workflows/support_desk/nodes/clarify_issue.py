@@ -1,90 +1,58 @@
 """
-Clarify Issue node for Support Desk workflow - Tool-based version.
+Clarify Issue node for Support Desk workflow - Simple HITL version.
 
-This node analyzes user input and asks clarifying questions when needed.
+This node handles user input collection via interrupt after classify_issue generates questions.
 """
 import logging
 from copy import deepcopy
 
-from ..business_context import MAX_GATHERING_ROUNDS
-
 from ..state import SupportDeskState
-from ..models.clarify_output import ClarifyOutput
-from ..prompts.clarify_issue_prompt import CLARIFICATION_PROMPT
-from ..utils import build_conversation_history
-from ..utils.state_logger import log_node_start, log_node_complete
-from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
-from langgraph.config import get_stream_writer
 from langgraph.types import interrupt
-from langgraph.errors import GraphInterrupt
 
 logger = logging.getLogger(__name__)
 
 
 async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Analyse if clarification is needed to classify this support ticket and ask questions if necessary.
+    Simple HITL node that interrupts to collect user clarification.
+    
+    The clarifying question has already been generated and streamed by classify_issue.
+    This node just handles the interrupt and response collection.
 
     Args:
         state: Workflow global state
     
     Returns:
-        Updated state with 
+        Updated state with user's clarification response
     """
-    messages = state.get("messages", [])
-    clarification_state = state.setdefault("clarification", {})
-    awaiting_reply = clarification_state.get("awaiting_reply", False)
-    clarification_attempt = clarification_state.get("clarification_attempts", 0)
-
-    if awaiting_reply:
-        # Resume path
-        user_response = interrupt("Waiting for user to clarify the nature of their support request")
-        if user_response and str(user_response).strip():
-            messages.append({
-                "role": "user",
-                "content": user_response
-            })
-        clarification_state["awaiting_reply"] = False
-        clarification_state["clarification_attempts"] = clarification_attempt + 1
-        return state
-
-    if clarification_attempt >= MAX_GATHERING_ROUNDS:
-        # Exhausted number of tool calls
-        clarification_state["awaiting_reply"] = False
-        return state
+    state = deepcopy(state)
     
-    # Default path
-    # user_input = messages[-1]["content"] if messages and messages[-1].get("role") == "user" else ""
-    conversation_history = build_conversation_history(messages)
+    # Log node entry
+    logger.info("→ clarify_issue: waiting for user response")
+    
+    # Get current clarification attempts
     clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
-    max_attempts = state.get("gathering", {}).get("max_clarification_attempts", 3)
-    tool_name = "clarify_analysis"
-    tools = [pydantic_to_openai_tool(ClarifyOutput, tool_name)] # set up tool for structured output
-
-    prompt = CLARIFICATION_PROMPT.format(
-        # user_input=user_input,
-        conversation_history=conversation_history,
-        clarification_attempts=clarification_attempts,
-        max_clarification_attempts=max_attempts,
-        tool_name=tool_name
-    )
-    assistant_response = await client.chat_completion(
-        messages=[{
-            "role": "system",
-            "content": prompt,
-        }],
-        model="openai/gpt-4.1",
-        temperature=0.3,
-        tools=tools,
-        tool_choice="required"
-    )
-    messages.append({
-        "role": "assistant",
-        "content": assistant_response,
-    })
-    clarification_state["awaiting_reply"] = True
-    return interrupt("Waiting for user to clarify the nature of their support request")
-        
+    
+    # Interrupt and wait for user response
+    user_response = interrupt("Waiting for user response to clarification")
+    
+    # Add user response to messages
+    if user_response and str(user_response).strip():
+        if "messages" not in state:
+            state["messages"] = []
+        state["messages"].append({
+            "role": "user",
+            "content": str(user_response)
+        })
+        logger.info(f"→ received user response: {str(user_response)[:50]}...")
+    
+    # Increment clarification attempts
+    if "gathering" not in state:
+        state["gathering"] = {}
+    state["gathering"]["clarification_attempts"] = clarification_attempts + 1
+    logger.info(f"→ clarification attempt {clarification_attempts + 1} complete")
+    
+    return state
 
 
 # async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
@@ -221,22 +189,3 @@ async def clarify_issue_node(state: SupportDeskState) -> SupportDeskState:
 #         raise
     
 #     return state
-
-
-def should_continue_to_triage(state: SupportDeskState) -> bool:
-    """
-    Determine if we should continue to triage or ask for clarification.
-    
-    Args:
-        state: Current workflow state
-        
-    Returns:
-        True if ready for triage, False if need clarification
-    """
-    needs_clarification = state.get("needs_clarification", False)
-    if needs_clarification:
-        logger.info("→ needs clarification")
-        return False
-    else:
-        logger.info("→ sufficient info")
-        return True

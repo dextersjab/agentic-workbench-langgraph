@@ -6,7 +6,7 @@ This node categorises the IT issue into predefined categories.
 import json
 import logging
 from copy import deepcopy
-from typing import Dict, Any
+from typing import Dict, Any, Literal
 from pathlib import Path
 
 from ..state import SupportDeskState
@@ -119,43 +119,57 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
             output_data = extract_tool_call_args(response, tool_name)
             classify_output = ClassifyOutput(**output_data)
             
-            logger.info(f"→ {classify_output.category}/{classify_output.priority} (conf: {classify_output.confidence})")
+            # Log classification results
+            category = classify_output.category
+            priority = classify_output.priority
+            logger.info(f"→ {str(category)} | {str(priority)} (conf: {classify_output.confidence})")
+            
+            # Always update classification state
+            if "classification" not in state:
+                state["classification"] = {}
+            state["classification"]["issue_category"] = classify_output.category
+            state["classification"]["issue_priority"] = classify_output.priority
+            state["classification"]["user_requested_escalation"] = classify_output.user_requested_escalation
+            
+            # Update gathering state for clarification needs
+            if "gathering" not in state:
+                state["gathering"] = {}
             
             # Check if clarification is needed (unless we've hit the limit)
             if classify_output.needs_clarification and not force_proceed:
                 logger.info("→ needs clarification")
-                
-                # Update gathering state
-                if "gathering" not in state:
-                    state["gathering"] = {}
                 state["gathering"]["needs_clarification"] = True
                 
-                # Add clarifying question to conversation
+                # Stream the clarifying question if provided
+                if classify_output.response:
+                    logger.info("→ streaming clarifying question")
+                    for chunk in classify_output.response:
+                        writer({"custom_llm_chunk": chunk})
+                    
+                    # Add the clarifying question to messages
+                    if "messages" not in state:
+                        state["messages"] = []
+                    state["messages"].append({
+                        "role": "assistant",
+                        "content": classify_output.response
+                    })
+            elif classify_output.user_requested_escalation:
+                logger.info("→ user requested escalation")
+                state["gathering"]["needs_clarification"] = False
+                # Will route directly to send_to_desk
+            else:
+                logger.info("→ classification complete")
+                state["gathering"]["needs_clarification"] = False
+                # Will route to triage
+                
+                # Add the tool call response to messages for successful classification
+                # (For clarification case, the question was already added above)
                 if "messages" not in state:
                     state["messages"] = []
                 state["messages"].append({
                     "role": "assistant",
-                    "content": classify_output.response
+                    "content": response
                 })
-            else:
-                logger.info("→ classification complete")
-                
-                # DON'T stream - this is internal processing, not user-facing
-                # Classification happens silently and routes to triage
-                
-                # Update state with structured classification information
-                if "classification" not in state:
-                    state["classification"] = {}
-                state["classification"]["issue_category"] = classify_output.category
-                state["classification"]["issue_priority"] = classify_output.priority
-                
-                if "gathering" not in state:
-                    state["gathering"] = {}
-                state["gathering"]["needs_clarification"] = False
-                # state["current_response"] = classify_output.response
-                
-                # DON'T add to conversation history - this is internal routing
-                # The user doesn't need to see "I've classified this as hardware..."
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
@@ -174,3 +188,34 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
     log_node_complete("classify_issue", state_before, state)
     
     return state
+
+
+def should_continue_to_triage(state: SupportDeskState) -> Literal["clarify", "triage", "escalate"]:
+    """
+    Determine routing from classification: clarify, triage, or escalate.
+    
+    Args:
+        state: Current workflow state
+        
+    Returns:
+        "escalate" if user requested escalation
+        "clarify" if needs clarification or missing category/priority
+        "triage" if ready for normal triage
+    """
+    # Check for escalation request
+    user_requested_escalation = state.get("classification", {}).get("user_requested_escalation", False)
+    if user_requested_escalation:
+        logger.info("→ user requested escalation")
+        return "escalate"
+    
+    # Check if we need clarification
+    needs_clarification = state.get("gathering", {}).get("needs_clarification", False)
+    category = state.get("classification", {}).get("issue_category")
+    priority = state.get("classification", {}).get("issue_priority")
+    
+    if needs_clarification or category is None or priority is None:
+        logger.info("→ needs clarification")
+        return "clarify"
+    else:
+        logger.info("→ sufficient info for triage")
+        return "triage"
