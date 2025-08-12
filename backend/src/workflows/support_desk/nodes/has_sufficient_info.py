@@ -11,7 +11,7 @@ from ..models.info_completeness_output import InfoCompletenessOutput
 from ..prompts.has_sufficient_info_prompt import HAS_SUFFICIENT_INFO_PROMPT
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
-from ..business_context import MAX_GATHERING_ROUNDS
+from ..business_context import MAX_GATHERING_ROUNDS, format_required_info_categories, format_category_specific_priorities
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 
 logger = logging.getLogger(__name__)
@@ -62,6 +62,8 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
             gathering_round=gathering_round,
             conversation_history=conversation_history,
             max_gathering_rounds=MAX_GATHERING_ROUNDS,
+            required_info_categories=format_required_info_categories(),
+            category_specific_priorities=format_category_specific_priorities(issue_category),
             tool_name=tool_name
         )
         

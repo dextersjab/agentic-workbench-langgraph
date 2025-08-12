@@ -93,3 +93,70 @@ SLA_COMMITMENTS = {
     f"P{i}": get_sla_commitment(f"P{i}") 
     for i in range(1, 5)
 }
+
+# Required information categories for ticket creation
+REQUIRED_INFO_CATEGORIES = {
+    "device_system": {
+        "name": "Device/System Details",
+        "description": "Specific hardware/software involved, models, versions"
+    },
+    "timeline": {
+        "name": "Timeline", 
+        "description": "When did this start, frequency, patterns"
+    },
+    "user_impact": {
+        "name": "User Impact",
+        "description": "How this affects work, urgency, business impact"
+    },
+    "symptoms": {
+        "name": "Symptoms",
+        "description": "Specific error messages, behaviors, what exactly happens"
+    },
+    "context": {
+        "name": "Context",
+        "description": "What user was doing when issue occurred, recent changes"
+    },
+    "environment": {
+        "name": "Environment", 
+        "description": "User location, department, role (if relevant to issue)"
+    }
+}
+
+# Category-specific information priorities for ServiceHub environment
+CATEGORY_SPECIFIC_PRIORITIES = {
+    "hardware": {
+        "name": "Hardware",
+        "priorities": "Device models, physical symptoms, connectivity (Dell/Lenovo equipment)"
+    },
+    "software": {
+        "name": "Software", 
+        "priorities": "Application versions, error messages, affected workflows (ServiceHub Portal, Dynamics 365, Salesforce CRM, Azure AD)"
+    },
+    "access": {
+        "name": "Access",
+        "priorities": "Account names, systems, permission levels (consider department-specific procedures)"
+    },
+    "network": {
+        "name": "Network",
+        "priorities": "Connection types, locations, affected devices (London HQ, Manchester, Edinburgh, remote workers)"
+    }
+}
+
+def format_required_info_categories() -> str:
+    """Format required information categories as markdown."""
+    lines = ["## Required Information Categories", ""]
+    for i, category in enumerate(REQUIRED_INFO_CATEGORIES.values(), 1):
+        lines.append(f"{i}. **{category['name']}**: {category['description']}")
+    return "\n".join(lines)
+
+def format_category_specific_priorities(issue_category: str) -> str:
+    """Format category-specific priorities as markdown."""
+    lines = [
+        "## Category-Specific Priorities",
+        "",
+        f"For **{issue_category}** issues in ServiceHub's environment, prioritize:",
+        ""
+    ]
+    for priority in CATEGORY_SPECIFIC_PRIORITIES.values():
+        lines.append(f"- **{priority['name']}**: {priority['priorities']}")
+    return "\n".join(lines)

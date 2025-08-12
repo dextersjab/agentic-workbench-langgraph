@@ -5,7 +5,7 @@ These prompts use tool calling to generate structured outputs.
 """
 
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
-from ..business_context import MAX_GATHERING_ROUNDS
+from ..business_context import MAX_GATHERING_ROUNDS, REQUIRED_INFO_CATEGORIES, CATEGORY_SPECIFIC_PRIORITIES
 
 # Has sufficient info prompt using tool calling
 HAS_SUFFICIENT_INFO_PROMPT = """
@@ -20,19 +20,9 @@ Assigned Team: {support_team}
 Gathering Round: {gathering_round}
 Conversation History: {conversation_history}
 
-REQUIRED INFORMATION CATEGORIES:
-1. **Device/System Details**: Specific hardware/software involved, models, versions
-2. **Timeline**: When did this start, frequency, patterns
-3. **User Impact**: How this affects work, urgency, business impact
-4. **Symptoms**: Specific error messages, behaviors, what exactly happens
-5. **Context**: What user was doing when issue occurred, recent changes
-6. **Environment**: User location, department, role (if relevant to issue)
+{required_info_categories}
 
-For {issue_category} issues in ServiceHub's environment, prioritize:
-- Hardware: Device models, physical symptoms, connectivity (Dell/Lenovo equipment)
-- Software: Application versions, error messages, affected workflows (ServiceHub Portal, Dynamics 365, Salesforce CRM, Azure AD)
-- Access: Account names, systems, permission levels (consider department-specific procedures)
-- Network: Connection types, locations, affected devices (London HQ, Manchester, Edinburgh, remote workers)
+{category_specific_priorities}
 
 IMPORTANT: Check if the user is requesting to escalate or stop information gathering:
 - "just raise the ticket"
