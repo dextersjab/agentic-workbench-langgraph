@@ -44,18 +44,27 @@ async def classify_issue_node(state: SupportDeskState) -> SupportDeskState:
     log_node_start("classify_issue", ["messages"])
     
     # Extract conversation history for context
-    messages = state.get("conversation", {}).get("messages", [])
+    messages = state.get("messages", [])
     conversation_history = build_conversation_history(messages)
     
     # Check if we've exhausted clarification attempts
     clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
     max_attempts = state.get("gathering", {}).get("max_clarification_attempts", 3)
     force_proceed = clarification_attempts >= max_attempts
-    force_proceed_subprompt = ""
+    
+    # Set prompt components based on whether we need to force classification
     if force_proceed:
-        force_proceed_subprompt = """
+        task_instruction = "Call the {tool_name} tool with the combination of category and priority."
+        additional_context = """
 You MUST classify the issue according to your best guess with the information available.
 """
+    else:
+        task_instruction = """
+If you have sufficient information to confidently classify this ticket, call the {tool_name} tool with the combination of category and priority.
+
+If you do NOT have sufficient information, respond directly to the user by asking for the most information-dense missing detail. You have a maximum of {max_clarification_attempts} total attempts to ascertain this information to keep the user experience pleasant.
+"""
+        additional_context = ""
     
     # Set up the tool for structured output
     tool_name = "classify_issue"
@@ -77,7 +86,8 @@ You MUST classify the issue according to your best guess with the information av
             tool_name=tool_name,
             clarification_attempts=clarification_attempts,
             max_clarification_attempts=max_attempts,
-            force_proceed_subprompt=force_proceed_subprompt,
+            task_instruction=task_instruction,
+            additional_context=additional_context,
             issue_categories=issue_categories,
             priority_levels=priority_levels,
             servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY
@@ -102,7 +112,7 @@ You MUST classify the issue according to your best guess with the information av
             stream_callback=stream_callback
         )
         
-        # Extract structured output from tool call using robust utility
+        # Extract category and priority from tool call
         try:
             output_data = extract_tool_call_args(response, tool_name)
             classify_output = ClassifyOutput(**output_data)
@@ -118,15 +128,10 @@ You MUST classify the issue according to your best guess with the information av
                     state["gathering"] = {}
                 state["gathering"]["needs_clarification"] = True
                 
-                # Update conversation state
-                if "conversation" not in state:
-                    state["conversation"] = {}
-                state["conversation"]["current_response"] = classify_output.response
-                
                 # Add clarifying question to conversation
-                if "messages" not in state["conversation"]:
-                    state["conversation"]["messages"] = []
-                state["conversation"]["messages"].append({
+                if "messages" not in state:
+                    state["messages"] = []
+                state["messages"].append({
                     "role": "assistant",
                     "content": classify_output.response
                 })
