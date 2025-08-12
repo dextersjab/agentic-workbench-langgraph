@@ -41,8 +41,3 @@ class ClassifyOutput(BaseModel):
         description="Brief explanation of the classification decision"
     )
     
-    response: Optional[str] = Field(
-        default=None,
-        description="Clarifying question to ask the user (only set when needs_clarification=True)"
-    )
-    

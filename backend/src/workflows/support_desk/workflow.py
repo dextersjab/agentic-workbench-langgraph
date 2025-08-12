@@ -79,7 +79,7 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
         "classify_issue",
         should_continue_to_triage,
         {
-            "clarify": "human_clarification",    # Need clarification
+            "clarify": "human_clarification",    # Need clarification - question generated in classify
             "triage": "triage_issue",       # Ready to proceed with triage
             "escalate": "send_to_desk"      # User requested escalation
         }

@@ -12,6 +12,7 @@ from pathlib import Path
 from ..state import SupportDeskState
 from ..models.classify_output import ClassifyOutput
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
+from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
 from ..utils import build_conversation_history, load_ontologies, format_categories_for_prompt, format_priorities_for_prompt
 from ..utils.state_logger import log_node_start, log_node_complete
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
@@ -140,19 +141,58 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
                 logger.info("→ needs clarification")
                 state["gathering"]["needs_clarification"] = True
                 
-                # Stream the clarifying question if provided
-                if classify_output.response:
-                    logger.info("→ streaming clarifying question")
-                    for chunk in classify_output.response:
-                        writer({"custom_llm_chunk": chunk})
+                # Make separate LLM call to generate clarifying question with real streaming
+                logger.info("→ generating clarifying question")
+                
+                question_prompt = GENERATE_QUESTION_PROMPT.format(
+                    conversation_history=conversation_history
+                )
+                
+                # Buffer to collect the question
+                question_buffer = []
+                
+                # Stream callback to emit chunks and collect them
+                def stream_callback(chunk: str):
+                    writer({"custom_llm_chunk": chunk})
+                    question_buffer.append(chunk)
+                
+                try:
+                    # Call LLM with streaming for question generation
+                    await client.chat_completion(
+                        messages=[
+                            {"role": "system", "content": question_prompt}
+                        ],
+                        model="openai/gpt-4.1",
+                        temperature=0.7,  # Slightly more creative for question generation
+                        stream_callback=stream_callback,
+                        use_streaming=True
+                    )
+                    
+                    # Get the complete question
+                    question_content = "".join(question_buffer)
                     
                     # Add the clarifying question to messages
                     if "messages" not in state:
                         state["messages"] = []
                     state["messages"].append({
                         "role": "assistant",
-                        "content": classify_output.response
+                        "content": question_content
                     })
+                    
+                    logger.info(f"→ generated question: {question_content[:50]}...")
+                    
+                except Exception as e:
+                    logger.error(f"Error generating clarifying question: {e}")
+                    # Fallback question if generation fails
+                    fallback_question = "Could you provide more details about your IT support request?"
+                    if "messages" not in state:
+                        state["messages"] = []
+                    state["messages"].append({
+                        "role": "assistant", 
+                        "content": fallback_question
+                    })
+                    logger.info("→ used fallback question due to error")
+                
             elif classify_output.user_requested_escalation:
                 logger.info("→ user requested escalation")
                 state["gathering"]["needs_clarification"] = False
@@ -161,15 +201,14 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
                 logger.info("→ classification complete")
                 state["gathering"]["needs_clarification"] = False
                 # Will route to triage
-                
-                # Add the tool call response to messages for successful classification
-                # (For clarification case, the question was already added above)
-                if "messages" not in state:
-                    state["messages"] = []
-                state["messages"].append({
-                    "role": "assistant",
-                    "content": response
-                })
+            
+            # Add the tool call response to messages for context
+            if "messages" not in state:
+                state["messages"] = []
+            state["messages"].append({
+                "role": "assistant",
+                "content": response
+            })
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
