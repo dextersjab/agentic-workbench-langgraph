@@ -3,7 +3,7 @@ from typing import Dict, Optional, TypeVar
 from pydantic import BaseModel
 
 from src.workflows.support_desk.business_context import MAX_GATHERING_ROUNDS
-from .state_types import ConversationState, ClassificationState, GatheringState, TicketState, SupportDeskState
+from .state_types import ClarificationState, ClassificationState, GatheringState, TicketState, SupportDeskState
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -16,11 +16,11 @@ def create_initial_state() -> SupportDeskState:
         A new SupportDeskState with default values using composition.
     """
     return SupportDeskState(
-        conversation=ConversationState(
-            messages=[],
-            current_user_input="",
-            current_response="",
-            custom_llm_chunk=None
+        messages=[],
+        clarification=ClarificationState(
+            awaiting_reply=False,
+            clarification_attempts=0,
+            max_clarification_attempts=MAX_GATHERING_ROUNDS,
         ),
         classification=ClassificationState(
             issue_category=None,

@@ -28,6 +28,33 @@ logger = logging.getLogger(__name__)
 
 async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     """
+    Analyse whether sufficient information:
+        awaiting_reply = state.get("awaiting_reply", False)
+        gather_round = state.get("gather_round", 1)
+        if gather_round >= MAX_GATHERING_ROUNDS:
+            return state
+        elif awaiting_reply:
+            state.set(gather_round=gather_round+1)
+            user_response = interrupt()
+            messages.append(user_response)
+            state.set(messages)
+            return state
+        else:
+            state.update(gathered_info=gathered_info)
+            assistant_response = llm_client(..., "Ask the user to provide more details up to 3 times...", stream_callback=stream_callback)
+            state.update(awaiting_reply=True)
+            interrupt("waiting for user to provide more details)
+    """
+    
+    log_node_start("gather_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round", "missing_categories"])
+
+    messages = state.get("messages", {}).get("")
+    
+    gathering_details = state.get("gathering", {})
+    gathering_details.get("awaiting")
+
+async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
+    """
     Analyze if more information is needed and ask targeted questions.
     
     Uses tool calls for decision making, streams questions when needed.
@@ -45,7 +72,7 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
     # Log what this node will read from state
     log_node_start("gather_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round", "missing_categories"])
     
-    messages = state.get("conversation", {}).get("messages", [])
+    messages = state.get("messages", [])
     issue_category = state.get("classification", {}).get("issue_category", "other")
     issue_priority = state.get("classification", {}).get("issue_priority", "P2")
     assigned_team = state.get("classification", {}).get("assigned_team", "L1")
@@ -170,17 +197,12 @@ async def gather_info_node(state: SupportDeskState) -> SupportDeskState:
         
         # Add streamed question to conversation
         if streamed_question:
-            if "conversation" not in state:
-                state["conversation"] = {}
-            if "messages" not in state["conversation"]:
-                state["conversation"]["messages"] = []
-            state["conversation"]["messages"].append({
+            if "messages" not in state:
+                state["messages"] = []
+            state["messages"].append({
                 "role": "assistant",
                 "content": streamed_question
             })
-            
-            # Update state with the response
-            state["conversation"]["current_response"] = streamed_question
         
         # Update missing categories from decision
         state["gathering"]["missing_categories"] = decision_output.missing_categories

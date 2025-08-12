@@ -6,9 +6,10 @@ These prompts use structured outputs to generate JSON responses.
 
 # Unified clarification prompt using structured outputs
 CLARIFICATION_PROMPT = """
+You are part of an agentic system for IT Support Desk asking the user a single inform question user's issue.
+
 You are an IT support analyst reviewing a user's request for clarity and completeness.
 
-User Request: {user_input}
 Conversation History: {conversation_history}
 Clarification Attempt: {clarification_attempts} of {max_clarification_attempts}
 

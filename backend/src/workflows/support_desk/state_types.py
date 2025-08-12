@@ -1,16 +1,8 @@
 """Composed state type definitions for Support Desk workflow using TypedDict."""
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Literal, Optional
 from typing_extensions import TypedDict
 
 from .business_context import IssueCategoryType, IssuePriorityType
-
-
-class ConversationState(TypedDict):
-    """State related to the conversation flow."""
-    messages: List[Dict[str, str]]  # Chat messages in OpenAI format
-    current_user_input: str         # Latest user message
-    current_response: str           # Response being built
-    custom_llm_chunk: Optional[str] # For streaming
 
 
 class ClassificationState(TypedDict):
@@ -18,6 +10,14 @@ class ClassificationState(TypedDict):
     issue_category: Optional[IssueCategoryType]   # hardware, software, access, network, other
     issue_priority: Optional[IssuePriorityType]   # P1, P2, P3, P4
     assigned_team: Optional[str]    # Final assigned team
+
+
+class ClarificationState(TypedDict):
+    """State related to clarifying category and priority classifications"""
+    # awaiting_reply: bool            # determines whether we're waiting for the HITL or responding
+    status: Literal["satisfied", "capped", "escalated", "awaiting_user"]
+    clarification_attempts: int     # tracks number of times HITL has been called
+    max_clarification_attempts: int # determines maximum number of HITL calls for this node
 
 
 class GatheringState(TypedDict):
@@ -49,8 +49,9 @@ class SupportDeskState(TypedDict):
     
     This state uses composition to group related fields for better organization.
     """
-    conversation: ConversationState
+    messages: List[Dict[str, str]]  # Chat messages in OpenAI format
     classification: ClassificationState
+    clarification: ClarificationState
     gathering: GatheringState
     ticket: TicketState
     user_context: Dict[str, Any]    # User info (role, department, etc.)

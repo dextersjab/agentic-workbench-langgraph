@@ -107,7 +107,6 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                 logger.info(f"Detected regenerate for thread {thread_id} - restarting workflow")
                 state = create_initial_state()
                 if req.messages:
-                    state["current_user_input"] = req.messages[-1].content
                     state["messages"] = current_messages
                 
                 # Start fresh workflow (same as new conversation)
@@ -178,7 +177,6 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
                 if req.messages:
                     # Update the persisted state with new user message
                     update_state = {
-                        "current_user_input": req.messages[-1].content,
                         "messages": current_messages
                     }
                     await workflow.aupdate_state(config, update_state)
@@ -232,7 +230,6 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             logger.info(f"Starting new conversation for thread {thread_id}")
             state = create_initial_state()
             if req.messages:
-                state["current_user_input"] = req.messages[-1].content
                 state["messages"] = [msg.model_dump() for msg in req.messages]
             
             # Start new workflow with initial state
@@ -303,7 +300,6 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
         logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
         state = create_initial_state()
         if req.messages:
-            state["current_user_input"] = req.messages[-1].content
             state["messages"] = [msg.model_dump() for msg in req.messages]
         
         # Start new workflow with initial state
@@ -417,7 +413,6 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
                 if req.messages:
                     # Update the persisted state with new user message
                     update_state = {
-                        "current_user_input": req.messages[-1].content,
                         "messages": [msg.model_dump() for msg in req.messages]
                     }
                     await workflow.aupdate_state(config, update_state)
@@ -478,8 +473,7 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
                 logger.info(f"Starting new conversation for thread {thread_id}")
                 state = create_initial_state()
                 if req.messages:
-                    state["current_user_input"] = req.messages[-1].content
-                    state["messages"] = [msg.model_dump() for msg in req.messages]
+                        state["messages"] = [msg.model_dump() for msg in req.messages]
                 
                 # Start new workflow with initial state
                 full_response = ""
@@ -538,7 +532,6 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
             logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
             state = create_initial_state()
             if req.messages:
-                state["current_user_input"] = req.messages[-1].content
                 state["messages"] = [msg.model_dump() for msg in req.messages]
             
             # Start new workflow with initial state

@@ -62,7 +62,9 @@ You MUST classify the issue according to your best guess with the information av
         task_instruction = """
 If you have sufficient information to confidently classify this ticket, call the {tool_name} tool with the combination of category and priority.
 
-If you do NOT have sufficient information, respond directly to the user by asking for the most information-dense missing detail. You have a maximum of {max_clarification_attempts} total attempts to ascertain this information to keep the user experience pleasant.
+If you do NOT have sufficient information, set clarification=True so that the next step can directly ask the user by asking for the most information-dense missing detail.
+
+As part of this agentic system, you have a maximum of {max_clarification_attempts} total attempts to ask the user for information, which we limit to keep the user experience as pleasant as possible.
 """
         additional_context = ""
     

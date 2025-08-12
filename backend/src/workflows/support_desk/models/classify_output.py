@@ -33,6 +33,3 @@ class ClassifyOutput(BaseModel):
         description="Brief explanation of the classification decision"
     )
     
-    response: str = Field(
-        description="User-facing message - either classification summary or clarifying question"
-    )

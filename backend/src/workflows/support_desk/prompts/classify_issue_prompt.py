@@ -8,7 +8,7 @@ These prompts use tool calling to generate structured outputs.
 CLASSIFICATION_PROMPT = """
 # Objective
 
-You are part of an agentic system for IT Support Desk attempting to categorise a user's issue.
+You are part of an agentic system for IT Support Desk tasked with categorising a user's issue.
 
 {servicehub_support_ticket_policy}
 

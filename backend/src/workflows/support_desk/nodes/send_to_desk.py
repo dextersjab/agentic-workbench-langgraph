@@ -124,15 +124,10 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
         # Store the complete response (summary + HTML + workflow note)
         complete_response = f"{summary_content}\n\n```html\n{ticket_html}\n```{workflow_note}"
         
-        # Update conversation state
-        if "conversation" not in state:
-            state["conversation"] = {}
-        state["conversation"]["current_response"] = complete_response
-        
         # Add response to conversation history
-        if "messages" not in state["conversation"]:
-            state["conversation"]["messages"] = []
-        state["conversation"]["messages"].append({
+        if "messages" not in state:
+            state["messages"] = []
+        state["messages"].append({
             "role": "assistant",
             "content": complete_response
         })

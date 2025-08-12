@@ -15,18 +15,14 @@ class ClarifyOutput(BaseModel):
         description="Whether the user's input needs more clarification"
     )
     
-    response: str = Field(
-        description="Either a clarifying question or confirmation to proceed"
-    )
+    # reasoning: str = Field(
+    #     description="Brief explanation of why clarification is or isn't needed"
+    # )
     
-    reasoning: str = Field(
-        description="Brief explanation of why clarification is or isn't needed"
-    )
-    
-    confidence: float = Field(
-        ge=0.0, le=1.0,
-        description="Confidence level in the clarity assessment (0.0 to 1.0)"
-    )
+    # confidence: float = Field(
+    #     ge=0.0, le=1.0,
+    #     description="Confidence level in the clarity assessment (0.0 to 1.0)"
+    # )
     
     user_requested_escalation: bool = Field(
         default=False,
