@@ -11,7 +11,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from .state import SupportDeskState
-from .nodes.clarify_issue import clarify_issue_node
+from .nodes.human_clarification import human_clarification_node
 from .nodes.classify_issue import classify_issue_node, should_continue_to_triage
 from .nodes.triage_issue import triage_issue_node
 from .nodes.has_sufficient_info import has_sufficient_info_node, has_sufficient_info
@@ -33,14 +33,14 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     Enhanced Flow with Info Sufficiency Check:
     classify_issue → [sufficient info?] → triage_issue → has_sufficient_info
          ↑               [no]                                ↓ [False]        ↓ [True]
-         └─── clarify_issue ←──┘                      gather_info ←──┘    send_to_desk
+         └─── human_clarification ←──┘              gather_info ←──┘    send_to_desk
                                                            ↓ [asked question]
                                                       has_sufficient_info
     
     Natural Flow Behavior:
     - classify_issue attempts classification first
-    - If insufficient information: routes to clarify_issue for questions  
-    - clarify_issue asks for details and returns to classification
+    - If insufficient information: routes to human_clarification for questions  
+    - human_clarification collects user details and returns to classification
     - triage_issue assigns support team once classification is confident
     - has_sufficient_info determines if enough info exists (fast tool call)
     - gather_info asks ONE targeted question using streaming (HITL)
@@ -64,7 +64,7 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     workflow = StateGraph(SupportDeskState)
     
     # Add nodes to the workflow
-    workflow.add_node("clarify_issue", clarify_issue_node)
+    workflow.add_node("human_clarification", human_clarification_node)
     workflow.add_node("classify_issue", classify_issue_node)
     workflow.add_node("triage_issue", triage_issue_node)
     workflow.add_node("has_sufficient_info", has_sufficient_info_node)
@@ -79,14 +79,14 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
         "classify_issue",
         should_continue_to_triage,
         {
-            "clarify": "clarify_issue",    # Need clarification
+            "clarify": "human_clarification",    # Need clarification
             "triage": "triage_issue",       # Ready to proceed with triage
             "escalate": "send_to_desk"      # User requested escalation
         }
     )
     
-    # Clarification loops back to classification
-    workflow.add_edge("clarify_issue", "classify_issue")
+    # Human clarification loops back to classification
+    workflow.add_edge("human_clarification", "classify_issue")
     
     # Continue with info sufficiency check after triage
     workflow.add_edge("triage_issue", "has_sufficient_info")
