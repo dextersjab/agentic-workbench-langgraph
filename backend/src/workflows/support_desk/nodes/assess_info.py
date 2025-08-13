@@ -1,10 +1,12 @@
 """
-Has Sufficient Info node for Support Desk workflow.
+Assess Info node for Support Desk workflow.
 
-This node determines if enough information has been gathered to create a ticket.
+This node assesses if enough information has been gathered to create a ticket.
+If not, it generates targeted questions for the user.
 """
 import logging
 from copy import deepcopy
+from typing import Literal
 
 from ..state import SupportDeskState
 from ..models.info_completeness_output import InfoCompletenessOutput
@@ -12,16 +14,18 @@ from ..prompts.has_sufficient_info_prompt import HAS_SUFFICIENT_INFO_PROMPT
 from ..utils import build_conversation_history
 from ..utils.state_logger import log_node_start, log_node_complete
 from ..business_context import MAX_GATHERING_ROUNDS, format_required_info_categories, format_category_specific_priorities
+from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
+from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
 
 
-async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
+async def assess_info_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Determine if enough information has been gathered to create a comprehensive ticket.
+    Assess if enough information has been gathered to create a comprehensive ticket.
     
-    This node uses tool calling for fast, structured decision making (similar to classify_issue).
+    This node uses tool calling for structured decision making and generates questions when needed (similar to classify_issue).
     
     Args:
         state: Current workflow state
@@ -34,7 +38,7 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
     state = deepcopy(state)
     
     # Log what this node will read from state
-    log_node_start("has_sufficient_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round"])
+    log_node_start("assess_info", ["messages", "issue_category", "issue_priority", "assigned_team", "gathering_round"])
     
     # Extract relevant information from nested state
     messages = state.get("conversation", {}).get("messages", [])
@@ -93,7 +97,65 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
             state["gathering"]["needs_more_info"] = completeness_output.needs_more_info
             state["gathering"]["info_completeness_confidence"] = completeness_output.confidence
             state["gathering"]["missing_categories"] = completeness_output.missing_categories
-            # state["current_response"] = completeness_output.response
+            
+            # Check if we need to generate a question (like classify_issue does)
+            if completeness_output.needs_more_info:
+                logger.info("→ needs more info, generating question")
+                
+                # Generate targeted question with streaming (similar to classify_issue)
+                question_prompt = GENERATE_QUESTION_PROMPT.format(
+                    conversation_history=conversation_history
+                )
+                
+                # Get stream writer for real-time streaming
+                writer = get_stream_writer()
+                
+                # Buffer to collect the question
+                question_buffer = []
+                
+                # Stream callback to emit chunks and collect them
+                def stream_callback(chunk: str):
+                    writer({"custom_llm_chunk": chunk})
+                    question_buffer.append(chunk)
+                
+                try:
+                    # Call LLM with streaming for question generation
+                    await client.chat_completion(
+                        messages=[
+                            {"role": "system", "content": question_prompt}
+                        ],
+                        model="openai/gpt-4.1",
+                        temperature=0.7,  # Slightly more creative for question generation
+                        stream_callback=stream_callback,
+                        use_streaming=True
+                    )
+                    
+                    # Get the complete question
+                    question_content = "".join(question_buffer)
+                    
+                    # Add the question to messages
+                    if "messages" not in state:
+                        state["messages"] = []
+                    state["messages"].append({
+                        "role": "assistant",
+                        "content": question_content
+                    })
+                    
+                    logger.info(f"→ generated question: {question_content[:50]}...")
+                    
+                except Exception as e:
+                    logger.error(f"Error generating info gathering question: {e}")
+                    # Fallback question if generation fails
+                    fallback_question = "Could you provide more details to help us create your support ticket?"
+                    if "messages" not in state:
+                        state["messages"] = []
+                    state["messages"].append({
+                        "role": "assistant", 
+                        "content": fallback_question
+                    })
+                    logger.info("→ used fallback question due to error")
+            else:
+                logger.info("→ sufficient info available")
             
         except ValueError as e:
             logger.error(f"Tool call parsing error: {e}")
@@ -107,20 +169,20 @@ async def has_sufficient_info_node(state: SupportDeskState) -> SupportDeskState:
         raise
     
     # Log what this node wrote to state
-    log_node_complete("has_sufficient_info", state_before, state)
+    log_node_complete("assess_info", state_before, state)
     
     return state
 
 
-def has_sufficient_info(state: SupportDeskState) -> bool:
+def should_continue_to_send(state: SupportDeskState) -> Literal["proceed", "clarify"]:
     """
-    Determine if we have sufficient information to proceed to ticket creation.
+    Determine if we should proceed to send to desk or clarify with more info.
     
     Args:
         state: Current workflow state
         
     Returns:
-        True if sufficient info exists, False if need to gather more
+        "proceed" if sufficient info exists, "clarify" if need to gather more
     """
     needs_more = state.get("gathering", {}).get("needs_more_info", True)
     gathering_round = state.get("gathering", {}).get("gathering_round", 1)
@@ -128,11 +190,11 @@ def has_sufficient_info(state: SupportDeskState) -> bool:
     
     # Consider sufficient if we've hit max rounds or have enough info
     if gathering_round >= max_rounds:
-        logger.info(f"→ max rounds reached ({max_rounds}), considering sufficient")
-        return True
+        logger.info(f"→ max rounds reached ({max_rounds}), proceeding")
+        return "proceed"
     elif not needs_more:
         logger.info("→ sufficient info collected")
-        return True
+        return "proceed"
     else:
         logger.info(f"→ insufficient info (round {gathering_round})")
-        return False
+        return "clarify"

@@ -14,8 +14,8 @@ from .state import SupportDeskState
 from .nodes.human_clarification import human_clarification_node
 from .nodes.classify_issue import classify_issue_node, should_continue_to_route
 from .nodes.route_issue import route_issue_node
-from .nodes.has_sufficient_info import has_sufficient_info_node, has_sufficient_info
-from .nodes.gather_info import gather_info_node
+from .nodes.assess_info import assess_info_node, should_continue_to_send
+from .nodes.human_gather_info import human_gather_info_node
 from .nodes.send_to_desk import send_to_desk_node
 
 logger = logging.getLogger(__name__)
@@ -30,21 +30,21 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     This workflow implements an IT support agent flow with natural conversation and HITL:
     
-    Enhanced Flow with Info Sufficiency Check:
-    classify_issue → [sufficient info?] → route_issue → has_sufficient_info
-         ↑               [no]                                ↓ [False]        ↓ [True]
-         └─── human_clarification ←──┘              gather_info ←──┘    send_to_desk
-                                                           ↓ [asked question]
-                                                      has_sufficient_info
+    Enhanced Flow with Info Assessment:
+    classify_issue → [sufficient info?] → route_issue → assess_info
+         ↑               [no]                                ↓ [clarify]    ↓ [proceed]
+         └─── human_clarification ←──┘      human_gather_info ←──┘    send_to_desk
+                                                           ↓ [collected response]
+                                                      assess_info
     
     Natural Flow Behavior:
     - classify_issue attempts classification first
     - If insufficient information: routes to human_clarification for questions  
     - human_clarification collects user details and returns to classification
     - route_issue assigns support team once classification is confident
-    - has_sufficient_info determines if enough info exists (fast tool call)
-    - gather_info asks ONE targeted question using streaming (HITL)
-    - Loop: user responds → has_sufficient_info → gather_info (max 3 rounds)
+    - assess_info determines if enough info exists and generates questions when needed
+    - human_gather_info collects user responses (HITL)
+    - Loop: user responds → assess_info → human_gather_info (max 3 rounds)
     - send_to_desk creates comprehensive ticket once information is complete
     
     This approach provides natural conversation rhythm with human-in-the-loop interactions
@@ -67,8 +67,8 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     workflow.add_node("human_clarification", human_clarification_node)
     workflow.add_node("classify_issue", classify_issue_node)
     workflow.add_node("route_issue", route_issue_node)
-    workflow.add_node("has_sufficient_info", has_sufficient_info_node)
-    workflow.add_node("gather_info", gather_info_node)
+    workflow.add_node("assess_info", assess_info_node)
+    workflow.add_node("human_gather_info", human_gather_info_node)
     workflow.add_node("send_to_desk", send_to_desk_node)
     
     # Set entry point to classification
@@ -79,8 +79,8 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
         "classify_issue",
         should_continue_to_route,
         {
+            "proceed": "route_issue",             # Classification complete - proceed to routing
             "clarify": "human_clarification",    # Need clarification - question generated in classify
-            "proceed": "route_issue",             # Classification complete - proceed to next step
             "escalate": "send_to_desk"            # User requested escalation
         }
     )
@@ -88,21 +88,21 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Human clarification loops back to classification
     workflow.add_edge("human_clarification", "classify_issue")
     
-    # Continue with info sufficiency check after routing
-    workflow.add_edge("route_issue", "has_sufficient_info")
+    # Continue with info assessment after routing
+    workflow.add_edge("route_issue", "assess_info")
     
-    # Conditional edge from info check: either create ticket or gather more info
+    # Conditional edge from info assessment: either create ticket or gather more info
     workflow.add_conditional_edges(
-        "has_sufficient_info",
-        has_sufficient_info,
+        "assess_info",
+        should_continue_to_send,
         {
-            True: "send_to_desk",          # Sufficient info - create ticket
-            False: "gather_info"           # Need more information
+            "proceed": "send_to_desk",            # Assessment complete - proceed to send
+            "clarify": "human_gather_info"       # Need more information - question generated in assess
         }
     )
     
-    # After asking a question, check sufficiency again
-    workflow.add_edge("gather_info", "has_sufficient_info")
+    # After collecting user response, assess info again
+    workflow.add_edge("human_gather_info", "assess_info")
     
     workflow.add_edge("send_to_desk", END)
     
