@@ -19,33 +19,34 @@ Respond with...
 
 ## Prompt files
 
-### [clarify_issue_prompt.py](clarify_issue_prompt.py)
-
-Contains prompts for analysing input clarity and generating clarifying questions.
-
-**Key prompts:**
-- `CLARIFICATION_PROMPT`: Generates specific questions when needed
-
 ### [classify_issue_prompt.py](classify_issue_prompt.py)
 
-Contains prompts for categorising IT issues into predefined types.
+Contains prompts for categorising IT issues and generating clarifying questions.
 
 **Key prompts:**
 - `CLASSIFICATION_PROMPT`: Categorises issues and sets priority
+- `GENERATE_QUESTION_PROMPT`: Generates clarifying questions when needed
 
-### [triage_issue_prompt.py](triage_issue_prompt.py)
+### [route_issue_prompt.py](route_issue_prompt.py)
 
 Contains prompts for routing issues to appropriate support teams.
 
 **Key prompts:**
-- `TRIAGE_PROMPT`: Determines support team and response time
+- `ROUTE_PROMPT`: Determines support team and response time
 
-### [gather_info_prompt.py](gather_info_prompt.py)
+### [has_sufficient_info_prompt.py](has_sufficient_info_prompt.py)
 
-Contains prompts for collecting additional information for support tickets.
+Contains prompts for assessing information completeness.
 
 **Key prompts:**
-- `INFO_GATHERING_PROMPT`: Gathers comprehensive ticket details
+- `HAS_SUFFICIENT_INFO_PROMPT`: Assesses if enough information exists for ticket creation
+
+### [generate_question_prompt.py](generate_question_prompt.py)
+
+Contains prompts for generating targeted questions when more information is needed.
+
+**Key prompts:**
+- `GENERATE_QUESTION_PROMPT`: Creates specific questions based on context
 
 ### [send_to_desk_prompt.py](send_to_desk_prompt.py)
 

@@ -1,17 +1,17 @@
 # Support desk workflow examples
 
-This directory contains example conversations that demonstrate the IT Support Desk workflow in action. These examples showcase different user inputs and how the workflow responds, particularly highlighting the conditional clarification loop.
+This directory contains example conversations that demonstrate the IT Support Desk workflow in action. These examples showcase different user inputs and how the workflow responds, particularly highlighting conditional routing and HITL interactions.
 
 ## Example files
 
 ### [linear_flow.yaml](linear_flow.yaml)
 
-Demonstrates the linear workflow when a user provides a clear request that doesn't need clarification.
+Demonstrates the linear workflow when a user provides a clear request.
 
 **Key features:**
 - Complete information in initial request
 - No clarification needed
-- Straight path through all nodes
+- Straight path: classify → route → assess → send
 - Professional ticket creation
 
 **Sample conversation:**
@@ -25,13 +25,13 @@ Support Desk: Thank you for the information. Let me help you with your IT issue.
 
 ### [conditional_flow.yaml](conditional_flow.yaml)
 
-Demonstrates the conditional loop when a user provides a vague request that needs clarification.
+Demonstrates conditional routing when a user provides a vague request that needs clarification.
 
 **Key features:**
 - Vague initial request
-- Multiple clarification questions
-- Loop back to clarification node
-- Eventually proceeds to classification
+- Classification generates clarifying questions
+- classify ↔ human_clarification loop
+- Eventually proceeds to routing
 
 **Sample conversation:**
 ```
@@ -51,13 +51,13 @@ Support Desk: Thank you for that information. To help diagnose the issue better,
 
 ### [max_attempts.yaml](max_attempts.yaml)
 
-Demonstrates what happens when the maximum number of clarification attempts is reached without getting clear information.
+Demonstrates workflow behavior when maximum clarification attempts are reached.
 
 **Key features:**
 - Persistently vague user responses
-- Maximum clarification attempts reached
+- Maximum attempts reached
 - Workflow proceeds with limited information
-- Generic support response
+- Best-effort ticket creation
 
 **Sample conversation:**
 ```
@@ -76,9 +76,9 @@ Support Desk: Thank you for the information. Let me help you with your IT issue.
 
 ## State transitions
 
-Each example includes detailed state transitions showing how the `SupportDeskState` evolves throughout the conversation. This helps you understand:
+Each example includes detailed state transitions showing how `SupportDeskState` evolves throughout the conversation. This helps understand:
 
 1. How state is maintained across multiple turns
-2. How the `needs_clarification` flag controls the workflow path
-3. How information is gradually collected and stored
-4. How the final ticket is created
+2. How conditional edges (`proceed`/`clarify`/`escalate`) control workflow routing
+3. How analysis nodes generate questions and human nodes collect responses
+4. How information is gradually collected and tickets are created

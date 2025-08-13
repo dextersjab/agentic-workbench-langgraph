@@ -19,29 +19,32 @@ support_desk/
 
 The Support Desk workflow implements an IT support desk agent that:
 
-1. Clarifies user issues when needed (with conditional loop)
-2. Classifies issues into categories
-3. Triages issues to appropriate support teams (internal routing only)
-4. Gathers additional information through targeted questions
-5. Creates support tickets with complete context
+1. Classifies issues into categories (with clarification loop when needed)
+2. Routes issues to appropriate support teams (internal routing only)
+3. Assesses information completeness and asks targeted questions
+4. Creates support tickets with complete context
 
 ```mermaid
 graph TD;
     __start__([<p>__start__</p>]):::first
-    clarify_issue(clarify_issue)
     classify_issue(classify_issue)
-    triage_issue(triage_issue)
-    gather_info(gather_info)
+    human_clarification(human_clarification)
+    route_issue(route_issue)
+    assess_info(assess_info)
+    human_gather_info(human_gather_info)
     send_to_desk(send_to_desk)
     __end__([<p>__end__</p>]):::last
 
-    __start__ --> clarify_issue;
-    clarify_issue -. &nbsp;classify&nbsp; .-> classify_issue;
-    classify_issue --> triage_issue;
-    gather_info --> send_to_desk;
-    triage_issue --> gather_info;
+    __start__ --> classify_issue;
+    classify_issue -. &nbsp;proceed&nbsp; .-> route_issue;
+    classify_issue -. &nbsp;clarify&nbsp; .-> human_clarification;
+    classify_issue -. &nbsp;escalate&nbsp; .-> send_to_desk;
+    human_clarification --> classify_issue;
+    route_issue --> assess_info;
+    assess_info -. &nbsp;proceed&nbsp; .-> send_to_desk;
+    assess_info -. &nbsp;clarify&nbsp; .-> human_gather_info;
+    human_gather_info --> assess_info;
     send_to_desk --> __end__;
-    clarify_issue -. &nbsp;clarify&nbsp; .-> clarify_issue;
     
     classDef default stroke:#f2f0ff,line-height:1.2
     classDef first stroke:green
@@ -52,16 +55,17 @@ graph TD;
 
 ### [workflow.py](workflow.py)
 
-Defines the LangGraph workflow with conditional loop logic. The key feature is the conditional edge from the `clarify_issue` node that can either loop back to itself or proceed to the `classify_issue` node based on the state.
+Defines the LangGraph workflow with conditional routing logic. Key feature is conditional edges that route based on analysis results.
 
 ```python
 # Conditional edge example
 workflow.add_conditional_edges(
-    "clarify_issue",
-    should_continue_clarifying,
+    "classify_issue",
+    should_continue_to_route,
     {
-        "clarify": "clarify_issue",  # Loop back to clarify
-        "classify": "classify_issue"  # Proceed to classification
+        "proceed": "route_issue",          # Classification complete
+        "clarify": "human_clarification", # Need clarification
+        "escalate": "send_to_desk"        # User requested escalation
     }
 )
 ```
@@ -73,10 +77,11 @@ Defines the `SupportDeskState` TypedDict that tracks conversation context, user 
 ### [nodes/](nodes/)
 
 Contains the implementation of each node in the workflow:
-- `clarify_issue.py`: Analyses user input and asks clarifying questions
-- `classify_issue.py`: Categorises issues into predefined types
-- `triage_issue.py`: Internal routing logic that assigns issues to support teams based on complexity
-- `gather_info.py`: Collects additional information through targeted user questions
+- `classify_issue.py`: Categorises issues and generates clarifying questions when needed
+- `human_clarification.py`: Lightweight interrupt node for collecting user clarifications
+- `route_issue.py`: Internal routing logic that assigns issues to support teams
+- `assess_info.py`: Assesses information completeness and generates targeted questions
+- `human_gather_info.py`: Lightweight interrupt node for collecting additional information
 - `send_to_desk.py`: Creates tickets and formats final responses
 
 ### [prompts/](prompts/)
