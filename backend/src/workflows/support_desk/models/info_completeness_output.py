@@ -25,6 +25,11 @@ class InfoCompletenessOutput(BaseModel):
         description="Categories of information still needed (e.g., 'device_details', 'timeline', 'user_impact')"
     )
     
+    user_requested_escalation: bool = Field(
+        default=False,
+        description="True if user explicitly requested to escalate or force proceed (e.g., 'just create the ticket', 'stop asking questions')"
+    )
+    
     reasoning: str = Field(
         description="Brief explanation of why more info is/isn't needed"
     )

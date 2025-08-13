@@ -15,7 +15,7 @@ from .nodes.human_clarification import human_clarification_node
 from .nodes.classify_issue import classify_issue_node, should_continue_to_route
 from .nodes.route_issue import route_issue_node
 from .nodes.assess_info import assess_info_node, should_continue_to_send
-from .nodes.human_gather_info import human_gather_info_node
+from .nodes.human_information import human_information_node
 from .nodes.send_to_desk import send_to_desk_node
 
 logger = logging.getLogger(__name__)
@@ -32,8 +32,8 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     Enhanced Flow with Info Assessment:
     classify_issue → [sufficient info?] → route_issue → assess_info
-         ↑               [no]                                ↓ [clarify]    ↓ [proceed]
-         └─── human_clarification ←──┘      human_gather_info ←──┘    send_to_desk
+         ↑               [no]                                ↓ [clarify]    ↓ [proceed/escalate]
+         └─── human_clarification ←──┘      human_information ←──┘    send_to_desk
                                                            ↓ [collected response]
                                                       assess_info
     
@@ -43,8 +43,8 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     - human_clarification collects user details and returns to classification
     - route_issue assigns support team once classification is confident
     - assess_info determines if enough info exists and generates questions when needed
-    - human_gather_info collects user responses (HITL)
-    - Loop: user responds → assess_info → human_gather_info (max 3 rounds)
+    - human_information collects user responses (HITL)
+    - Loop: user responds → assess_info → human_information (max 3 rounds)
     - send_to_desk creates comprehensive ticket once information is complete
     
     This approach provides natural conversation rhythm with human-in-the-loop interactions
@@ -68,7 +68,7 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     workflow.add_node("classify_issue", classify_issue_node)
     workflow.add_node("route_issue", route_issue_node)
     workflow.add_node("assess_info", assess_info_node)
-    workflow.add_node("human_gather_info", human_gather_info_node)
+    workflow.add_node("human_information", human_information_node)
     workflow.add_node("send_to_desk", send_to_desk_node)
     
     # Set entry point to classification
@@ -91,18 +91,19 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Continue with info assessment after routing
     workflow.add_edge("route_issue", "assess_info")
     
-    # Conditional edge from info assessment: either create ticket or gather more info
+    # Conditional edge from info assessment: proceed, clarify, or escalate
     workflow.add_conditional_edges(
         "assess_info",
         should_continue_to_send,
         {
             "proceed": "send_to_desk",            # Assessment complete - proceed to send
-            "clarify": "human_gather_info"       # Need more information - question generated in assess
+            "clarify": "human_information",       # Need more information - question generated in assess
+            "escalate": "send_to_desk"           # User requested escalation - force proceed
         }
     )
     
     # After collecting user response, assess info again
-    workflow.add_edge("human_gather_info", "assess_info")
+    workflow.add_edge("human_information", "assess_info")
     
     workflow.add_edge("send_to_desk", END)
     

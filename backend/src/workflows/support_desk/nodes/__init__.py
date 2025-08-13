@@ -8,7 +8,7 @@ from .human_clarification import human_clarification_node
 from .classify_issue import classify_issue_node, should_continue_to_route
 from .route_issue import route_issue_node
 from .assess_info import assess_info_node, should_continue_to_send
-from .human_gather_info import human_gather_info_node
+from .human_information import human_information_node
 from .send_to_desk import send_to_desk_node
 
 __all__ = [
@@ -18,6 +18,6 @@ __all__ = [
     "route_issue_node",
     "assess_info_node",
     "should_continue_to_send",
-    "human_gather_info_node",
+    "human_information_node",
     "send_to_desk_node"
 ]

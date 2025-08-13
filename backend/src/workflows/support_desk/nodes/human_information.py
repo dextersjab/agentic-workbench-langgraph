@@ -1,8 +1,8 @@
 """
-Human Gather Info node for Support Desk workflow - HITL diamond node.
+Human Information node for Support Desk workflow - HITL diamond node.
 
 This node represents the human interaction point for collecting additional information
-after assess_info has generated and streamed the gathering question.
+after assess_info has generated and streamed the information gathering question.
 """
 import logging
 from copy import deepcopy
@@ -13,7 +13,7 @@ from langgraph.types import interrupt
 logger = logging.getLogger(__name__)
 
 
-async def human_gather_info_node(state: SupportDeskState) -> SupportDeskState:
+async def human_information_node(state: SupportDeskState) -> SupportDeskState:
     """
     Human interaction node (diamond) that collects additional information.
     
@@ -29,7 +29,7 @@ async def human_gather_info_node(state: SupportDeskState) -> SupportDeskState:
     state = deepcopy(state)
     
     # Log node entry
-    logger.info("→ human_gather_info: waiting for user response")
+    logger.info("→ human_information: waiting for user response")
     
     # Get current gathering round
     gathering_round = state.get("gathering", {}).get("gathering_round", 1)

@@ -31,7 +31,7 @@ graph TD;
     human_clarification(human_clarification)
     route_issue(route_issue)
     assess_info(assess_info)
-    human_gather_info(human_gather_info)
+    human_information(human_information)
     send_to_desk(send_to_desk)
     __end__([<p>__end__</p>]):::last
 
@@ -42,8 +42,9 @@ graph TD;
     human_clarification --> classify_issue;
     route_issue --> assess_info;
     assess_info -. &nbsp;proceed&nbsp; .-> send_to_desk;
-    assess_info -. &nbsp;clarify&nbsp; .-> human_gather_info;
-    human_gather_info --> assess_info;
+    assess_info -. &nbsp;clarify&nbsp; .-> human_information;
+    assess_info -. &nbsp;escalate&nbsp; .-> send_to_desk;
+    human_information --> assess_info;
     send_to_desk --> __end__;
     
     classDef default stroke:#f2f0ff,line-height:1.2
@@ -81,7 +82,7 @@ Contains the implementation of each node in the workflow:
 - `human_clarification.py`: Lightweight interrupt node for collecting user clarifications
 - `route_issue.py`: Internal routing logic that assigns issues to support teams
 - `assess_info.py`: Assesses information completeness and generates targeted questions
-- `human_gather_info.py`: Lightweight interrupt node for collecting additional information
+- `human_information.py`: Lightweight interrupt node for collecting additional information
 - `send_to_desk.py`: Creates tickets and formats final responses
 
 ### [prompts/](prompts/)

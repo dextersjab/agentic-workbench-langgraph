@@ -99,7 +99,8 @@ Internal routing node that assigns issues to appropriate support teams based on 
 graph TD
     A[route_issue] --> B[assess_info]
     B -. proceed .-> C[send_to_desk]
-    B -. clarify .-> D[human_gather_info]
+    B -. clarify .-> D[human_information]
+    B -. escalate .-> C
     D --> B
     
     classDef default stroke:#f2f0ff,line-height:1.2
@@ -108,7 +109,7 @@ graph TD
     class A,C,D context
 ```
 
-Assesses information completeness and generates targeted questions when needed. Implements conditional routing like classify_issue.
+Assesses information completeness and generates targeted questions when needed. Implements **conditional routing** - it can proceed to send, ask for clarification, or escalate based on analysis.
 
 **Reads from state:**
 - `issue_category` - Issue type for assessment criteria
@@ -120,11 +121,11 @@ Assesses information completeness and generates targeted questions when needed. 
 - `missing_categories` - Specific info categories needed
 - `messages` - Updated with questions when needed
 
-### [human_gather_info.py](human_gather_info.py)
+### [human_information.py](human_information.py)
 
 ```mermaid
 graph TD
-    A[assess_info] --> B[human_gather_info]
+    A[assess_info] --> B[human_information]
     B --> A
     
     classDef default stroke:#f2f0ff,line-height:1.2
