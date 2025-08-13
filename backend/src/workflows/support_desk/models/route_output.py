@@ -1,13 +1,13 @@
 """
-Pydantic model for triage_issue node output.
+Pydantic model for route_issue node output.
 """
 from pydantic import BaseModel, Field
 from typing import Literal
 
 
-class TriageOutput(BaseModel):
+class RouteOutput(BaseModel):
     """
-    Structured output from the triage_issue node.
+    Structured output from the route_issue node.
     
     This model defines the team assignment and routing information.
     """

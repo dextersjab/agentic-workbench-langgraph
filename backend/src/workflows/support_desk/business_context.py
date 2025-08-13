@@ -98,27 +98,27 @@ SLA_COMMITMENTS = {
 REQUIRED_INFO_CATEGORIES = {
     "device_system": {
         "name": "Device/System Details",
-        "description": "Specific hardware/software involved, models, versions"
+        "description": ["Specific device make and model", "Software/application name and version", "Operating system version"]
     },
     "timeline": {
         "name": "Timeline", 
-        "description": "When did this start, frequency, patterns"
+        "description": ["When the issue first occurred", "How often it happens (once/intermittent/constant)", "Any patterns or triggers"]
     },
     "user_impact": {
         "name": "User Impact",
-        "description": "How this affects work, urgency, business impact"
+        "description": ["Number of users affected", "Business processes blocked", "Severity of productivity impact"]
     },
     "symptoms": {
         "name": "Symptoms",
-        "description": "Specific error messages, behaviors, what exactly happens"
+        "description": ["Exact error messages or codes", "Observable behavior or symptoms", "What happens when attempting the task"]
     },
     "context": {
         "name": "Context",
-        "description": "What user was doing when issue occurred, recent changes"
+        "description": ["What was being attempted when issue occurred", "Recent system or environment changes", "Previous troubleshooting attempts"]
     },
     "environment": {
         "name": "Environment", 
-        "description": "User location, department, role (if relevant to issue)"
+        "description": ["Physical location or office", "Network connection type (office/VPN/home)", "User's department and role"]
     }
 }
 
@@ -126,19 +126,19 @@ REQUIRED_INFO_CATEGORIES = {
 CATEGORY_SPECIFIC_PRIORITIES = {
     "hardware": {
         "name": "Hardware",
-        "priorities": "Device models, physical symptoms, connectivity (Dell/Lenovo equipment)"
+        "priorities": ["Device models", "Physical symptoms", "Connectivity (Dell/Lenovo equipment)"]
     },
     "software": {
         "name": "Software", 
-        "priorities": "Application versions, error messages, affected workflows (ServiceHub Portal, Dynamics 365, Salesforce CRM, Azure AD)"
+        "priorities": ["Application versions", "Error messages", "Affected workflows (ServiceHub Portal, Dynamics 365, Salesforce CRM, Azure AD)"]
     },
     "access": {
         "name": "Access",
-        "priorities": "Account names, systems, permission levels (consider department-specific procedures)"
+        "priorities": ["Account names", "Systems", "Permission levels (consider department-specific procedures)"]
     },
     "network": {
         "name": "Network",
-        "priorities": "Connection types, locations, affected devices (London HQ, Manchester, Edinburgh, remote workers)"
+        "priorities": ["Connection types", "Locations", "Affected devices (London HQ, Manchester, Edinburgh, remote workers)"]
     }
 }
 
@@ -146,7 +146,8 @@ def format_required_info_categories() -> str:
     """Format required information categories as markdown."""
     lines = ["## Required Information Categories", ""]
     for i, category in enumerate(REQUIRED_INFO_CATEGORIES.values(), 1):
-        lines.append(f"{i}. **{category['name']}**: {category['description']}")
+        desc_items = ", ".join(category['description'])
+        lines.append(f"{i}. **{category['name']}**: {desc_items}")
     return "\n".join(lines)
 
 def format_category_specific_priorities(issue_category: str) -> str:
@@ -158,5 +159,6 @@ def format_category_specific_priorities(issue_category: str) -> str:
         ""
     ]
     for priority in CATEGORY_SPECIFIC_PRIORITIES.values():
-        lines.append(f"- **{priority['name']}**: {priority['priorities']}")
+        priority_items = ", ".join(priority['priorities'])
+        lines.append(f"- **{priority['name']}**: {priority_items}")
     return "\n".join(lines)

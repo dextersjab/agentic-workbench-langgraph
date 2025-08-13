@@ -1,12 +1,12 @@
 """
-Prompts for triage node in Support Desk workflow.
+Prompts for route node in Support Desk workflow.
 
 These prompts use tool calling to generate structured outputs.
 """
 
-# Triage prompt using tool calling
-TRIAGE_PROMPT = """
-You are an IT support triage specialist analyzing issues to route them to the most appropriate team.
+# Route prompt using tool calling
+ROUTE_PROMPT = """
+You are an IT support routing specialist analyzing issues to route them to the most appropriate team.
 
 Issue Category: {issue_category}
 Issue Priority: {issue_priority}
