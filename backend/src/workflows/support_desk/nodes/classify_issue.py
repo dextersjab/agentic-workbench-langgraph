@@ -229,9 +229,9 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
     return state
 
 
-def should_continue_to_route(state: SupportDeskState) -> Literal["clarify", "route", "escalate"]:
+def should_continue_to_route(state: SupportDeskState) -> Literal["clarify", "complete", "escalate"]:
     """
-    Determine routing from classification: clarify, route, or escalate.
+    Determine routing from classification: clarify, complete, or escalate.
     
     Args:
         state: Current workflow state
@@ -239,7 +239,7 @@ def should_continue_to_route(state: SupportDeskState) -> Literal["clarify", "rou
     Returns:
         "escalate" if user requested escalation
         "clarify" if needs clarification or missing category/priority
-        "route" if ready for normal routing
+        "complete" if classification is complete and ready for routing
     """
     # Check for escalation request
     user_requested_escalation = state.get("classification", {}).get("user_requested_escalation", False)
@@ -256,5 +256,5 @@ def should_continue_to_route(state: SupportDeskState) -> Literal["clarify", "rou
         logger.info("→ needs clarification")
         return "clarify"
     else:
-        logger.info("→ sufficient info for routing")
-        return "route"
+        logger.info("→ classification complete")
+        return "complete"

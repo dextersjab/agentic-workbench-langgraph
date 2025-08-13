@@ -74,14 +74,14 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     # Set entry point to classification
     workflow.set_entry_point("classify_issue")
     
-    # Conditional edge from classification: clarify, route, or escalate
+    # Conditional edge from classification: clarify, complete, or escalate
     workflow.add_conditional_edges(
         "classify_issue",
         should_continue_to_route,
         {
             "clarify": "human_clarification",    # Need clarification - question generated in classify
-            "route": "route_issue",       # Ready to proceed with routing
-            "escalate": "send_to_desk"      # User requested escalation
+            "complete": "route_issue",            # Classification complete - proceed to routing
+            "escalate": "send_to_desk"            # User requested escalation
         }
     )
     
