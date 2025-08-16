@@ -28,7 +28,7 @@ from .models import (
 )
 from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
 from ..workflows.registry import WorkflowRegistry
-from ..workflows.support_desk.state import create_initial_state
+from ..workflows.utils import create_workflow_initial_state
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -82,9 +82,9 @@ def _determine_thread_id(req: ChatCompletionRequest, request: Request) -> str:
     return thread_id
 
 
-async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: str) -> AsyncGenerator[str, None]:
-    """Stream responses from the Support Desk workflow, managing interruptions."""
-    logger.info(f"Streaming Support Desk workflow for thread_id: {thread_id}")
+async def _workflow_stream(req: ChatCompletionRequest, workflow, thread_id: str) -> AsyncGenerator[str, None]:
+    """Stream responses from a workflow, managing interruptions."""
+    logger.info(f"Streaming workflow for thread_id: {thread_id}")
     
     config = {"configurable": {"thread_id": thread_id}}
     
@@ -105,7 +105,7 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
             if is_regenerate:
                 # This is a regenerate - reset to start of workflow with same input
                 logger.info(f"Detected regenerate for thread {thread_id} - restarting workflow")
-                state = create_initial_state()
+                state = create_workflow_initial_state(req.model)
                 if req.messages:
                     state["messages"] = current_messages
                 
@@ -228,7 +228,7 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
         else:
             # New conversation - create initial state and start fresh
             logger.info(f"Starting new conversation for thread {thread_id}")
-            state = create_initial_state()
+            state = create_workflow_initial_state(req.model)
             if req.messages:
                 state["messages"] = [msg.model_dump() for msg in req.messages]
             
@@ -298,7 +298,7 @@ async def _support_desk_stream(req: ChatCompletionRequest, workflow, thread_id: 
     except Exception as e:
         # Fallback to new conversation if state retrieval fails
         logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
-        state = create_initial_state()
+        state = create_workflow_initial_state(req.model)
         if req.messages:
             state["messages"] = [msg.model_dump() for msg in req.messages]
         
@@ -351,7 +351,7 @@ async def _sse_generator(req: ChatCompletionRequest, request: Request) -> AsyncG
         logger.info("Got Support Desk workflow, starting stream")
         
         first_chunk = True
-        async for text in _support_desk_stream(req, workflow, thread_id):
+        async for text in _workflow_stream(req, workflow, thread_id):
             # Create SSE chunk
             sse_chunk = create_sse_chunk(
                 completion_id=completion_id,
@@ -471,7 +471,7 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
             else:
                 # New conversation - create initial state and start fresh
                 logger.info(f"Starting new conversation for thread {thread_id}")
-                state = create_initial_state()
+                state = create_workflow_initial_state(req.model)
                 if req.messages:
                         state["messages"] = [msg.model_dump() for msg in req.messages]
                 
@@ -530,7 +530,7 @@ async def _create_non_streaming_response(req: ChatCompletionRequest, request: Re
         except Exception as e:
             # Fallback to new conversation if state retrieval fails
             logger.warning(f"Could not retrieve existing state for thread {thread_id}: {e}")
-            state = create_initial_state()
+            state = create_workflow_initial_state(req.model)
             if req.messages:
                 state["messages"] = [msg.model_dump() for msg in req.messages]
             

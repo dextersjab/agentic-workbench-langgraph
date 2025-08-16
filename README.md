@@ -25,7 +25,8 @@ agentic-workflow-workbench/
 │   ├── src/
 │   │   ├── core/                 # Shared API and LLM client code  
 │   │   └── workflows/
-│   │       └── support_desk/     # Business use case: IT support desk workflow
+│   │       ├── support_desk/     # IT support desk workflow
+│   │       └── fs_agent/         # File system agent workflow
 │   ├── langgraph-app/
 │   └── logs/
 └── frontend/                     # OpenWebUI frontend service
@@ -35,6 +36,7 @@ agentic-workflow-workbench/
 ## Example Workflows
 
 - **[Support desk](backend/src/workflows/support_desk/README.md)** - IT support desk agentic chatbot that answers queries and raises tickets
+- **[fs-agent](backend/src/workflows/fs_agent/README.md)** - File system agent that can read, write, and manage files in a workspace directory
 
 ## Quick Start
 
@@ -49,11 +51,9 @@ agentic-workflow-workbench/
 
 2. **Configure API keys** in `.env`:
    ```bash
-   # Required for basic functionality
-   OPENAI_API_KEY=your_openai_api_key_here
-   
-   # Required for support-desk workflow
-   OPENROUTER_API_KEY=your_openrouter_api_key_here
+   # Required for workflows
+   OPENAI_API_KEY=your_openai_api_key_here       # For fs-agent workflow
+   OPENROUTER_API_KEY=your_openrouter_api_key_here # For support-desk workflow
    ```
 
 3. **Start both services**:
@@ -119,8 +119,9 @@ If you prefer to run services individually:
 Copy `.env.example` to `.env` and configure:
 
 ```bash
-# Required
-OPENROUTER_API_KEY=your_openrouter_api_key_here
+# Required API Keys (depending on workflow)
+OPENAI_API_KEY=your_openai_api_key_here       # For fs-agent
+OPENROUTER_API_KEY=your_openrouter_api_key_here # For support-desk
 
 # Optional
 BACKEND_PORT=8000
@@ -134,7 +135,7 @@ LOG_LEVEL=info
 The frontend service is pre-configured with optimal settings:
 - Connects automatically to the backend API
 - Disables unnecessary features (tags, titles, follow-ups)
-- Sets the support-desk workflow as default
+- Workflows available via model selector dropdown
 
 ## Adding New Workflows
 
@@ -174,11 +175,13 @@ Backend logs are available in `backend/logs/` directory and include:
 
 ### Common Issues
 
-1. **Backend fails to start**: Check your `OPENROUTER_API_KEY` in `.env`
+1. **Backend fails to start**: Check your API keys in `.env`
 2. **Frontend can't connect**: Verify backend is running on port 8000
 3. **Workflows not appearing**: Check backend logs for model registration errors
-4. **"Unknown workflow: support-desk" error**: 
-   - Ensure `OPENROUTER_API_KEY` is set in your `.env` file
+4. **"Unknown workflow" errors**: 
+   - Ensure required API keys are set in your `.env` file:
+     - `OPENAI_API_KEY` for fs-agent workflow
+     - `OPENROUTER_API_KEY` for support-desk workflow
    - The `.env` file must be in the project root directory
    - Restart containers after updating environment variables: `docker-compose restart`
 
@@ -207,7 +210,9 @@ docker-compose logs frontend
 4. Test with Docker Compose setup
 5. Submit a pull request
 
-For detailed workflow development, see [backend/src/workflows/support_desk/README.md](backend/src/workflows/support_desk/README.md).
+For detailed workflow development, see the README files in each workflow directory:
+- [Support Desk Workflow](backend/src/workflows/support_desk/README.md)
+- [FS Agent Workflow](backend/src/workflows/fs_agent/README.md)
 
 ## License
 

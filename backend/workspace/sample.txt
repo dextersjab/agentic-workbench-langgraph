@@ -1,0 +1,10 @@
+This is a sample text file for the fs-agent workflow.
+
+The fs-agent can read this file and display its contents.
+In write mode, it can also modify or delete this file.
+
+Feel free to ask the agent to:
+- List files in the workspace
+- Read this file
+- Create new files
+- Modify existing files (in write mode)

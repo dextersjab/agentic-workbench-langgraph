@@ -24,6 +24,12 @@ class WorkflowRegistry:
             object="model",
             created=1753056000,
             owned_by="support-desk"
+        ),
+        "fs-agent": ModelInfo(
+            id="fs-agent",
+            object="model",
+            created=1755309438,
+            owned_by="fs-agent"
         )
     }
     
