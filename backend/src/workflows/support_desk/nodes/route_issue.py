@@ -5,13 +5,12 @@ This node routes the issue to the appropriate support team.
 """
 import logging
 from copy import deepcopy
-from typing import Dict, Any
 
 from ..state import SupportDeskState, update_state_from_output
 from ..models.route_output import RouteOutput
 from ..prompts.route_issue_prompt import ROUTE_PROMPT
 from ..utils import build_conversation_history
-from ..utils.state_logger import log_node_start, log_node_complete
+from src.core.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 

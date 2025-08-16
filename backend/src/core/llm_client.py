@@ -5,7 +5,7 @@ import logging
 from typing import Dict, Any, Optional, Callable, List, Type
 import aiohttp
 from pydantic import BaseModel
-from src.workflows.support_desk.utils.state_logger import GREY, RESET
+from .state_logger import GREY, RESET
 from .schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 
 logger = logging.getLogger(__name__)

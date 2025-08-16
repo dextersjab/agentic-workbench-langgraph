@@ -9,7 +9,7 @@ from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.send_to_desk_prompt import FINAL_RESPONSE_PROMPT
-from ..utils.state_logger import log_node_start, log_node_complete
+from src.core.state_logger import log_node_start, log_node_complete
 from ..utils.ticket_generator import generate_ticket_data
 from ..templates.ticket_template import generate_ticket_html
 from src.core.llm_client import client

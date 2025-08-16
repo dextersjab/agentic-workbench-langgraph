@@ -14,7 +14,7 @@ from ..models.classify_output import ClassifyOutput
 from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
 from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
 from ..utils import build_conversation_history, load_ontologies, format_categories_for_prompt, format_priorities_for_prompt
-from ..utils.state_logger import log_node_start, log_node_complete
+from src.core.state_logger import log_node_start, log_node_complete
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer

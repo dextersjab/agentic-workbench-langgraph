@@ -12,7 +12,7 @@ from ..state import SupportDeskState
 from ..models.info_completeness_output import InfoCompletenessOutput
 from ..prompts.has_sufficient_info_prompt import HAS_SUFFICIENT_INFO_PROMPT
 from ..utils import build_conversation_history
-from ..utils.state_logger import log_node_start, log_node_complete
+from src.core.state_logger import log_node_start, log_node_complete
 from ..business_context import MAX_GATHERING_ROUNDS, format_required_info_categories, format_category_specific_priorities
 from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args

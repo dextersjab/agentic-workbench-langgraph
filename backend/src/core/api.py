@@ -8,7 +8,7 @@ import uuid
 import traceback
 import logging
 
-from src.workflows.support_desk.utils.state_logger import GREY, RESET
+from .state_logger import GREY, RESET
 from typing import AsyncGenerator, Optional
 
 from fastapi import FastAPI, APIRouter, HTTPException, status, Request

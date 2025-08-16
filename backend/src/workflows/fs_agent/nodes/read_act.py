@@ -8,6 +8,7 @@ import logging
 from copy import deepcopy
 
 from ..state import FSAgentState
+from src.core.state_logger import log_node_start, log_node_complete
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,11 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
     Returns:
         Updated state with action result
     """
+    state_before = deepcopy(state)
     state = deepcopy(state)
+    
+    # Log what this node will read from state
+    log_node_start("read_act", ["action.planned_action", "session.working_directory"], state)
     
     # Get the planned action
     action = state["action"]["planned_action"]
@@ -33,9 +38,10 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
             "result": None,
             "error": "No planned action found"
         }
+        
+        # Log what this node wrote to state
+        log_node_complete("read_act", state_before, state)
         return state
-    
-    logger.info(f"Executing read action: {action['action_type']} on {action['path']}")
     
     # Normalize the path
     path = action["path"]
@@ -116,6 +122,6 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
         "content": message
     })
     
-    logger.info(f"Read action {'succeeded' if success else 'failed'}")
-    
+    # Log what this node wrote to state
+    log_node_complete("read_act", state_before, state)
     return state

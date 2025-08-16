@@ -8,6 +8,7 @@ import logging
 from copy import deepcopy
 
 from ..state import SupportDeskState
+from src.core.state_logger import log_node_start, log_node_complete
 from langgraph.types import interrupt
 
 logger = logging.getLogger(__name__)
@@ -26,10 +27,11 @@ async def human_clarification_node(state: SupportDeskState) -> SupportDeskState:
     Returns:
         Updated state with user's clarification response
     """
+    state_before = deepcopy(state)
     state = deepcopy(state)
     
-    # Log node entry
-    logger.info("→ human_clarification: waiting for user response")
+    # Log what this node will read from state
+    log_node_start("human_clarification", ["messages", "gathering.clarification_attempts"])
     
     # Get current clarification attempts
     clarification_attempts = state.get("gathering", {}).get("clarification_attempts", 0)
@@ -52,5 +54,8 @@ async def human_clarification_node(state: SupportDeskState) -> SupportDeskState:
         state["gathering"] = {}
     state["gathering"]["clarification_attempts"] = clarification_attempts + 1
     logger.info(f"→ clarification attempt {clarification_attempts + 1} complete")
+    
+    # Log what this node wrote to state
+    log_node_complete("human_clarification", state_before, state)
     
     return state

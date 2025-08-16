@@ -8,6 +8,7 @@ import logging
 from copy import deepcopy
 
 from ..state import SupportDeskState
+from src.core.state_logger import log_node_start, log_node_complete
 from langgraph.types import interrupt
 
 logger = logging.getLogger(__name__)
@@ -26,10 +27,11 @@ async def human_information_node(state: SupportDeskState) -> SupportDeskState:
     Returns:
         Updated state with user's information response
     """
+    state_before = deepcopy(state)
     state = deepcopy(state)
     
-    # Log node entry
-    logger.info("→ human_information: waiting for user response")
+    # Log what this node will read from state
+    log_node_start("human_information", ["messages", "gathering.gathering_round"])
     
     # Get current gathering round
     gathering_round = state.get("gathering", {}).get("gathering_round", 1)
@@ -52,5 +54,8 @@ async def human_information_node(state: SupportDeskState) -> SupportDeskState:
         state["gathering"] = {}
     state["gathering"]["gathering_round"] = gathering_round + 1
     logger.info(f"→ gathering round {gathering_round + 1} complete")
+    
+    # Log what this node wrote to state
+    log_node_complete("human_information", state_before, state)
     
     return state

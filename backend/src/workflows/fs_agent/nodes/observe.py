@@ -11,6 +11,7 @@ from typing import Literal
 from ..state import FSAgentState
 from ..models.observe_output import ObserveOutput
 from ..prompts.observe_prompt import OBSERVE_PROMPT
+from src.core.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
 
 logger = logging.getLogger(__name__)
@@ -27,9 +28,11 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
     Returns:
         Updated state with planned action and mode (if first interaction)
     """
+    state_before = deepcopy(state)
     state = deepcopy(state)
     
-    logger.info("Observe node: Planning next action")
+    # Log what this node will read from state
+    log_node_start("observe", ["messages", "session", "action"], state)
     
     # Check if this is the first interaction
     is_first = state["session"]["is_first_interaction"]
@@ -57,6 +60,9 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
                     "content": "I've completed the requested file operations. Is there anything else you'd like me to help with?"
                 }
                 state["messages"].append(completion_message)
+                
+                # Log what this node wrote to state
+                log_node_complete("observe", state_before, state)
                 return state
     
     # Format prompt based on whether this is first interaction
@@ -118,7 +124,6 @@ Then, plan the first file action based on their request."""
         state["session"]["is_first_interaction"] = False
         if observe_output.is_read_only is not None:
             state["session"]["is_read_only"] = observe_output.is_read_only
-            logger.info(f"Mode determined: {'read-only' if observe_output.is_read_only else 'write'} mode")
             
             # Add mode announcement
             mode_message = {
@@ -138,6 +143,9 @@ Then, plan the first file action based on their request."""
                 "content": "I'm currently in read-only mode and cannot perform write or delete operations. If you need to modify files, please start a new session with a request that clearly indicates you want to create, modify, or delete files."
             }
             state["messages"].append(error_message)
+            
+            # Log what this node wrote to state
+            log_node_complete("observe", state_before, state)
             return state
         
         state["action"]["planned_action"] = {
@@ -145,7 +153,6 @@ Then, plan the first file action based on their request."""
             "path": observe_output.planned_action.path,
             "content": observe_output.planned_action.content
         }
-        logger.info(f"Planned action: {observe_output.planned_action.action_type} on {observe_output.planned_action.path}")
     else:
         state["action"]["planned_action"] = None
     
@@ -158,6 +165,8 @@ Then, plan the first file action based on their request."""
             "content": observe_output.message
         })
     
+    # Log what this node wrote to state
+    log_node_complete("observe", state_before, state)
     return state
 
 
