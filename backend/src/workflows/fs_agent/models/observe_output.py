@@ -29,6 +29,10 @@ class ObserveOutput(BaseModel):
         False,
         description="True if the user's request has been fulfilled"
     )
+    is_read_only: Optional[bool] = Field(
+        None,
+        description="True if only read operations are needed, False if write operations are needed (only set on first interaction)"
+    )
     message: Optional[str] = Field(
         None,
         description="Optional message to provide context about the action"

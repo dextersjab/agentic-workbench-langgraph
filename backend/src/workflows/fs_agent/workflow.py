@@ -5,11 +5,9 @@ This module implements a file system agent workflow that can perform
 read and write operations on files in a workspace directory.
 """
 import logging
-from typing import Literal
 from langgraph.graph import StateGraph, END
 
-from .state import FSAgentState, create_initial_state
-from .nodes.router import router_node, should_route_to_observe
+from .state import FSAgentState
 from .nodes.observe import observe_node, determine_action_type
 from .nodes.read_act import read_act_node
 from .nodes.write_act import write_act_node
@@ -24,13 +22,12 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     This workflow implements a file system agent with the following flow:
     
-    1. Router determines if session is read-only or write mode
-    2. Observe node plans the next file action based on user request
-    3. Read/Write act nodes execute the planned actions
-    4. Loop back to observe until task is complete
+    1. Observe node determines mode and plans file actions based on user request
+    2. Read/Write act nodes execute the planned actions
+    3. Both action nodes loop back to Observe until task is complete
     
     Flow diagram:
-    router → observe → [read_act | write_act] → observe (loop) → END
+    observe → [read_act | write_act] → observe (loop) → END
     
     Args:
         checkpointer: LangGraph checkpointer for state persistence
@@ -45,18 +42,14 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     workflow = StateGraph(FSAgentState)
     
     # Add nodes
-    workflow.add_node("router", router_node)
     workflow.add_node("observe", observe_node)
     workflow.add_node("read_act", read_act_node)
     workflow.add_node("write_act", write_act_node)
     
-    # Set entry point
-    workflow.set_entry_point("router")
+    # Set entry point - start directly at observe
+    workflow.set_entry_point("observe")
     
     # Add edges
-    # Router always goes to observe
-    workflow.add_edge("router", "observe")
-    
     # Observe routes based on action type
     workflow.add_conditional_edges(
         "observe",

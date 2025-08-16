@@ -18,7 +18,7 @@ fs_agent/
 
 The fs_agent workflow implements a file system agent that can:
 
-1. Determine operation mode (read-only vs write)
+1. Determine operation mode (read-only vs write) on first interaction
 2. List files in directories
 3. Read file contents
 4. Write to files (in write mode)
@@ -27,14 +27,12 @@ The fs_agent workflow implements a file system agent that can:
 ```mermaid
 graph TD;
     __start__([<p>__start__</p>]):::first
-    router(router)
     observe(observe)
     read_act(read_act)
     write_act(write_act)
     __end__([<p>__end__</p>]):::last
 
-    __start__ --> router;
-    router --> observe;
+    __start__ --> observe;
     observe -. &nbsp;read&nbsp; .-> read_act;
     observe -. &nbsp;write&nbsp; .-> write_act;
     observe -. &nbsp;none&nbsp; .-> __end__;
@@ -48,14 +46,19 @@ graph TD;
     classDef last stroke:red
 ```
 
+**Note**: The observe node handles both mode detection (on first interaction) and action planning throughout the session.
+
 ## Key components
 
 ### [workflow.py](workflow.py)
 
-Defines the LangGraph workflow with conditional routing based on action types and completion status.
+Defines the simplified LangGraph workflow with conditional routing based on action types and completion status.
 
 ```python
-# Conditional edge example
+# Simplified workflow - starts directly at observe
+workflow.set_entry_point("observe")
+
+# Conditional routing based on planned action
 workflow.add_conditional_edges(
     "observe",
     determine_action_type,
@@ -78,23 +81,20 @@ Defines the `FSAgentState` TypedDict that tracks:
 ### [nodes/](nodes/)
 
 Contains the implementation of each node in the workflow:
-- `router.py`: Determines if the session requires read-only or write operations
-- `observe.py`: Plans the next file action based on conversation and previous results
+- `observe.py`: Determines session mode (first interaction) and plans file actions based on conversation and previous results
 - `read_act.py`: Executes read operations (list, read)
 - `write_act.py`: Executes write operations (write, delete)
 - `utils.py`: Helper functions for workflow control
 
 ### [prompts/](prompts/)
 
-Contains prompt templates for each decision-making node:
-- `router_prompt.py`: Guides mode selection
-- `observe_prompt.py`: Guides action planning
+Contains prompt templates for the decision-making node:
+- `observe_prompt.py`: Guides mode selection (first interaction) and action planning
 
 ### [models/](models/)
 
 Contains Pydantic models for structured outputs:
-- `router_output.py`: Structured output for routing decisions
-- `observe_output.py`: Structured output for action planning
+- `observe_output.py`: Structured output for mode detection and action planning
 
 ## Workspace Directory
 

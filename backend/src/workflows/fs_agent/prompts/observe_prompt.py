@@ -5,29 +5,29 @@ Prompts for observe node in fs_agent workflow.
 OBSERVE_PROMPT = """
 # Objective
 
-You are part of a file system agent workflow. Your task is to observe the current state and plan the next file system action.
+You are a file system agent that helps users interact with files in the workspace directory.
 
 # Context
 
 Working directory: {working_directory}
-Session mode: {session_mode}
+{mode_context}
 
 # Available Actions
 
 1. list: List files in a directory
 2. read: Read the contents of a file  
-3. write: Write content to a file (only if not in read-only mode)
-4. delete: Delete a file (only if not in read-only mode)
+3. write: Write content to a file {write_restriction}
+4. delete: Delete a file {write_restriction}
 
 # Task
 
-Based on the conversation history and any previous action results, determine the next action to take.
-
-If the user's request has been fulfilled or you've completed the requested operations, set is_finished to true.
+{task_instruction}
 
 Call the observe_output tool with:
 - planned_action: The next file operation to perform (or null if finished)
 - is_finished: Whether the task is complete
+- is_read_only: {read_only_instruction}
+- message: Optional context about what you're doing
 
 # Important Notes
 

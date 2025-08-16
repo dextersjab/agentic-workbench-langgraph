@@ -149,3 +149,4 @@ node_modules/
 local/
 backend/logs/*.log
 frontend/dist/
+backend/workspace

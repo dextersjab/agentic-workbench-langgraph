@@ -2,6 +2,7 @@
 Observe node for fs_agent workflow.
 
 This node observes the current state and plans the next file action.
+On first interaction, it also determines if the session should be read-only or allow writes.
 """
 import logging
 from copy import deepcopy
@@ -18,19 +19,23 @@ logger = logging.getLogger(__name__)
 async def observe_node(state: FSAgentState) -> FSAgentState:
     """
     Observe the current state and plan the next action.
+    On first interaction, also determine read-only vs write mode.
     
     Args:
         state: Current workflow state
         
     Returns:
-        Updated state with planned action
+        Updated state with planned action and mode (if first interaction)
     """
     state = deepcopy(state)
     
     logger.info("Observe node: Planning next action")
     
-    # Check for repeated actions
-    if state["action"]["planned_action"] and state["action"]["action_result"]:
+    # Check if this is the first interaction
+    is_first = state["session"]["is_first_interaction"]
+    
+    # Check for repeated actions (skip on first interaction)
+    if not is_first and state["action"]["planned_action"] and state["action"]["action_result"]:
         if state["action"]["action_result"]["success"]:
             action_type = state["action"]["planned_action"]["action_type"]
             action_path = state["action"]["planned_action"]["path"]
@@ -54,11 +59,29 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
                 state["messages"].append(completion_message)
                 return state
     
-    # Format prompt with context
-    session_mode = "read-only" if state["session"]["is_read_only"] else "read-write"
+    # Format prompt based on whether this is first interaction
+    if is_first:
+        mode_context = "This is the first interaction. Determine if the user needs write operations."
+        task_instruction = """First, analyze the user's request to determine the operation mode:
+- If they want to create, write, modify, or delete files, set is_read_only to False
+- If they only want to explore, list, or read files, set is_read_only to True
+
+Then, plan the first file action based on their request."""
+        read_only_instruction = "Set based on whether write operations are needed"
+        write_restriction = "(requires write mode)"
+    else:
+        session_mode = "read-only" if state["session"]["is_read_only"] else "read-write"
+        mode_context = f"Session mode: {session_mode}"
+        task_instruction = "Based on the conversation history and any previous action results, determine the next action to take."
+        read_only_instruction = "Leave as None (already determined)"
+        write_restriction = "(only if not in read-only mode)" if state["session"]["is_read_only"] else ""
+    
     prompt = OBSERVE_PROMPT.format(
         working_directory=state["session"]["working_directory"],
-        session_mode=session_mode
+        mode_context=mode_context,
+        task_instruction=task_instruction,
+        read_only_instruction=read_only_instruction,
+        write_restriction=write_restriction
     )
     
     # Create tool for structured output
@@ -66,7 +89,7 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
     
     # Build conversation with action results if any
     messages = state.get("messages", [])
-    if state["action"]["action_result"]:
+    if state["action"]["action_result"] and not is_first:
         result = state["action"]["action_result"]
         if result["success"]:
             result_msg = f"Previous action completed successfully. Result: {result.get('result', 'Done')}"
@@ -74,23 +97,49 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
             result_msg = f"Previous action failed: {result.get('error', 'Unknown error')}"
         messages = messages + [{"role": "system", "content": result_msg}]
     
-    # Call LLM to plan next action
-    response = await client.chat.completions.create(
-        model="gpt-4o-mini",
+    # Call LLM to plan next action (and determine mode if first interaction)
+    response = await client.chat_completion(
         messages=[
             {"role": "system", "content": prompt},
             *messages
         ],
+        model="openai/gpt-4.1-mini",
+        temperature=0.7,
         tools=[observe_tool],
-        tool_choice={"type": "function", "function": {"name": "observe_output"}}
+        tool_choice="required"
     )
     
     # Extract the structured output
-    tool_call = response.choices[0].message.tool_calls[0]
-    observe_output = extract_tool_call_args(tool_call, ObserveOutput)
+    output_data = extract_tool_call_args(response, "observe_output")
+    observe_output = ObserveOutput(**output_data)
+    
+    # Handle first interaction mode setting
+    if is_first:
+        state["session"]["is_first_interaction"] = False
+        if observe_output.is_read_only is not None:
+            state["session"]["is_read_only"] = observe_output.is_read_only
+            logger.info(f"Mode determined: {'read-only' if observe_output.is_read_only else 'write'} mode")
+            
+            # Add mode announcement
+            mode_message = {
+                "role": "assistant",
+                "content": f"I'll help you with {'exploring and reading' if observe_output.is_read_only else 'file operations including writing'} files in the workspace directory."
+            }
+            state["messages"].append(mode_message)
     
     # Update state with planned action
     if observe_output.planned_action:
+        # Check if action is allowed in current mode
+        if state["session"]["is_read_only"] and observe_output.planned_action.action_type in ["write", "delete"]:
+            logger.warning(f"Write operation requested in read-only mode: {observe_output.planned_action.action_type}")
+            state["session"]["is_finished"] = True
+            error_message = {
+                "role": "assistant",
+                "content": "I'm currently in read-only mode and cannot perform write or delete operations. If you need to modify files, please start a new session with a request that clearly indicates you want to create, modify, or delete files."
+            }
+            state["messages"].append(error_message)
+            return state
+        
         state["action"]["planned_action"] = {
             "action_type": observe_output.planned_action.action_type,
             "path": observe_output.planned_action.path,
@@ -102,8 +151,8 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
     
     state["session"]["is_finished"] = observe_output.is_finished
     
-    # Add message if provided
-    if observe_output.message:
+    # Add message if provided (and not already added mode message)
+    if observe_output.message and not (is_first and observe_output.is_read_only is not None):
         state["messages"].append({
             "role": "assistant",
             "content": observe_output.message

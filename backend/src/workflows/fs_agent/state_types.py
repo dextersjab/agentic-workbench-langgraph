@@ -22,6 +22,7 @@ class SessionState(TypedDict):
     working_directory: str
     is_read_only: bool
     is_finished: bool
+    is_first_interaction: bool  # Track if this is the first user message
 
 
 class ActionState(TypedDict):

@@ -19,7 +19,8 @@ def create_initial_state() -> FSAgentState:
         session=SessionState(
             working_directory="./workspace",
             is_read_only=True,
-            is_finished=False
+            is_finished=False,
+            is_first_interaction=True
         ),
         action=ActionState(
             planned_action=None,
