@@ -9,7 +9,8 @@ import os
 from langgraph.graph import StateGraph, END
 
 from .state import FSAgentState
-from .nodes.observe import observe_node, determine_action_type
+from .nodes.observe import observe_node
+from .nodes.plan import plan_node, should_continue_planning
 from .nodes.read_act import read_act_node
 from .nodes.write_act import write_act_node
 from .nodes.utils import is_finished
@@ -21,14 +22,16 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     """
     Create the fs_agent LangGraph workflow.
     
-    This workflow implements a file system agent with the following flow:
+    This workflow implements a file system agent following the ReAct pattern:
     
-    1. Observe node determines mode and plans file actions based on user request
-    2. Read/Write act nodes execute the planned actions
-    3. Both action nodes loop back to Observe until task is complete
+    1. Observe node gathers current state and context
+    2. Plan node reasons about next action (with optional think loops)
+    3. Read/Write act nodes execute the planned actions
+    4. Action nodes loop back to Observe for next iteration
     
     Flow diagram:
-    observe → [read_act | write_act] → observe (loop) → END
+    observe → plan → [read_act | write_act] → observe (loop) → END
+              ↺ think (self-loop, max 2 iterations)
     
     Args:
         checkpointer: LangGraph checkpointer for state persistence
@@ -44,18 +47,23 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     # Add nodes
     workflow.add_node("observe", observe_node)
+    workflow.add_node("plan", plan_node)
     workflow.add_node("read_act", read_act_node)
     workflow.add_node("write_act", write_act_node)
     
-    # Set entry point - start directly at observe
+    # Set entry point - start at observe
     workflow.set_entry_point("observe")
     
     # Add edges
-    # Observe routes based on action type
+    # Observe always goes to plan
+    workflow.add_edge("observe", "plan")
+    
+    # Plan can self-loop (think) or route to actions
     workflow.add_conditional_edges(
-        "observe",
-        determine_action_type,
+        "plan",
+        should_continue_planning,
         {
+            "think": "plan",  # Self-loop for deeper thinking
             "read": "read_act",
             "write": "write_act",
             "none": END

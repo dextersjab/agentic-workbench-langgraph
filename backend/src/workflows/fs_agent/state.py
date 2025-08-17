@@ -2,7 +2,7 @@
 from typing import Dict, Optional, TypeVar
 from pydantic import BaseModel
 
-from .state_types import SessionState, ActionState, FSAgentState
+from .state_types import SessionState, ActionState, PlanningState, FSAgentState
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -26,5 +26,11 @@ def create_initial_state() -> FSAgentState:
             planned_action=None,
             action_result=None,
             action_counter={}
+        ),
+        planning=PlanningState(
+            thinking_iterations=0,
+            needs_deeper_thinking=False,
+            current_reasoning="",
+            alternative_approaches=[]
         )
     )

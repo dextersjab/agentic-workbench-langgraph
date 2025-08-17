@@ -32,6 +32,14 @@ class ActionState(TypedDict):
     action_counter: Dict[str, int]  # Track repeated actions
 
 
+class PlanningState(TypedDict):
+    """State related to reasoning and planning iterations."""
+    thinking_iterations: int  # Current thinking iteration count
+    needs_deeper_thinking: bool  # Whether the agent wants to think more
+    current_reasoning: str  # Current reasoning/thoughts
+    alternative_approaches: List[str]  # Alternative approaches considered
+
+
 class FSAgentState(TypedDict):
     """
     Composed state for the fs_agent workflow.
@@ -41,3 +49,4 @@ class FSAgentState(TypedDict):
     messages: List[Dict[str, str]]  # Chat messages in OpenAI format
     session: SessionState
     action: ActionState
+    planning: PlanningState
