@@ -13,6 +13,7 @@ from ..models.observe_output import ObserveOutput
 from ..prompts.observe_prompt import OBSERVE_PROMPT
 from src.core.state_logger import log_node_start, log_node_complete
 from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
+from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +91,9 @@ Then, plan the first file action based on their request."""
         write_restriction=write_restriction
     )
     
+    # Get stream writer for real-time feedback
+    writer = get_stream_writer()
+    
     # Create tool for structured output
     observe_tool = pydantic_to_openai_tool(ObserveOutput, "observe_output")
     
@@ -103,6 +107,14 @@ Then, plan the first file action based on their request."""
             result_msg = f"Previous action failed: {result.get('error', 'Unknown error')}"
         messages = messages + [{"role": "system", "content": result_msg}]
     
+    # Buffer to collect the response
+    response_buffer = []
+    
+    # Stream callback to emit chunks and collect them
+    def stream_callback(chunk: str):
+        writer({"custom_llm_chunk": chunk})
+        response_buffer.append(chunk)
+    
     # Call LLM to plan next action (and determine mode if first interaction)
     response = await client.chat_completion(
         messages=[
@@ -112,7 +124,9 @@ Then, plan the first file action based on their request."""
         model="openai/gpt-4.1-mini",
         temperature=0.7,
         tools=[observe_tool],
-        tool_choice="required"
+        tool_choice="required",
+        stream_callback=stream_callback,
+        use_streaming=True
     )
     
     # Extract the structured output
@@ -125,10 +139,14 @@ Then, plan the first file action based on their request."""
         if observe_output.is_read_only is not None:
             state["session"]["is_read_only"] = observe_output.is_read_only
             
-            # Add mode announcement
+            # Stream mode announcement
+            mode_text = f"\n\nI'll help you with {'exploring and reading' if observe_output.is_read_only else 'file operations including writing'} files in the workspace directory.\n\n"
+            writer({"custom_llm_chunk": mode_text})
+            
+            # Add to state for history
             mode_message = {
                 "role": "assistant",
-                "content": f"I'll help you with {'exploring and reading' if observe_output.is_read_only else 'file operations including writing'} files in the workspace directory."
+                "content": mode_text
             }
             state["messages"].append(mode_message)
     
@@ -158,8 +176,9 @@ Then, plan the first file action based on their request."""
     
     state["session"]["is_finished"] = observe_output.is_finished
     
-    # Add message if provided (and not already added mode message)
+    # Stream and add message if provided (and not already added mode message)
     if observe_output.message and not (is_first and observe_output.is_read_only is not None):
+        writer({"custom_llm_chunk": f"\n{observe_output.message}\n"})
         state["messages"].append({
             "role": "assistant",
             "content": observe_output.message

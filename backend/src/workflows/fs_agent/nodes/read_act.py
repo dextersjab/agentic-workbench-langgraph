@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from ..state import FSAgentState
 from src.core.state_logger import log_node_start, log_node_complete
+from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,9 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
     
     # Log what this node will read from state
     log_node_start("read_act", ["action.planned_action", "session.working_directory"], state)
+    
+    # Get stream writer for real-time feedback
+    writer = get_stream_writer()
     
     # Get the planned action
     action = state["action"]["planned_action"]
@@ -71,15 +75,20 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
                 result = files if files else []
                 success = True
                 
-                # Format result message
+                # Format and stream result message
                 if files:
                     file_list = "\n".join([f"  - {f}" for f in files])
                     message = f"Files in {path}:\n{file_list}"
                 else:
                     message = f"The directory {path} is empty."
+                
+                # Stream the directory listing
+                writer({"custom_llm_chunk": f"\n{message}\n"})
             else:
                 error = f"Directory not found: {path}"
                 message = error
+                # Stream error
+                writer({"custom_llm_chunk": f"\n{message}\n"})
                 
         elif action["action_type"] == "read":
             # Read file contents
@@ -95,19 +104,30 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
                 else:
                     preview = content
                 message = f"Contents of {path}:\n```\n{preview}\n```"
+                
+                # Stream the file contents
+                writer({"custom_llm_chunk": f"\n{message}\n"})
             else:
                 error = f"File not found: {path}"
                 message = error
+                # Stream error
+                writer({"custom_llm_chunk": f"\n{message}\n"})
         else:
             error = f"Invalid read action type: {action['action_type']}"
             message = error
+            # Stream error
+            writer({"custom_llm_chunk": f"\n{message}\n"})
             
     except PermissionError:
         error = f"Permission denied: {path}"
         message = error
+        # Stream error
+        writer({"custom_llm_chunk": f"\n{message}\n"})
     except Exception as e:
         error = f"Error executing read action: {str(e)}"
         message = error
+        # Stream error
+        writer({"custom_llm_chunk": f"\n{message}\n"})
     
     # Update state with result
     state["action"]["action_result"] = {

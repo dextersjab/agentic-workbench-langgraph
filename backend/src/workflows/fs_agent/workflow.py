@@ -5,6 +5,7 @@ This module implements a file system agent workflow that can perform
 read and write operations on files in a workspace directory.
 """
 import logging
+import os
 from langgraph.graph import StateGraph, END
 
 from .state import FSAgentState
@@ -85,12 +86,16 @@ def create_workflow(checkpointer, draw_diagram: bool = True):
     
     # Generate diagram if requested
     if draw_diagram:
+        # Generate diagram path in the same directory as this module
+        current_dir = os.path.dirname(__file__)
+        diagram_path = os.path.join(current_dir, "fs_agent_workflow.png")
+        
+        logger.info(f"Drawing workflow diagram to {diagram_path}")
         try:
             png_bytes = compiled.get_graph().draw_mermaid_png()
-            diagram_path = "backend/src/workflows/fs_agent/fs_agent_workflow.png"
             with open(diagram_path, "wb") as f:
                 f.write(png_bytes)
-            logger.info(f"Workflow diagram saved to {diagram_path}")
+            logger.info(f"Workflow diagram saved successfully to {diagram_path}")
         except Exception as e:
             logger.warning(f"Could not generate workflow diagram: {e}")
     
