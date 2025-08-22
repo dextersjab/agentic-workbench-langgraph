@@ -237,7 +237,7 @@ async def _workflow_stream(req: ChatCompletionRequest, workflow, thread_id: str)
                 # Handle both tuple format (stream_type, data) and direct dictionary format
                 if isinstance(chunk, tuple) and len(chunk) == 2:
                     stream_type, stream_data = chunk
-                    logger.debug(f"Stream chunk received: {stream_type} -> {list(stream_data.keys()) if isinstance(stream_data, dict) else type(stream_data)}")
+                    logger.info(f"Stream chunk received: {stream_type} -> {list(stream_data.keys()) if isinstance(stream_data, dict) else type(stream_data)}")
                     
                     if stream_type == "custom":
                         # Handle custom LLM chunks for user-facing streaming
@@ -260,7 +260,7 @@ async def _workflow_stream(req: ChatCompletionRequest, workflow, thread_id: str)
                 
                 elif isinstance(chunk, dict):
                     # Fallback for direct dictionary format (backwards compatibility)
-                    logger.info(f"Direct chunk received: {list(chunk.keys())}")
+                    logger.info(f"Direct dict chunk received: {list(chunk.keys())}")
                     
                     # Check for custom LLM chunks to stream back
                     if "custom_llm_chunk" in chunk:

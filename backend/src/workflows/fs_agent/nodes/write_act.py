@@ -47,6 +47,29 @@ async def write_act_node(state: FSAgentState) -> FSAgentState:
         log_node_complete("write_act", state_before, state)
         return state
     
+    # Check approval for risky operations
+    approval = state["approval"]
+    if approval["needs_approval"] and not approval["approval_granted"]:
+        logger.warning(f"Action {action['action_type']} on {action['path']} was rejected by user")
+        state["action"]["action_result"] = {
+            "success": False,
+            "result": None,
+            "error": "Action rejected by user"
+        }
+        
+        # Stream rejection message
+        writer({"custom_llm_chunk": "\n✗ Action cancelled: User did not approve\n"})
+        
+        # Add message to conversation
+        state["messages"].append({
+            "role": "assistant",
+            "content": "✗ Action cancelled: User did not approve"
+        })
+        
+        # Log what this node wrote to state
+        log_node_complete("write_act", state_before, state)
+        return state
+    
     # Normalize the path
     path = action["path"]
     working_dir = state["session"]["working_directory"]
@@ -85,6 +108,46 @@ async def write_act_node(state: FSAgentState) -> FSAgentState:
             # Stream success message
             writer({"custom_llm_chunk": f"\n{message}\n"})
             
+        elif action["action_type"] == "edit":
+            # Apply edit operations to file
+            if not os.path.exists(full_path):
+                error = f"Cannot edit non-existent file: {path}"
+                message = f"✗ Error: {error}"
+                writer({"custom_llm_chunk": f"\n{message}\n"})
+            else:
+                # Read original content
+                with open(full_path, 'r') as f:
+                    original_content = f.read()
+                
+                # Apply edits
+                edits = action.get("edits", [])
+                if edits:
+                    # Import the edit function from preview node
+                    from .preview import apply_edits
+                    
+                    try:
+                        modified_content = apply_edits(original_content, edits)
+                        
+                        # Write modified content back
+                        with open(full_path, 'w') as f:
+                            f.write(modified_content)
+                        
+                        success = True
+                        result = f"Successfully applied {len(edits)} edit(s) to {path}"
+                        message = f"✓ File edited: {path} ({len(edits)} change(s))"
+                        
+                        # Stream success message
+                        writer({"custom_llm_chunk": f"\n{message}\n"})
+                        
+                    except Exception as edit_error:
+                        error = f"Error applying edits to {path}: {str(edit_error)}"
+                        message = f"✗ Error: {error}"
+                        writer({"custom_llm_chunk": f"\n{message}\n"})
+                else:
+                    error = f"No edit operations specified for {path}"
+                    message = f"✗ Error: {error}"
+                    writer({"custom_llm_chunk": f"\n{message}\n"})
+                    
         elif action["action_type"] == "delete":
             # Delete file
             if os.path.isfile(full_path):

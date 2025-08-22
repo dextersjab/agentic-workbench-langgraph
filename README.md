@@ -36,7 +36,7 @@ agentic-workflow-workbench/
 ## Example Workflows
 
 - **[Support desk](backend/src/workflows/support_desk/README.md)** - IT support desk agentic chatbot that answers queries and raises tickets
-- **[fs-agent](backend/src/workflows/fs_agent/README.md)** - File system agent that can read, write, and manage files in a workspace directory
+- **[fs-agent](backend/src/workflows/fs_agent/README.md)** - ReAct-based file system agent with planning, thinking loops, and human approval for risky operations
 
 ## Quick Start
 

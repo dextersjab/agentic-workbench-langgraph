@@ -16,26 +16,42 @@ fs_agent/
 
 ## Workflow overview
 
-The fs_agent workflow implements a file system agent that can:
+The fs_agent workflow implements a file system agent following the ReAct (Reasoning and Acting) pattern:
 
-1. Determine operation mode (read-only vs write) on first interaction
-2. List files in directories
-3. Read file contents
-4. Write to files (in write mode)
-5. Delete files (in write mode)
+1. **Observe**: Gathers current state and context
+2. **Plan**: Reasons about next action with optional thinking loops
+3. **Approve**: For risky actions, generates preview and requires approval
+4. **Act**: Executes the planned action (read or write operations)
+5. **Loop**: Returns to observe for next iteration
+
+The agent supports:
+- Listing files in directories
+- Reading file contents
+- Writing to files (with preview and approval for risky operations)
+- Editing files (with diff preview)
+- Deleting files (with confirmation)
 
 ```mermaid
 graph TD;
     __start__([<p>__start__</p>]):::first
     observe(observe)
+    plan(plan)
+    preview(preview)
+    human_approve(human_approve)
     read_act(read_act)
     write_act(write_act)
     __end__([<p>__end__</p>]):::last
 
     __start__ --> observe;
-    observe -. &nbsp;read&nbsp; .-> read_act;
-    observe -. &nbsp;write&nbsp; .-> write_act;
-    observe -. &nbsp;none&nbsp; .-> __end__;
+    observe --> plan;
+    plan -. &nbsp;think&nbsp; .-> plan;
+    plan -. &nbsp;safe&nbsp; .-> read_act;
+    plan -. &nbsp;safe&nbsp; .-> write_act;
+    plan -. &nbsp;risky&nbsp; .-> preview;
+    plan -. &nbsp;none&nbsp; .-> __end__;
+    preview --> human_approve;
+    human_approve --> read_act;
+    human_approve --> write_act;
     read_act -. &nbsp;continue&nbsp; .-> observe;
     read_act -. &nbsp;finished&nbsp; .-> __end__;
     write_act -. &nbsp;continue&nbsp; .-> observe;
@@ -46,26 +62,34 @@ graph TD;
     classDef last stroke:red
 ```
 
-**Note**: The observe node handles both mode detection (on first interaction) and action planning throughout the session.
+**Key Features**:
+- **Think Loop**: The plan node can self-loop (max 2 iterations) for deeper reasoning
+- **Safe vs Risky Actions**: Safe actions execute directly, risky actions require approval
+- **Preview Generation**: For write/edit/delete operations, generates diffs for user review
+- **Human-in-the-Loop**: Approval node for confirming risky operations
 
 ## Key components
 
 ### [workflow.py](workflow.py)
 
-Defines the simplified LangGraph workflow with conditional routing based on action types and completion status.
+Defines the LangGraph workflow with conditional routing based on action safety and completion status.
 
 ```python
-# Simplified workflow - starts directly at observe
+# Workflow starts at observe
 workflow.set_entry_point("observe")
 
-# Conditional routing based on planned action
+# Observe always goes to plan
+workflow.add_edge("observe", "plan")
+
+# Plan can self-loop (think) or route to safe/risky actions
 workflow.add_conditional_edges(
-    "observe",
-    determine_action_type,
+    "plan",
+    should_continue_planning,
     {
-        "read": "read_act",     # Read operations
-        "write": "write_act",   # Write operations  
-        "none": END            # Task complete
+        "think": "plan",  # Self-loop for deeper thinking
+        "safe": route_after_approval,  # Safe actions execute directly
+        "risky": "preview",  # Risky actions need approval
+        "none": END
     }
 )
 ```
@@ -81,20 +105,25 @@ Defines the `FSAgentState` TypedDict that tracks:
 ### [nodes/](nodes/)
 
 Contains the implementation of each node in the workflow:
-- `observe.py`: Determines session mode (first interaction) and plans file actions based on conversation and previous results
+- `observe.py`: Gathers current state and context from conversation history
+- `plan.py`: Reasons about next action with optional thinking loops (max 2 iterations)
+- `preview.py`: Generates diffs and previews for risky operations
+- `human_approve.py`: Human-in-the-loop node for approving risky actions
 - `read_act.py`: Executes read operations (list, read)
-- `write_act.py`: Executes write operations (write, delete)
-- `utils.py`: Helper functions for workflow control
+- `write_act.py`: Executes write operations (write, edit, delete)
+- `utils.py`: Helper functions for workflow control and routing
 
 ### [prompts/](prompts/)
 
-Contains prompt templates for the decision-making node:
-- `observe_prompt.py`: Guides mode selection (first interaction) and action planning
+Contains prompt templates for the reasoning nodes:
+- `observe_prompt.py`: Guides observation and context gathering
+- `plan_prompt.py`: Guides action planning and thinking process
 
 ### [models/](models/)
 
 Contains Pydantic models for structured outputs:
-- `observe_output.py`: Structured output for mode detection and action planning
+- `observe_output.py`: Structured output for observation results
+- `plan_output.py`: Structured output for planning decisions and thinking
 
 ## Workspace Directory
 
@@ -112,22 +141,42 @@ Through the OpenWebUI interface, select "fs-agent" from the model dropdown to in
 
 ## Example Interactions
 
-### Read-only operations
+### Read operations (safe)
 ```
 User: "What files are in the workspace?"
-Agent: [Lists files in workspace directory]
+Agent: [Observes context] → [Plans list action] → [Executes list] → [Shows files]
 
-User: "Can you read the sample.txt file?"
-Agent: [Reads and displays file contents]
+User: "Can you read the index.html file?"
+Agent: [Observes context] → [Plans read action] → [Reads and displays contents]
 ```
 
-### Write operations
+### Write operations (with approval)
 ```
-User: "Create a new file called test.txt with some content"
-Agent: [Creates the file with specified content]
+User: "Create a new file called test.txt with 'Hello World' content"
+Agent: [Observes] → [Plans write action] → [Generates preview] → 
+       "I'll create test.txt with the following content: Hello World"
+       [Awaits approval] → [Creates file after approval]
+
+User: "Edit the test.txt file to say 'Hello Universe'"
+Agent: [Observes] → [Plans edit] → [Shows diff preview] →
+       "Preview of changes:
+        - Hello World
+        + Hello Universe"
+       [Awaits approval] → [Applies edit after approval]
 
 User: "Delete the test.txt file"
-Agent: [Deletes the specified file]
+Agent: [Observes] → [Plans delete] → [Shows file to be deleted] →
+       "I'll delete test.txt. This action cannot be undone."
+       [Awaits approval] → [Deletes after approval]
+```
+
+### Planning with thinking
+```
+User: "I need to organize my project files better"
+Agent: [Observes current structure] → [Plans with thinking loop] →
+       "Let me think about the best approach..." →
+       [Re-evaluates plan] → [Presents organized action plan] →
+       [Executes approved actions]
 ```
 
 ## Security Considerations

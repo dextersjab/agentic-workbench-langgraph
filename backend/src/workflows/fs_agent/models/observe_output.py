@@ -1,11 +1,27 @@
 """Observe output model for fs_agent workflow."""
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from pydantic import BaseModel, Field
+
+
+class EditOperationModel(BaseModel):
+    """Represents a single edit operation."""
+    line_number: Optional[int] = Field(
+        None,
+        description="Line number to edit (1-based), None for append"
+    )
+    old_content: Optional[str] = Field(
+        None,
+        description="Expected content to replace, None for new lines"
+    )
+    new_content: str = Field(
+        ...,
+        description="New content to insert or replace with"
+    )
 
 
 class FileActionModel(BaseModel):
     """Represents a planned file action."""
-    action_type: Literal["list", "read", "write", "delete"] = Field(
+    action_type: Literal["list", "read", "write", "edit", "delete"] = Field(
         ...,
         description="Type of file operation to perform"
     )
@@ -16,6 +32,10 @@ class FileActionModel(BaseModel):
     content: Optional[str] = Field(
         None,
         description="Content to write (only for write actions)"
+    )
+    edits: Optional[List[EditOperationModel]] = Field(
+        None,
+        description="Edit operations to perform (only for edit actions)"
     )
 
 

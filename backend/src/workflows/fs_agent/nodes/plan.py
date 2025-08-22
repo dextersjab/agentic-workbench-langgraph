@@ -194,25 +194,18 @@ async def plan_node(state: FSAgentState) -> FSAgentState:
     return state
 
 
-def should_continue_planning(state: FSAgentState) -> Literal["think", "read", "write", "none"]:
+def route_by_safety(state: FSAgentState) -> Literal["safe", "risky", "none"]:
     """
-    Determine routing from plan node.
+    Route actions based on safety: safe actions execute directly, risky ones need approval.
     
     Args:
         state: Current workflow state
         
     Returns:
-        "think" if needs deeper thinking and hasn't hit limit
-        "read"/"write" if ready to act based on planned action
+        "safe" for list/read operations that can execute directly
+        "risky" for write/edit/delete operations that need approval
         "none" if finished or no action planned
     """
-    planning = state["planning"]
-    
-    # Check if we need more thinking (and haven't hit limit)
-    if planning["needs_deeper_thinking"] and planning["thinking_iterations"] < MAX_THINKING_ITERATIONS:
-        logger.info(f"→ continuing to think (iteration {planning['thinking_iterations']}/{MAX_THINKING_ITERATIONS})")
-        return "think"
-    
     # Check if we're finished
     if state["session"]["is_finished"]:
         logger.info("→ task finished")
@@ -225,12 +218,63 @@ def should_continue_planning(state: FSAgentState) -> Literal["think", "read", "w
         return "none"
     
     action_type = planned_action["action_type"]
+    
+    # Safe operations can execute directly
     if action_type in ["list", "read"]:
-        logger.info(f"→ routing to read_act for {action_type}")
-        return "read"
-    elif action_type in ["write", "delete"]:
-        logger.info(f"→ routing to write_act for {action_type}")
-        return "write"
+        logger.info(f"→ routing to safe execution for {action_type}")
+        return "safe"
+    
+    # Risky operations need approval
+    elif action_type in ["write", "edit", "delete"]:
+        # Check if file exists for write operations (new vs overwrite)
+        if action_type == "write":
+            import os
+            file_path = planned_action["path"]
+            working_dir = state["session"]["working_directory"]
+            
+            if not os.path.isabs(file_path):
+                if file_path == working_dir or file_path.startswith(f"{working_dir}/"):
+                    full_path = file_path
+                else:
+                    full_path = os.path.join(working_dir, file_path)
+            else:
+                full_path = file_path
+            
+            if os.path.exists(full_path):
+                logger.info(f"→ routing to risky (overwrite) for {action_type}")
+                return "risky"
+            else:
+                # New file creation is safe(r)
+                logger.info(f"→ routing to safe (new file) for {action_type}")
+                return "safe"
+        else:
+            # edit and delete are always risky
+            logger.info(f"→ routing to risky for {action_type}")
+            return "risky"
+    
     else:
         logger.warning(f"→ unknown action type: {action_type}")
         return "none"
+
+
+def should_continue_planning(state: FSAgentState) -> Literal["think", "safe", "risky", "none"]:
+    """
+    Determine routing from plan node.
+    
+    Args:
+        state: Current workflow state
+        
+    Returns:
+        "think" if needs deeper thinking and hasn't hit limit
+        "safe"/"risky" based on action safety level
+        "none" if finished or no action planned
+    """
+    planning = state["planning"]
+    
+    # Check if we need more thinking (and haven't hit limit)
+    if planning["needs_deeper_thinking"] and planning["thinking_iterations"] < MAX_THINKING_ITERATIONS:
+        logger.info(f"→ continuing to think (iteration {planning['thinking_iterations']}/{MAX_THINKING_ITERATIONS})")
+        return "think"
+    
+    # Route based on action safety
+    return route_by_safety(state)
