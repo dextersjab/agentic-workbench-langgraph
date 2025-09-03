@@ -10,7 +10,7 @@ from typing import Literal
 
 from ..state import SupportDeskState
 from ..models.info_completeness_output import InfoCompletenessOutput
-from ..prompts.has_sufficient_info_prompt import HAS_SUFFICIENT_INFO_PROMPT
+from ..prompts.has_sufficient_info_prompt import format_has_sufficient_info_prompt
 from ..utils import build_conversation_history
 from src.core.state_logger import log_node_start, log_node_complete
 from ..business_context import MAX_GATHERING_ROUNDS, format_required_info_categories, format_category_specific_priorities
@@ -79,7 +79,7 @@ As part of this agentic system, you have a maximum of {max_gathering_rounds} tot
         # Create prompt for completeness assessment
         from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
         
-        prompt = HAS_SUFFICIENT_INFO_PROMPT.format(
+        prompt = format_has_sufficient_info_prompt(
             servicehub_support_ticket_policy=SERVICEHUB_SUPPORT_TICKET_POLICY,
             issue_category=issue_category,
             issue_priority=issue_priority,

@@ -4,6 +4,8 @@ Prompts for classification node in Support Desk workflow.
 These prompts use tool calling to generate structured outputs.
 """
 
+from .common import ESCALATION_PHRASES
+
 # Classification prompt using tool calling
 CLASSIFICATION_PROMPT = """
 # Objective
@@ -24,13 +26,7 @@ This is clarification attempt #{clarification_attempts} of {max_clarification_at
 
 ## Escalation Detection
 
-First, check if the user is requesting escalation with phrases like:
-- "just raise the ticket"
-- "connect me to a human"
-- "stop asking questions"  
-- "I don't have time for this"
-- "let me speak to someone"
-- "escalate this"
+{escalation_phrases}
 
 If escalation is detected, set `user_requested_escalation=True` and attempt to classify with best guess.
 
@@ -51,23 +47,6 @@ If you DO have sufficient information, categorise into one of these categories:
 Priority levels:
 {priority_levels}
 
-## Decision Summary
-
-- If user_requested_escalation=True: Set category/priority to best guess (can be None), needs_clarification=False, no response needed
-- If needs_clarification=True: Category/priority can be None if uncertain, **MUST set response to a specific clarifying question**
-- If confident in classification: Set category/priority appropriately, needs_clarification=False, no response needed
-
-## Clarifying Questions
-
-When needs_clarification=True, generate a helpful clarifying question in the `response` field:
-- Be specific about what information you need
-- Ask one clear question at a time
-- Be friendly and professional
-- Examples:
-  - "Could you describe what specific error message you're seeing?"
-  - "Which application or system are you having trouble accessing?"
-  - "When did this issue first start occurring?"
-
 This is the full conversation history between the IT Support Desk agentic system until now:
 \"\"\"
 {conversation_history}
@@ -75,3 +54,8 @@ This is the full conversation history between the IT Support Desk agentic system
 
 Use the {tool_name} tool to provide your analysis.
 """
+
+# Format the prompt with escalation phrases
+def format_classification_prompt(**kwargs):
+    kwargs['escalation_phrases'] = ESCALATION_PHRASES
+    return CLASSIFICATION_PROMPT.format(**kwargs)

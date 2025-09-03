@@ -4,6 +4,7 @@ Prompts for has_sufficient_info node in Support Desk workflow.
 These prompts use tool calling to generate structured outputs.
 """
 
+from .common import ESCALATION_PHRASES
 from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
 from ..business_context import MAX_GATHERING_ROUNDS, REQUIRED_INFO_CATEGORIES, CATEGORY_SPECIFIC_PRIORITIES
 
@@ -32,13 +33,7 @@ This is gathering round #{gathering_round} of {max_gathering_rounds}
 
 ## Escalation Detection
 
-First, check if the user is requesting escalation with phrases like:
-- "just raise the ticket"
-- "connect me to a human"
-- "stop asking questions"
-- "I don't have time for this"
-- "let me speak to someone"
-- "escalate this"
+{escalation_phrases}
 
 If escalation is detected, set `user_requested_escalation=True` and set needs_more_info=False.
 
@@ -54,12 +49,6 @@ Consider:
 - Whether critical information is missing for proper ticket creation
 - Issue priority and SLAs (P1 issues may need less detail to start resolution)
 - User location, department, role (if relevant to issue)
-
-## Decision Summary
-
-- If user_requested_escalation=True: Set needs_more_info=False, proceed with available info
-- If needs_more_info=True: Missing categories should be listed, response explains what's needed
-- If sufficient info exists: Set needs_more_info=False, confidence should be high
 
 ## Examples of Sufficient Information
 
@@ -81,3 +70,8 @@ This is the full conversation history between the IT Support Desk agentic system
 
 Use the {tool_name} tool to provide your assessment.
 """
+
+# Format the prompt with escalation phrases
+def format_has_sufficient_info_prompt(**kwargs):
+    kwargs['escalation_phrases'] = ESCALATION_PHRASES
+    return HAS_SUFFICIENT_INFO_PROMPT.format(**kwargs)

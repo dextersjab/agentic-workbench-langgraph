@@ -11,7 +11,7 @@ from pathlib import Path
 
 from ..state import SupportDeskState
 from ..models.classify_output import ClassifyOutput
-from ..prompts.classify_issue_prompt import CLASSIFICATION_PROMPT
+from ..prompts.classify_issue_prompt import format_classification_prompt
 from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
 from ..utils import build_conversation_history, load_ontologies, format_categories_for_prompt, format_priorities_for_prompt
 from src.core.state_logger import log_node_start, log_node_complete
@@ -84,7 +84,7 @@ As part of this agentic system, you have a maximum of {max_clarification_attempt
         logger.debug(f"formatted {issue_categories=}")
         logger.debug(f"formatted {priority_levels=}")
         # Create prompt with tool calling instruction
-        prompt = CLASSIFICATION_PROMPT.format(
+        prompt = format_classification_prompt(
             conversation_history=conversation_history,
             tool_name=tool_name,
             clarification_attempts=clarification_attempts,
