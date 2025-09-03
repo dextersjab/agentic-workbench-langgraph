@@ -23,7 +23,7 @@ Feel free to take inspiration, modify and build your own!
 
 ```
 agentic-workbench-langgraph/
-├── docker compose.yml            # Multi-service Docker setup
+├── docker-compose.yml            # Multi-service Docker setup
 ├── .env.example                  # Environment variables template
 ├── README.md
 ├── Makefile                      # Convenient development commands
