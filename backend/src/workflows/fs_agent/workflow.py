@@ -45,7 +45,7 @@ def route_after_approval(state: FSAgentState) -> str:
         return "read_act"
 
 
-def create_workflow(checkpointer, draw_diagram: bool = True):
+def create_workflow(checkpointer, draw_diagram: bool = False):
     """
     Create the fs_agent LangGraph workflow.
     

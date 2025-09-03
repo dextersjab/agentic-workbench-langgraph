@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # Removed separate clarification routing function - using should_continue_clarifying from node
 
 
-def create_workflow(checkpointer, draw_diagram: bool = True):
+def create_workflow(checkpointer, draw_diagram: bool = False):
     """
     Create the Support Desk LangGraph workflow with classify-first and iterative gathering.
     
