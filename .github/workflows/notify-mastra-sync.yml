@@ -20,7 +20,11 @@ jobs:
       - name: Get Changed Files
         id: changed-files
         run: |
-          echo "files=$(git diff --name-only HEAD^ HEAD | grep 'backend/src/workflows' | head -20)" >> $GITHUB_OUTPUT
+          {
+            echo 'files<<EOF'
+            git diff --name-only HEAD^ HEAD | grep 'backend/src/workflows' | head -20
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
       
       - name: Create Issue in Mastra Repo
         uses: actions/github-script@v6
