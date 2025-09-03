@@ -1,0 +1,741 @@
+# Max Attempts Example
+# Demonstrates what happens when maximum clarification attempts are reached
+# Shows graceful degradation when user remains persistently vague
+
+conversation:
+  - role: user
+    content: "Something's not right."
+
+  - role: assistant
+    content: |
+      I'd be happy to help you. Could you please provide more details about what isn't 
+      working correctly? Is this related to your computer, a specific application, 
+      network connection, or something else?
+
+  - role: user
+    content: "It's just not working."
+
+  - role: assistant
+    content: |
+      I understand you're experiencing an issue. To help you effectively, I need to know 
+      what specifically isn't working. Is it your computer, phone, a software application, 
+      email, internet connection, or something else? Any details about error messages or 
+      when the problem started would also be helpful.
+
+  - role: user
+    content: "The thing on my computer."
+
+  - role: assistant
+    content: |
+      Thank you for letting me know it's related to your computer. Could you please 
+      specify which program, application, or feature on your computer isn't working? 
+      For example, is it your web browser, email, a specific software, or perhaps the 
+      computer itself (like startup issues or performance problems)?
+
+  - role: user
+    content: "The icon thing."
+
+  - role: assistant
+    content: "Thank you for the information. Let me help you with your IT issue."
+
+  - role: assistant
+    content: |
+      I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+      This appears to be a LOW priority issue based on the limited information available. 
+      It seems to be related to an icon or application on your computer.
+
+  - role: assistant
+    content: |
+      I'm routing your issue to our General-Support team with LOW priority. You can 
+      expect a response within 24-48 hours. This routing is based on the limited 
+      information available about your issue with an icon on your computer.
+
+  - role: assistant
+    content: |
+      # Icon Issue on Computer
+
+      ## Issue Summary
+      User is experiencing an issue with an icon or application on their computer. 
+      Limited details are available about the specific nature of the problem.
+
+      ## Technical Details
+      - Device: Computer (additional details needed)
+      - Issue: Problem with an icon or application (additional details needed)
+      - Timing: Unknown
+      - Symptoms: "Not working" (additional details needed)
+      - Error messages: None reported
+
+      ## Troubleshooting Attempted
+      None reported
+
+      ## Business Impact
+      LOW - Based on limited information available
+
+      ## Availability for Follow-up
+      User is available for troubleshooting assistance.
+
+      ## Additional Notes
+      Additional information will be needed to properly diagnose and resolve this issue. 
+      Support agent should begin by gathering more specific details about the problem.
+
+  - role: assistant
+    content: |
+      Your support ticket #T-1627385350-9012 has been created and assigned to our 
+      General Support team.
+
+      A technician will contact you within the next 24-48 hours to help resolve your 
+      issue with the icon on your computer. They'll begin by gathering more specific 
+      information about what's happening.
+
+      In the meantime, you might try:
+      - Restarting your computer
+      - Right-clicking on the problematic icon and selecting "Properties" to check if there are any obvious issues
+      - Checking if other icons or applications are also affected
+
+      The General Support team will reach out to you shortly. You can reference 
+      ticket #T-1627385350-9012 in any follow-up communications.
+
+      Thank you for your patience.
+
+state_transitions:
+  # Initial extremely vague request
+  - node: initial
+    state:
+      messages: []
+      current_user_input: "Something's not right."
+      needs_clarification: false
+      clarification_attempts: 0
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: ""
+      custom_llm_chunk: null
+      ticket_id: null
+      ticket_status: null
+
+  # First clarification attempt - completely vague response
+  - node: clarify_issue (first attempt)
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+
+      current_user_input: "Something's not right."
+      needs_clarification: true  # Extremely vague, needs clarity
+      clarification_attempts: 1
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I'd be happy to help you. Could you please provide more details about what isn't 
+        working correctly? Is this related to your computer, a specific application, 
+        network connection, or something else?
+      custom_llm_chunk: |
+        I'd be happy to help you. Could you please provide more details about what isn't 
+        working correctly? Is this related to your computer, a specific application, 
+        network connection, or something else?
+      ticket_id: null
+      ticket_status: null
+
+  # Second clarification attempt - still vague response
+  - node: clarify_issue (second attempt)
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+
+      current_user_input: "It's just not working."
+      needs_clarification: true  # Still vague, needs more detail
+      clarification_attempts: 2
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I understand you're experiencing an issue. To help you effectively, I need to know 
+        what specifically isn't working. Is it your computer, phone, a software application, 
+        email, internet connection, or something else? Any details about error messages or 
+        when the problem started would also be helpful.
+      custom_llm_chunk: |
+        I understand you're experiencing an issue. To help you effectively, I need to know 
+        what specifically isn't working. Is it your computer, phone, a software application, 
+        email, internet connection, or something else? Any details about error messages or 
+        when the problem started would also be helpful.
+      ticket_id: null
+      ticket_status: null
+
+  # Third clarification attempt - slightly better but still unclear
+  - node: clarify_issue (third attempt)
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+
+      current_user_input: "The thing on my computer."
+      needs_clarification: true  # Slightly better but still vague
+      clarification_attempts: 3
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        Thank you for letting me know it's related to your computer. Could you please 
+        specify which program, application, or feature on your computer isn't working? 
+        For example, is it your web browser, email, a specific software, or perhaps the 
+        computer itself (like startup issues or performance problems)?
+      custom_llm_chunk: |
+        Thank you for letting me know it's related to your computer. Could you please 
+        specify which program, application, or feature on your computer isn't working? 
+        For example, is it your web browser, email, a specific software, or perhaps the 
+        computer itself (like startup issues or performance problems)?
+      ticket_id: null
+      ticket_status: null
+
+  # Max attempts reached - proceed with limited information
+  - node: clarify_issue (max attempts reached)
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+        - role: user
+          content: "The icon thing."
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+
+      current_user_input: "The icon thing."
+      needs_clarification: false  # Max attempts reached, proceeding anyway
+      clarification_attempts: 3  # Hit the maximum
+      max_clarification_attempts: 3
+      issue_category: null
+      issue_priority: null
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: "Thank you for the information. Let me help you with your IT issue."
+      custom_llm_chunk: "Thank you for the information. Let me help you with your IT issue."
+      ticket_id: null
+      ticket_status: null
+
+  # Classification with limited information
+  - node: classify_issue
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+        - role: user
+          content: "The icon thing."
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+            This appears to be a LOW priority issue based on the limited information available. 
+            It seems to be related to an icon or application on your computer.
+
+      current_user_input: "The icon thing."
+      needs_clarification: false
+      clarification_attempts: 3
+      max_clarification_attempts: 3
+      issue_category: software  # Best guess with limited info
+      issue_priority: low       # Low confidence, low priority
+      support_team: null
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+        This appears to be a LOW priority issue based on the limited information available. 
+        It seems to be related to an icon or application on your computer.
+      custom_llm_chunk: |
+        I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+        This appears to be a LOW priority issue based on the limited information available. 
+        It seems to be related to an icon or application on your computer.
+      ticket_id: null
+      ticket_status: null
+
+  # Triage with low confidence routing
+  - node: triage_issue
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+        - role: user
+          content: "The icon thing."
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+            This appears to be a LOW priority issue based on the limited information available. 
+            It seems to be related to an icon or application on your computer.
+        - role: assistant
+          content: |
+            I'm routing your issue to our General-Support team with LOW priority. You can 
+            expect a response within 24-48 hours. This routing is based on the limited 
+            information available about your issue with an icon on your computer.
+
+      current_user_input: "The icon thing."
+      needs_clarification: false
+      clarification_attempts: 3
+      max_clarification_attempts: 3
+      issue_category: software
+      issue_priority: low
+      support_team: General-Support  # Generic team for unclear issues
+      ticket_info: {}
+      user_context: {}
+      current_response: |
+        I'm routing your issue to our General-Support team with LOW priority. You can 
+        expect a response within 24-48 hours. This routing is based on the limited 
+        information available about your issue with an icon on your computer.
+      custom_llm_chunk: |
+        I'm routing your issue to our General-Support team with LOW priority. You can 
+        expect a response within 24-48 hours. This routing is based on the limited 
+        information available about your issue with an icon on your computer.
+      ticket_id: null
+      ticket_status: null
+
+  # Information gathering with minimal details
+  - node: gather_info
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+        - role: user
+          content: "The icon thing."
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+            This appears to be a LOW priority issue based on the limited information available. 
+            It seems to be related to an icon or application on your computer.
+        - role: assistant
+          content: |
+            I'm routing your issue to our General-Support team with LOW priority. You can 
+            expect a response within 24-48 hours. This routing is based on the limited 
+            information available about your issue with an icon on your computer.
+        - role: assistant
+          content: |
+            # Icon Issue on Computer
+
+            ## Issue Summary
+            User is experiencing an issue with an icon or application on their computer. 
+            Limited details are available about the specific nature of the problem.
+
+            ## Technical Details
+            - Device: Computer (additional details needed)
+            - Issue: Problem with an icon or application (additional details needed)
+            - Timing: Unknown
+            - Symptoms: "Not working" (additional details needed)
+            - Error messages: None reported
+
+            ## Troubleshooting Attempted
+            None reported
+
+            ## Business Impact
+            LOW - Based on limited information available
+
+            ## Availability for Follow-up
+            User is available for troubleshooting assistance.
+
+            ## Additional Notes
+            Additional information will be needed to properly diagnose and resolve this issue. 
+            Support agent should begin by gathering more specific details about the problem.
+
+      current_user_input: "The icon thing."
+      needs_clarification: false
+      clarification_attempts: 3
+      max_clarification_attempts: 3
+      issue_category: software
+      issue_priority: low
+      support_team: General-Support
+      
+      # Ticket info with lots of "additional details needed" flags
+      ticket_info:
+        category: software
+        priority: low
+        support_team: General-Support
+        description: |
+          # Icon Issue on Computer
+
+          ## Issue Summary
+          User is experiencing an issue with an icon or application on their computer. 
+          Limited details are available about the specific nature of the problem.
+
+          ## Technical Details
+          - Device: Computer (additional details needed)
+          - Issue: Problem with an icon or application (additional details needed)
+          - Timing: Unknown
+          - Symptoms: "Not working" (additional details needed)
+          - Error messages: None reported
+
+          ## Troubleshooting Attempted
+          None reported
+
+          ## Business Impact
+          LOW - Based on limited information available
+
+          ## Availability for Follow-up
+          User is available for troubleshooting assistance.
+
+          ## Additional Notes
+          Additional information will be needed to properly diagnose and resolve this issue. 
+          Support agent should begin by gathering more specific details about the problem.
+        timestamp: 1627385350
+        status: new
+      
+      user_context: {}
+      current_response: |
+        # Icon Issue on Computer
+
+        ## Issue Summary
+        User is experiencing an issue with an icon or application on their computer. 
+        Limited details are available about the specific nature of the problem.
+
+        ## Technical Details
+        - Device: Computer (additional details needed)
+        - Issue: Problem with an icon or application (additional details needed)
+        - Timing: Unknown
+        - Symptoms: "Not working" (additional details needed)
+        - Error messages: None reported
+
+        ## Troubleshooting Attempted
+        None reported
+
+        ## Business Impact
+        LOW - Based on limited information available
+
+        ## Availability for Follow-up
+        User is available for troubleshooting assistance.
+
+        ## Additional Notes
+        Additional information will be needed to properly diagnose and resolve this issue. 
+        Support agent should begin by gathering more specific details about the problem.
+      custom_llm_chunk: |
+        # Icon Issue on Computer
+
+        ## Issue Summary
+        User is experiencing an issue with an icon or application on their computer. 
+        Limited details are available about the specific nature of the problem.
+
+        ## Technical Details
+        - Device: Computer (additional details needed)
+        - Issue: Problem with an icon or application (additional details needed)
+        - Timing: Unknown
+        - Symptoms: "Not working" (additional details needed)
+        - Error messages: None reported
+
+        ## Troubleshooting Attempted
+        None reported
+
+        ## Business Impact
+        LOW - Based on limited information available
+
+        ## Availability for Follow-up
+        User is available for troubleshooting assistance.
+
+        ## Additional Notes
+        Additional information will be needed to properly diagnose and resolve this issue. 
+        Support agent should begin by gathering more specific details about the problem.
+      ticket_id: null
+      ticket_status: null
+
+  # Final ticket creation with limited information
+  - node: send_to_desk
+    state:
+      messages:
+        - role: user
+          content: "Something's not right."
+        - role: assistant
+          content: |
+            I'd be happy to help you. Could you please provide more details about what isn't 
+            working correctly? Is this related to your computer, a specific application, 
+            network connection, or something else?
+        - role: user
+          content: "It's just not working."
+        - role: assistant
+          content: |
+            I understand you're experiencing an issue. To help you effectively, I need to know 
+            what specifically isn't working. Is it your computer, phone, a software application, 
+            email, internet connection, or something else? Any details about error messages or 
+            when the problem started would also be helpful.
+        - role: user
+          content: "The thing on my computer."
+        - role: assistant
+          content: |
+            Thank you for letting me know it's related to your computer. Could you please 
+            specify which program, application, or feature on your computer isn't working? 
+            For example, is it your web browser, email, a specific software, or perhaps the 
+            computer itself (like startup issues or performance problems)?
+        - role: user
+          content: "The icon thing."
+        - role: assistant
+          content: "Thank you for the information. Let me help you with your IT issue."
+        - role: assistant
+          content: |
+            I've analyzed your issue and categorized it as SOFTWARE with 60% confidence. 
+            This appears to be a LOW priority issue based on the limited information available. 
+            It seems to be related to an icon or application on your computer.
+        - role: assistant
+          content: |
+            I'm routing your issue to our General-Support team with LOW priority. You can 
+            expect a response within 24-48 hours. This routing is based on the limited 
+            information available about your issue with an icon on your computer.
+        - role: assistant
+          content: |
+            # Icon Issue on Computer
+
+            ## Issue Summary
+            User is experiencing an issue with an icon or application on their computer. 
+            Limited details are available about the specific nature of the problem.
+
+            ## Technical Details
+            - Device: Computer (additional details needed)
+            - Issue: Problem with an icon or application (additional details needed)
+            - Timing: Unknown
+            - Symptoms: "Not working" (additional details needed)
+            - Error messages: None reported
+
+            ## Troubleshooting Attempted
+            None reported
+
+            ## Business Impact
+            LOW - Based on limited information available
+
+            ## Availability for Follow-up
+            User is available for troubleshooting assistance.
+
+            ## Additional Notes
+            Additional information will be needed to properly diagnose and resolve this issue. 
+            Support agent should begin by gathering more specific details about the problem.
+        - role: assistant
+          content: |
+            Your support ticket #T-1627385350-9012 has been created and assigned to our 
+            General Support team.
+
+            A technician will contact you within the next 24-48 hours to help resolve your 
+            issue with the icon on your computer. They'll begin by gathering more specific 
+            information about what's happening.
+
+            In the meantime, you might try:
+            - Restarting your computer
+            - Right-clicking on the problematic icon and selecting "Properties" to check if there are any obvious issues
+            - Checking if other icons or applications are also affected
+
+            The General Support team will reach out to you shortly. You can reference 
+            ticket #T-1627385350-9012 in any follow-up communications.
+
+            Thank you for your patience.
+
+      current_user_input: "The icon thing."
+      needs_clarification: false
+      clarification_attempts: 3
+      max_clarification_attempts: 3
+      issue_category: software
+      issue_priority: low
+      support_team: General-Support
+      
+      ticket_info:
+        category: software
+        priority: low
+        support_team: General-Support
+        description: |
+          # Icon Issue on Computer
+
+          ## Issue Summary
+          User is experiencing an issue with an icon or application on their computer. 
+          Limited details are available about the specific nature of the problem.
+
+          ## Technical Details
+          - Device: Computer (additional details needed)
+          - Issue: Problem with an icon or application (additional details needed)
+          - Timing: Unknown
+          - Symptoms: "Not working" (additional details needed)
+          - Error messages: None reported
+
+          ## Troubleshooting Attempted
+          None reported
+
+          ## Business Impact
+          LOW - Based on limited information available
+
+          ## Availability for Follow-up
+          User is available for troubleshooting assistance.
+
+          ## Additional Notes
+          Additional information will be needed to properly diagnose and resolve this issue. 
+          Support agent should begin by gathering more specific details about the problem.
+        timestamp: 1627385350
+        status: new
+      
+      user_context: {}
+      current_response: |
+        Your support ticket #T-1627385350-9012 has been created and assigned to our 
+        General Support team.
+
+        A technician will contact you within the next 24-48 hours to help resolve your 
+        issue with the icon on your computer. They'll begin by gathering more specific 
+        information about what's happening.
+
+        In the meantime, you might try:
+        - Restarting your computer
+        - Right-clicking on the problematic icon and selecting "Properties" to check if there are any obvious issues
+        - Checking if other icons or applications are also affected
+
+        The General Support team will reach out to you shortly. You can reference 
+        ticket #T-1627385350-9012 in any follow-up communications.
+
+        Thank you for your patience.
+      custom_llm_chunk: |
+        Your support ticket #T-1627385350-9012 has been created and assigned to our 
+        General Support team.
+
+        A technician will contact you within the next 24-48 hours to help resolve your 
+        issue with the icon on your computer. They'll begin by gathering more specific 
+        information about what's happening.
+
+        In the meantime, you might try:
+        - Restarting your computer
+        - Right-clicking on the problematic icon and selecting "Properties" to check if there are any obvious issues
+        - Checking if other icons or applications are also affected
+
+        The General Support team will reach out to you shortly. You can reference 
+        ticket #T-1627385350-9012 in any follow-up communications.
+
+        Thank you for your patience.
+      
+      # Generic ticket created despite limited information
+      ticket_id: T-1627385350-9012
+      ticket_status: created

@@ -1,0 +1,107 @@
+{
+  "required_information_categories": {
+    "device_system_details": {
+      "id": "device_system_details",
+      "name": "Device/System Details",
+      "description": "Specific hardware/software involved, models, versions",
+      "examples": [
+        "Dell Latitude 7420 laptop",
+        "Windows 11 version 22H2",
+        "Chrome browser version 120.0.6099.130",
+        "iPhone 14 Pro running iOS 17.2",
+        "HP LaserJet Pro M404dn printer"
+      ],
+      "questions": [
+        "What specific device or system are you having trouble with?",
+        "Can you provide the model number or version of the affected hardware/software?",
+        "Which browser and version are you using?"
+      ]
+    },
+    "timeline": {
+      "id": "timeline",
+      "name": "Timeline",
+      "description": "When did this start, frequency, patterns",
+      "examples": [
+        "Started happening yesterday afternoon",
+        "Occurs every morning around 9 AM",
+        "Has been intermittent for the past week",
+        "Happens 3-4 times per day"
+      ],
+      "questions": [
+        "When did you first notice this issue?",
+        "How often does this problem occur?",
+        "Is there a pattern to when this happens?"
+      ]
+    },
+    "user_impact": {
+      "id": "user_impact",
+      "name": "User Impact",
+      "description": "How this affects work, urgency, business impact",
+      "examples": [
+        "Cannot complete daily reports",
+        "Blocking entire team from accessing shared files",
+        "Delaying client deliverables",
+        "Unable to process customer orders"
+      ],
+      "questions": [
+        "How is this issue affecting your work?",
+        "Are other team members experiencing the same problem?",
+        "What business processes are being impacted?"
+      ]
+    },
+    "symptoms": {
+      "id": "symptoms",
+      "name": "Symptoms",
+      "description": "Specific error messages, behaviors, what exactly happens",
+      "examples": [
+        "Error: 'Access denied to resource'",
+        "Blue screen with error code 0x0000007B",
+        "Application freezes for 30 seconds then crashes",
+        "Getting '404 Page Not Found' error"
+      ],
+      "questions": [
+        "What specific error message are you seeing?",
+        "Can you describe exactly what happens when the issue occurs?",
+        "What do you see on your screen when this problem happens?"
+      ]
+    },
+    "context": {
+      "id": "context",
+      "name": "Context",
+      "description": "What user was doing when issue occurred, recent changes",
+      "examples": [
+        "Was uploading a large file when it crashed",
+        "Just installed a Windows update",
+        "Started after office moved to new location",
+        "Occurs when opening specific Excel files"
+      ],
+      "questions": [
+        "What were you doing when this issue first occurred?",
+        "Have there been any recent changes to your system or environment?",
+        "Does this happen with specific files or applications?"
+      ]
+    },
+    "environment": {
+      "id": "environment",
+      "name": "Environment",
+      "description": "User location, department, role (if relevant to issue)",
+      "examples": [
+        "Working from London office",
+        "Finance department user",
+        "Remote worker using VPN",
+        "Warehouse floor terminal"
+      ],
+      "questions": [
+        "Which office location are you working from?",
+        "Are you connected via VPN or in the office?",
+        "What department or team are you part of?"
+      ]
+    }
+  },
+  "category_specific_priorities": {
+    "hardware": ["device_system_details", "symptoms", "timeline"],
+    "software": ["device_system_details", "symptoms", "context"],
+    "access": ["device_system_details", "symptoms", "user_impact"],
+    "network": ["environment", "device_system_details", "timeline"]
+  }
+}

@@ -1,0 +1,63 @@
+name: Notify Mastra Repository
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/src/workflows/**/*.py'
+      - 'backend/src/workflows/**/prompts/*.py'
+      - 'backend/src/workflows/**/nodes/*.py'
+      - 'backend/src/workflows/**/README.md'
+
+jobs:
+  create-sync-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      
+      - name: Get Changed Files
+        id: changed-files
+        run: |
+          echo "files=$(git diff --name-only HEAD^ HEAD | grep 'backend/src/workflows' | head -20)" >> $GITHUB_OUTPUT
+      
+      - name: Create Issue in Mastra Repo
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.CROSS_REPO_TOKEN }}
+          script: |
+            const commits = context.payload.commits;
+            const compareUrl = context.payload.compare;
+            const changedFiles = `${{ steps.changed-files.outputs.files }}`.split('\n').filter(f => f);
+            
+            const body = `## Sync Required from LangGraph Implementation
+
+            @claude Please review these changes from the LangGraph implementation and update the Mastra version accordingly.
+            
+            ### Changes Made:
+            ${commits.map(c => `- ${c.message}`).join('\n')}
+            
+            ### Files Modified:
+            ${changedFiles.map(f => `- \`${f}\``).join('\n')}
+            
+            ### Compare Changes:
+            ${compareUrl}
+            
+            ### Instructions for Claude:
+            1. Review the changes in the LangGraph implementation
+            2. Port relevant business logic changes to the Mastra implementation  
+            3. Maintain framework-specific patterns (use Mastra idioms, not LangGraph)
+            4. Update tests if applicable
+            5. Ensure the workflows remain functionally equivalent
+            
+            **Source Repository:** [agentic-workbench-langgraph](https://github.com/dextersjab/agentic-workbench-langgraph)
+            `;
+            
+            await github.rest.issues.create({
+              owner: 'dextersjab',
+              repo: 'agentic-workbench-mastra',
+              title: `[Sync] ${commits[0]?.message || 'Update from LangGraph'}`,
+              body: body,
+              labels: ['sync-from-langgraph', 'needs-claude']
+            });
