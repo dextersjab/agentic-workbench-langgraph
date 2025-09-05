@@ -73,7 +73,6 @@ async def preview_node(state: FSAgentState) -> FSAgentState:
         Updated state with preview content and approval requirements
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("preview", ["action.planned_action"], state)

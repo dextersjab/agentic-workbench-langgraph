@@ -25,7 +25,6 @@ async def read_act_node(state: FSAgentState) -> FSAgentState:
         Updated state with action result
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("read_act", ["action.planned_action", "session.working_directory"], state)

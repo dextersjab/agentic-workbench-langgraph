@@ -8,7 +8,6 @@ Each node is implemented as an async function that takes a `SupportDeskState` as
 
 ```python
 async def current_node(state: SupportDeskState) -> SupportDeskState:
-    state = deepcopy(state)
     # Update state...
     return state
 ```

@@ -27,7 +27,6 @@ async def observe_node(state: FSAgentState) -> FSAgentState:
         Updated state with observations and mode settings
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("observe", ["messages", "session", "action"], state)

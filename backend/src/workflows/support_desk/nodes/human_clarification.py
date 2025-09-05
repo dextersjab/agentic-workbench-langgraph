@@ -28,7 +28,6 @@ async def human_clarification_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with user's clarification response
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("human_clarification", ["messages", "gathering.clarification_attempts"])

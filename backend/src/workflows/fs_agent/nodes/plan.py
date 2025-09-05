@@ -33,7 +33,6 @@ async def plan_node(state: FSAgentState) -> FSAgentState:
         Updated state with planning results and potential action
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("plan", ["messages", "session", "action", "planning"], state)

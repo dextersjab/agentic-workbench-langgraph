@@ -35,7 +35,6 @@ async def send_to_desk_node(state: SupportDeskState) -> SupportDeskState:
     """
     
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("send_to_desk", ["issue_category", "issue_priority", "assigned_team"])

@@ -32,7 +32,6 @@ async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
     
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("route_issue", ["issue_category", "issue_priority", "messages"])

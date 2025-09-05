@@ -28,7 +28,6 @@ async def human_approve_node(state: FSAgentState) -> FSAgentState:
         Updated state with user's approval decision
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("human_approve", ["approval.needs_approval", "approval.preview_content"], state)

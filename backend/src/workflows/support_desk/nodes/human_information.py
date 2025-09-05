@@ -28,7 +28,6 @@ async def human_information_node(state: SupportDeskState) -> SupportDeskState:
         Updated state with user's information response
     """
     state_before = deepcopy(state)
-    state = deepcopy(state)
     
     # Log what this node will read from state
     log_node_start("human_information", ["messages", "gathering.gathering_round"])
