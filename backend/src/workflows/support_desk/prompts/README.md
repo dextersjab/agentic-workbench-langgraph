@@ -27,13 +27,6 @@ Contains prompts for categorising IT issues and generating clarifying questions.
 - `CLASSIFICATION_PROMPT`: Categorises issues and sets priority
 - `GENERATE_QUESTION_PROMPT`: Generates clarifying questions when needed
 
-### [route_issue_prompt.py](route_issue_prompt.py)
-
-Contains prompts for routing issues to appropriate support teams.
-
-**Key prompts:**
-- `ROUTE_PROMPT`: Determines support team and response time
-
 ### [has_sufficient_info_prompt.py](has_sufficient_info_prompt.py)
 
 Contains prompts for assessing information completeness.

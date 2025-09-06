@@ -1,28 +1,26 @@
 """
 Route Issue node for Support Desk workflow.
 
-This node routes the issue to the appropriate support team.
+This node routes the issue to the appropriate support team using deterministic rules.
 """
 import logging
 from copy import deepcopy
 
 from ..state import SupportDeskState, update_state_from_output
 from ..models.route_output import RouteOutput
-from ..prompts.route_issue_prompt import ROUTE_PROMPT
+from ..business_context import get_routing_decision
 from ..utils import build_conversation_history
 from src.core.state_logger import log_node_start, log_node_complete
-from src.core.llm_client import client, pydantic_to_openai_tool, extract_tool_call_args
-from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
 
 
 async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
     """
-    Route the issue to the appropriate support team using structured outputs.
+    Route the issue to the appropriate support team using deterministic rules.
     
-    This node uses tool calling to generate structured RouteOutput responses
-    for reliable team assignment and routing decisions.
+    This node uses business rules and lookup tables to determine routing
+    based on issue category, priority, and conversation content.
     
     Args:
         state: Current workflow state
@@ -41,69 +39,40 @@ async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
     issue_priority = state.get("classification", {}).get("issue_priority", "P2")
     messages = state.get("conversation", {}).get("messages", [])
     
-    # Build conversation history for context
+    # Build conversation history for keyword analysis
     conversation_history = build_conversation_history(messages)
     
-    # Set up the tool for structured output
-    tool_name = "route_issue"
-    tools = [pydantic_to_openai_tool(RouteOutput, tool_name)]
-    
     try:
-        # Create prompt with tool calling instruction
-        prompt = ROUTE_PROMPT.format(
+        # Get deterministic routing decision based on business rules
+        routing_decision = get_routing_decision(
             issue_category=issue_category,
             issue_priority=issue_priority,
-            conversation_history=conversation_history,
-            tool_name=tool_name
+            conversation_text=conversation_history
         )
         
-        # Get stream writer for custom streaming
-        writer = get_stream_writer()
-        
-        # Stream callback to emit chunks as they come in
-        def stream_callback(chunk: str):
-            writer({"custom_llm_chunk": chunk})
-        
-        # Call LLM with tools for structured output
-        response = await client.chat_completion(
-            messages=[
-                {"role": "system", "content": prompt}
-            ],
-            model="openai/gpt-4.1",
-            temperature=0.3,
-            tools=tools,
-            tool_choice="required",
-            stream_callback=stream_callback
+        # Create RouteOutput from the decision
+        route_output = RouteOutput(
+            support_team=routing_decision["support_team"],
+            estimated_resolution_time=routing_decision["estimated_resolution_time"],
+            escalation_path=routing_decision["escalation_path"]
         )
         
-        # Extract structured output from tool call using robust utility
-        try:
-            output_data = extract_tool_call_args(response, tool_name)
-            route_output = RouteOutput(**output_data)
-            
-            logger.info(f"→ {route_output.support_team} team ({route_output.estimated_resolution_time})")
-            
-            # DON'T stream - this is internal processing, not user-facing
-            # Routing happens silently and routes to gather_info
-            
-            # Update state with structured routing information using helper
-            update_state_from_output(state, route_output, {
-                'support_team': 'assigned_team',
-                'estimated_resolution_time': 'estimated_resolution_time',
-                'escalation_path': 'escalation_path'
-            })
-            
-            # DON'T add to conversation history - this is internal routing
-            # The user doesn't need to see "Your issue has been assigned to L1..."
-            
-            logger.info("→ routing complete")
-            
-        except ValueError as e:
-            logger.error(f"Tool call parsing error: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error creating RouteOutput from tool call: {e}")
-            raise
+        logger.info(f"→ {route_output.support_team} team ({route_output.estimated_resolution_time})")
+        
+        # DON'T stream - this is internal processing, not user-facing
+        # Routing happens silently and routes to assess_info
+        
+        # Update state with structured routing information using helper
+        update_state_from_output(state, route_output, {
+            'support_team': 'assigned_team',
+            'estimated_resolution_time': 'estimated_resolution_time',
+            'escalation_path': 'escalation_path'
+        })
+        
+        # DON'T add to conversation history - this is internal routing
+        # The user doesn't need to see "Your issue has been assigned to L1..."
+        
+        logger.info("→ routing complete")
         
     except Exception as e:
         logger.error(f"Error in route_issue_node: {e}")

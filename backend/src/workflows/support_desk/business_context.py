@@ -94,6 +94,163 @@ SLA_COMMITMENTS = {
     for i in range(1, 5)
 }
 
+# Deterministic routing table based on category and priority
+ROUTING_TABLE = {
+    # Hardware issues
+    ("hardware", "P1"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "2 hours",
+        "escalation_path": "specialist -> escalation"
+    },
+    ("hardware", "P2"): {
+        "support_team": "L1", 
+        "estimated_resolution_time": "4 hours",
+        "escalation_path": "L2 -> specialist"
+    },
+    ("hardware", "P3"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "1 business day",
+        "escalation_path": "L2"
+    },
+    ("hardware", "P4"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "3 business days",
+        "escalation_path": "L2"
+    },
+    
+    # Software issues
+    ("software", "P1"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "2 hours",
+        "escalation_path": "specialist -> escalation"
+    },
+    ("software", "P2"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "4 hours", 
+        "escalation_path": "L2 -> specialist"
+    },
+    ("software", "P3"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "1 business day",
+        "escalation_path": "L2"
+    },
+    ("software", "P4"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "3 business days",
+        "escalation_path": "L2"
+    },
+    
+    # Access issues
+    ("access", "P1"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "1 hour",
+        "escalation_path": "specialist -> escalation"
+    },
+    ("access", "P2"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "2 hours",
+        "escalation_path": "L2 -> specialist"
+    },
+    ("access", "P3"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "4 hours",
+        "escalation_path": "L2"
+    },
+    ("access", "P4"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "1 business day",
+        "escalation_path": "L2"
+    },
+    
+    # Network issues
+    ("network", "P1"): {
+        "support_team": "specialist",
+        "estimated_resolution_time": "1 hour",
+        "escalation_path": "escalation"
+    },
+    ("network", "P2"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "2 hours",
+        "escalation_path": "specialist -> escalation"
+    },
+    ("network", "P3"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "4 hours",
+        "escalation_path": "specialist"
+    },
+    ("network", "P4"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "1 business day",
+        "escalation_path": "L2 -> specialist"
+    },
+    
+    # Other issues (default routing)
+    ("other", "P1"): {
+        "support_team": "L2",
+        "estimated_resolution_time": "2 hours",
+        "escalation_path": "specialist -> escalation"
+    },
+    ("other", "P2"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "4 hours",
+        "escalation_path": "L2 -> specialist"
+    },
+    ("other", "P3"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "1 business day",
+        "escalation_path": "L2"
+    },
+    ("other", "P4"): {
+        "support_team": "L1",
+        "estimated_resolution_time": "3 business days",
+        "escalation_path": "L2"
+    }
+}
+
+def get_routing_decision(issue_category: str, issue_priority: str, conversation_text: str = "") -> dict:
+    """
+    Get deterministic routing decision based on category, priority and conversation content.
+    
+    Args:
+        issue_category: The category of the issue
+        issue_priority: The priority level of the issue
+        conversation_text: Combined text from conversation for keyword analysis
+        
+    Returns:
+        Dictionary with support_team, estimated_resolution_time, and escalation_path
+    """
+    # Check for auto-escalation keywords
+    if conversation_text:
+        conversation_lower = conversation_text.lower()
+        for keyword in ROUTING_RULES["auto_escalate_keywords"]:
+            if keyword.lower() in conversation_lower:
+                return {
+                    "support_team": "escalation",
+                    "estimated_resolution_time": "30 minutes",
+                    "escalation_path": "executive"
+                }
+        
+        # Check for specialist triggers
+        for trigger, specialist in ROUTING_RULES["specialist_triggers"].items():
+            if trigger.lower() in conversation_lower:
+                return {
+                    "support_team": "specialist", 
+                    "estimated_resolution_time": "2 hours",
+                    "escalation_path": f"{specialist} -> escalation"
+                }
+    
+    # Use routing table for standard routing
+    routing_key = (issue_category or "other", issue_priority or "P2")
+    
+    # Default fallback if key not found
+    default_routing = {
+        "support_team": "L1",
+        "estimated_resolution_time": "4 hours", 
+        "escalation_path": "L2 -> specialist"
+    }
+    
+    return ROUTING_TABLE.get(routing_key, default_routing)
+
 # Required information categories for ticket creation
 REQUIRED_INFO_CATEGORIES = {
     "device_system": {
