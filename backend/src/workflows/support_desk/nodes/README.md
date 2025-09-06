@@ -90,7 +90,6 @@ Internal routing node that assigns issues to appropriate support teams based on 
 **Updates state:**
 - `assigned_team` - Team assignment (L1, L2, specialist, escalation)
 - `estimated_resolution_time` - Expected timeframe
-- `escalation_path` - Next level if needed
 
 ### [assess_info.py](assess_info.py)
 

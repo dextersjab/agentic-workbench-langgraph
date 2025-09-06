@@ -120,114 +120,49 @@ def get_sla_commitment(priority: str) -> tuple[str, int]:
 # SLA mapping for quick lookup
 SLA_COMMITMENTS = {f"P{i}": get_sla_commitment(f"P{i}") for i in range(1, 5)}
 
-# Deterministic routing table based on category and priority
-ROUTING_TABLE = {
-    # Hardware issues
-    ("hardware", "P1"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "2 hours",
-        "escalation_path": "specialist -> escalation",
-    },
-    ("hardware", "P2"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "L2 -> specialist",
-    },
-    ("hardware", "P3"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "1 business day",
-        "escalation_path": "L2",
-    },
-    ("hardware", "P4"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "3 business days",
-        "escalation_path": "L2",
-    },
-    # Software issues
-    ("software", "P1"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "2 hours",
-        "escalation_path": "specialist -> escalation",
-    },
-    ("software", "P2"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "L2 -> specialist",
-    },
-    ("software", "P3"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "1 business day",
-        "escalation_path": "L2",
-    },
-    ("software", "P4"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "3 business days",
-        "escalation_path": "L2",
-    },
-    # Access issues
-    ("access", "P1"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "1 hour",
-        "escalation_path": "specialist -> escalation",
-    },
-    ("access", "P2"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "2 hours",
-        "escalation_path": "L2 -> specialist",
-    },
-    ("access", "P3"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "L2",
-    },
-    ("access", "P4"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "1 business day",
-        "escalation_path": "L2",
-    },
-    # Network issues
-    ("network", "P1"): {
-        "support_team": "specialist",
-        "estimated_resolution_time": "1 hour",
-        "escalation_path": "escalation",
-    },
-    ("network", "P2"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "2 hours",
-        "escalation_path": "specialist -> escalation",
-    },
-    ("network", "P3"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "specialist",
-    },
-    ("network", "P4"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "1 business day",
-        "escalation_path": "L2 -> specialist",
-    },
-    # Other issues (default routing)
-    ("other", "P1"): {
-        "support_team": "L2",
-        "estimated_resolution_time": "2 hours",
-        "escalation_path": "specialist -> escalation",
-    },
-    ("other", "P2"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "L2 -> specialist",
-    },
-    ("other", "P3"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "1 business day",
-        "escalation_path": "L2",
-    },
-    ("other", "P4"): {
-        "support_team": "L1",
-        "estimated_resolution_time": "3 business days",
-        "escalation_path": "L2",
-    },
-}
+# Build routing table with ontology-based time calculations
+def _build_routing_table() -> dict:
+    """Build routing table with consistent ontology-based time calculations."""
+    base_routing = {
+        # Hardware issues
+        ("hardware", "P1"): {"support_team": "L2"},
+        ("hardware", "P2"): {"support_team": "L1"},
+        ("hardware", "P3"): {"support_team": "L1"},
+        ("hardware", "P4"): {"support_team": "L1"},
+        # Software issues
+        ("software", "P1"): {"support_team": "L2"},
+        ("software", "P2"): {"support_team": "L1"},
+        ("software", "P3"): {"support_team": "L1"},
+        ("software", "P4"): {"support_team": "L1"},
+        # Access issues
+        ("access", "P1"): {"support_team": "L2"},
+        ("access", "P2"): {"support_team": "L1"},
+        ("access", "P3"): {"support_team": "L1"},
+        ("access", "P4"): {"support_team": "L1"},
+        # Network issues
+        ("network", "P1"): {"support_team": "specialist"},
+        ("network", "P2"): {"support_team": "L2"},
+        ("network", "P3"): {"support_team": "L2"},
+        ("network", "P4"): {"support_team": "L1"},
+        # Other issues (default routing)
+        ("other", "P1"): {"support_team": "L2"},
+        ("other", "P2"): {"support_team": "L1"},
+        ("other", "P3"): {"support_team": "L1"},
+        ("other", "P4"): {"support_team": "L1"},
+    }
+    
+    # Add consistent ontology-based estimated resolution times
+    routing_table = {}
+    for (category, priority), routing_info in base_routing.items():
+        # Get time from ontology for consistency with SLA commitment
+        sla_text, _ = get_sla_commitment(priority)
+        routing_info["estimated_resolution_time"] = sla_text
+        routing_table[(category, priority)] = routing_info
+    
+    return routing_table
+
+# Deterministic routing table with ontology-based time calculations
+ROUTING_TABLE = _build_routing_table()
 
 
 def get_routing_decision(
@@ -242,7 +177,7 @@ def get_routing_decision(
         conversation_text: Combined text from conversation for keyword analysis
 
     Returns:
-        Dictionary with support_team, estimated_resolution_time, and escalation_path
+        Dictionary with support_team and estimated_resolution_time
     """
     # Check for auto-escalation keywords
     if conversation_text:
@@ -252,29 +187,32 @@ def get_routing_decision(
                 return {
                     "support_team": "escalation",
                     "estimated_resolution_time": "30 minutes",
-                    "escalation_path": "executive",
                 }
 
         # Check for specialist triggers
         for trigger, specialist in ROUTING_RULES["specialist_triggers"].items():
             if trigger.lower() in conversation_lower:
+                # Use consistent ontology-based time for P2 (default for specialist routing)
+                sla_text, _ = get_sla_commitment("P2")
                 return {
                     "support_team": "specialist",
-                    "estimated_resolution_time": "2 hours",
-                    "escalation_path": f"{specialist} -> escalation",
+                    "estimated_resolution_time": sla_text,
                 }
 
     # Use routing table for standard routing
     routing_key = (issue_category or "other", issue_priority or "P2")
 
-    # Default fallback if key not found
-    default_routing = {
-        "support_team": "L1",
-        "estimated_resolution_time": "4 hours",
-        "escalation_path": "L2 -> specialist",
-    }
+    # Default fallback if key not found - use ontology-based time
+    if routing_key not in ROUTING_TABLE:
+        fallback_priority = issue_priority or "P2"
+        sla_text, _ = get_sla_commitment(fallback_priority)
+        default_routing = {
+            "support_team": "L1",
+            "estimated_resolution_time": sla_text,
+        }
+        return default_routing
 
-    return ROUTING_TABLE.get(routing_key, default_routing)
+    return ROUTING_TABLE.get(routing_key)
 
 
 # Required information categories for ticket creation

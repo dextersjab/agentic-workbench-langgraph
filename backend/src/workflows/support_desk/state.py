@@ -49,7 +49,6 @@ def create_initial_state() -> SupportDeskState:
             next_steps=None,
             contact_information={},
             estimated_resolution_time=None,
-            escalation_path=None,
         ),
         user_context={},
     )
@@ -62,7 +61,6 @@ def update_state_from_output(state: SupportDeskState, output: T) -> None:
     This is currently only used by route_issue to set:
     - classification.assigned_team
     - ticket.estimated_resolution_time  
-    - ticket.escalation_path
 
     Args:
         state: The workflow state to update
@@ -75,5 +73,3 @@ def update_state_from_output(state: SupportDeskState, output: T) -> None:
     if hasattr(output, 'estimated_resolution_time'):
         state["ticket"]["estimated_resolution_time"] = output.estimated_resolution_time
     
-    if hasattr(output, 'escalation_path'):
-        state["ticket"]["escalation_path"] = output.escalation_path

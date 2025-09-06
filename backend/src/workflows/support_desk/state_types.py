@@ -49,7 +49,6 @@ class TicketState(TypedDict):
     next_steps: Optional[str]  # What happens next
     contact_information: Dict[str, str]  # Support contact details
     estimated_resolution_time: Optional[str]  # Expected resolution time
-    escalation_path: Optional[str]  # Escalation procedure
 
 
 class SupportDeskState(TypedDict):

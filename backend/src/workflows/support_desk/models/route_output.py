@@ -21,6 +21,3 @@ class RouteOutput(BaseModel):
         description="Expected resolution timeframe (e.g., '2 hours', '1 business day')"
     )
 
-    escalation_path: str = Field(
-        description="Next escalation level if L1 cannot resolve"
-    )

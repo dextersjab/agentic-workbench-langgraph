@@ -55,7 +55,6 @@ async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
         route_output = RouteOutput(
             support_team=routing_decision["support_team"],
             estimated_resolution_time=routing_decision["estimated_resolution_time"],
-            escalation_path=routing_decision["escalation_path"],
         )
 
         logger.info(
