@@ -6,9 +6,7 @@ clarification loop, demonstrating advanced LangGraph patterns.
 """
 import logging
 import os
-from typing import Literal
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
 
 from .state import SupportDeskState
 from .nodes.human_clarification import human_clarification_node

@@ -5,7 +5,7 @@ Generates deterministic ticket data based on issue information.
 """
 import hashlib
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 from ..business_context import get_sla_commitment, SUPPORT_TEAMS
 from ..config.company_config import COMPANY_INFO

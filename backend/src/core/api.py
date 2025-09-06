@@ -1,8 +1,6 @@
 """OpenAI-compatible API for Open WebUI integration."""
 # Import logging configuration first to set up file logging
-from . import logging_config
 
-import json
 import time
 import uuid
 import traceback
@@ -15,18 +13,16 @@ from fastapi import FastAPI, APIRouter, HTTPException, status, Request
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.memory import InMemorySaver
-from langgraph.types import Interrupt, Command
+from langgraph.types import Command
 
 from .models import (
     ChatCompletionRequest, 
     ModelsResponse, 
-    ModelInfo,
-    OpenAIError,
     ChatCompletionResponse,
     ChatCompletionChoice,
     ChatMessage
 )
-from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk, _to_lc
+from .streaming import create_sse_chunk, create_done_chunk, create_error_chunk
 from ..workflows.registry import WorkflowRegistry
 from ..workflows.utils import create_workflow_initial_state
 

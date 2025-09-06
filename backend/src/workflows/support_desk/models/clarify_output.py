@@ -2,7 +2,6 @@
 Pydantic model for clarify_issue node output.
 """
 from pydantic import BaseModel, Field
-from typing import Literal
 
 
 class ClarifyOutput(BaseModel):

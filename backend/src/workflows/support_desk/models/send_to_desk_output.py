@@ -2,7 +2,7 @@
 Pydantic model for send_to_desk node output.
 """
 from pydantic import BaseModel, Field
-from typing import Dict, Any
+from typing import Dict
 
 
 class SendToDeskOutput(BaseModel):

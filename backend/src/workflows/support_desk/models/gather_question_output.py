@@ -2,7 +2,7 @@
 Pydantic model for gather_info iterative questioning.
 """
 from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
+from typing import List
 
 
 class GatherQuestionOutput(BaseModel):

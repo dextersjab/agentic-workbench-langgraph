@@ -2,11 +2,9 @@
 import json
 import os
 import logging
-from typing import Dict, Any, Optional, Callable, List, Type
+from typing import Dict, Any, Optional, Callable, List
 import aiohttp
-from pydantic import BaseModel
 from .state_logger import GREY, RESET
-from .schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +77,6 @@ class OpenRouterClient:
         
         accumulated_content = ""
         tool_calls = []
-        current_tool_call = None
         
         try:
             async with aiohttp.ClientSession() as session:

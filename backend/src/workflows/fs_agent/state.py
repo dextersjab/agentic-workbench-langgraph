@@ -1,5 +1,5 @@
 """fs_agent workflow state management."""
-from typing import Dict, Optional, TypeVar
+from typing import TypeVar
 from pydantic import BaseModel
 
 from .state_types import SessionState, ActionState, PlanningState, ApprovalState, FSAgentState

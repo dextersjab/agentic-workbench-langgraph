@@ -4,7 +4,6 @@ Workflow registry for managing available workflows and models.
 Add additional workflows and customise model configurations for your agentic system use cases.
 """
 import logging
-import os
 import importlib
 from typing import Dict, List, Any
 from ..core.models import ModelInfo

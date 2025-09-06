@@ -5,7 +5,6 @@ This node generates a brief summary and creates an HTML artifact for ticket disp
 """
 import logging
 from copy import deepcopy
-from typing import Dict, Any
 
 from ..state import SupportDeskState
 from ..prompts.send_to_desk_prompt import FINAL_RESPONSE_PROMPT

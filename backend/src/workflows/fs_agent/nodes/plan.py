@@ -106,7 +106,7 @@ async def plan_node(state: FSAgentState) -> FSAgentState:
     
     try:
         # Stage 1: Stream pure reasoning without tools
-        reasoning_response = await client.chat_completion(
+        await client.chat_completion(
             messages=[
                 {"role": "system", "content": reasoning_prompt},
                 *state["messages"]

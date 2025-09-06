@@ -5,8 +5,6 @@ These prompts use tool calling to generate structured outputs.
 """
 
 from .common import ESCALATION_PHRASES
-from ..kb.servicehub_policy import SERVICEHUB_SUPPORT_TICKET_POLICY
-from ..business_context import MAX_GATHERING_ROUNDS, REQUIRED_INFO_CATEGORIES, CATEGORY_SPECIFIC_PRIORITIES
 
 # Has sufficient info prompt using tool calling
 HAS_SUFFICIENT_INFO_PROMPT = """

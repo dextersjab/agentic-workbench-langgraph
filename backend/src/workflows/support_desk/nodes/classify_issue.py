@@ -3,11 +3,9 @@ Classify Issue node for Support Desk workflow.
 
 This node categorises the IT issue into predefined categories.
 """
-import json
 import logging
 from copy import deepcopy
-from typing import Dict, Any, Literal
-from pathlib import Path
+from typing import Literal
 
 from ..state import SupportDeskState
 from ..models.classify_output import ClassifyOutput
