@@ -66,15 +66,7 @@ async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
         # Routing happens silently and routes to assess_info
 
         # Update state with structured routing information using helper
-        update_state_from_output(
-            state,
-            route_output,
-            {
-                "support_team": "assigned_team",
-                "estimated_resolution_time": "estimated_resolution_time",
-                "escalation_path": "escalation_path",
-            },
-        )
+        update_state_from_output(state, route_output)
 
         # DON'T add to conversation history - this is internal routing
         # The user doesn't need to see "Your issue has been assigned to L1..."

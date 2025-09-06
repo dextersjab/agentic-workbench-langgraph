@@ -89,10 +89,11 @@ def generate_ticket_data(state: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dictionary with all ticket fields populated
     """
-    # Extract info from state
-    category = state.get("issue_category", "other")
-    priority = state.get("issue_priority", "P2")
-    team = state.get("assigned_team", "L1")
+    # Extract info from nested state structure
+    classification = state.get("classification", {})
+    category = classification.get("issue_category", "other")
+    priority = classification.get("issue_priority", "P2")
+    team = classification.get("assigned_team", "L1")
 
     # Generate ticket ID
     ticket_id = generate_ticket_id({"category": category, "priority": priority})

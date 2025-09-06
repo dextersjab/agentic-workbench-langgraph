@@ -1,6 +1,6 @@
 """Support Desk workflow state management."""
 
-from typing import Dict, Optional, TypeVar
+from typing import TypeVar
 from pydantic import BaseModel
 
 from src.workflows.support_desk.business_context import MAX_GATHERING_ROUNDS
@@ -55,20 +55,25 @@ def create_initial_state() -> SupportDeskState:
     )
 
 
-def update_state_from_output(
-    state: SupportDeskState, output: T, field_mapping: Optional[Dict[str, str]] = None
-) -> None:
+def update_state_from_output(state: SupportDeskState, output: T) -> None:
     """
-    Update state fields from a Pydantic model output with type safety.
+    Update state fields from a Pydantic model output.
 
-    Note: This function needs to be updated to work with the composed state structure.
-    For now, it's kept for compatibility but may need revision.
+    This is currently only used by route_issue to set:
+    - classification.assigned_team
+    - ticket.estimated_resolution_time  
+    - ticket.escalation_path
 
     Args:
         state: The workflow state to update
-        output: Pydantic model with output data
-        field_mapping: Optional mapping of {output_field: state_field}
+        output: Pydantic model with output data (RouteOutput)
     """
-    # This function will need to be updated to handle the composed structure
-    # For now, we'll leave it as a placeholder
-    pass
+    # Direct assignment - state structure is always initialized
+    if hasattr(output, 'support_team'):
+        state["classification"]["assigned_team"] = output.support_team
+    
+    if hasattr(output, 'estimated_resolution_time'):
+        state["ticket"]["estimated_resolution_time"] = output.estimated_resolution_time
+    
+    if hasattr(output, 'escalation_path'):
+        state["ticket"]["escalation_path"] = output.escalation_path
