@@ -146,8 +146,8 @@ As part of this agentic system, you have a maximum of {max_gathering_rounds} tot
             state["gathering"]["info_completeness_confidence"] = (
                 completeness_output.confidence
             )
-            state["gathering"]["missing_categories"] = (
-                completeness_output.missing_categories
+            state["gathering"]["missing_info_types"] = (
+                completeness_output.missing_info_types
             )
             state["gathering"]["user_requested_escalation"] = (
                 completeness_output.user_requested_escalation

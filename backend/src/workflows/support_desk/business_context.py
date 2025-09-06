@@ -6,6 +6,7 @@ workflow-specific categorizations and rules.
 """
 
 from typing import Literal
+from enum import Enum
 from .config.company_config import COMPANY_SUPPORT_TEAMS
 from .utils import load_ontologies, get_sla_commitment as ontology_get_sla_commitment
 
@@ -17,6 +18,17 @@ MAX_GATHERING_ROUNDS = 2
 # Type definitions for issue classification
 IssueCategoryType = Literal["hardware", "software", "access", "network", "other"]
 IssuePriorityType = Literal["P1", "P2", "P3", "P4"]
+
+
+class RequiredInfoType(Enum):
+    """Required information types for comprehensive ticket creation."""
+    
+    DEVICE_SYSTEM = "device_system"
+    TIMELINE = "timeline"
+    USER_IMPACT = "user_impact"
+    SYMPTOMS = "symptoms"
+    CONTEXT = "context"
+    ENVIRONMENT = "environment"
 
 # Workflow-specific issue categorizations
 ISSUE_CATEGORIES = {

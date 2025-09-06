@@ -116,7 +116,7 @@ Assesses information completeness and generates targeted questions when needed. 
 
 **Updates state:**
 - `needs_more_info` - Whether additional info is required
-- `missing_categories` - Specific info categories needed
+- `missing_info_types` - Required info types still needed
 - `messages` - Updated with questions when needed
 
 ### [human_information.py](human_information.py)

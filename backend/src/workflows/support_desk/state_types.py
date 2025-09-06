@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Literal, Optional
 from typing_extensions import TypedDict
 
-from .business_context import IssueCategoryType, IssuePriorityType
+from .business_context import IssueCategoryType, IssuePriorityType, RequiredInfoType
 
 
 class ClassificationState(TypedDict):
@@ -37,7 +37,7 @@ class GatheringState(TypedDict):
     max_gathering_rounds: int  # Maximum rounds allowed
     needs_more_info: bool  # Whether more info is needed
     info_completeness_confidence: Optional[float]  # Confidence in completeness
-    missing_categories: List[str]  # Categories still missing info
+    missing_info_types: List[RequiredInfoType]  # Required info types still needed
 
 
 class TicketState(TypedDict):

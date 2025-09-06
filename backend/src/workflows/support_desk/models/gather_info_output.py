@@ -4,6 +4,7 @@ Pydantic model for gather_info node output.
 
 from pydantic import BaseModel, Field
 from typing import List
+from ..business_context import RequiredInfoType
 
 
 class GatherInfoOutput(BaseModel):
@@ -37,9 +38,9 @@ class GatherInfoOutput(BaseModel):
         description="Whether the information gathering process should be considered complete"
     )
 
-    missing_categories: List[str] = Field(
+    missing_info_types: List[RequiredInfoType] = Field(
         default_factory=list,
-        description="Categories of information still missing (e.g., 'device_details', 'timeline')",
+        description="Required information types still needed for ticket creation",
     )
 
 
@@ -69,7 +70,7 @@ class GatherInfoDecision(BaseModel):
         description="Whether the information gathering process should be considered complete"
     )
 
-    missing_categories: List[str] = Field(
+    missing_info_types: List[RequiredInfoType] = Field(
         default_factory=list,
-        description="Categories of information still missing (e.g., 'device_details', 'timeline')",
+        description="Required information types still needed for ticket creation",
     )

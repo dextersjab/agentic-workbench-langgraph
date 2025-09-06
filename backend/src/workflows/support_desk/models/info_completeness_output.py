@@ -3,6 +3,7 @@ Pydantic model for information completeness check output.
 """
 
 from pydantic import BaseModel, Field
+from ..business_context import RequiredInfoType
 
 
 class InfoCompletenessOutput(BaseModel):
@@ -23,9 +24,9 @@ class InfoCompletenessOutput(BaseModel):
         description="Confidence level in the completeness assessment (0.0 to 1.0)",
     )
 
-    missing_categories: list[str] = Field(
+    missing_info_types: list[RequiredInfoType] = Field(
         default=[],
-        description="Categories of information still needed (e.g., 'device_details', 'timeline', 'user_impact')",
+        description="Required information types still needed for ticket creation",
     )
 
     user_requested_escalation: bool = Field(

@@ -40,7 +40,7 @@ def create_initial_state() -> SupportDeskState:
             max_gathering_rounds=MAX_GATHERING_ROUNDS,
             needs_more_info=True,
             info_completeness_confidence=None,
-            missing_categories=[],
+            missing_info_types=[],
         ),
         ticket=TicketState(
             ticket_id=None,
