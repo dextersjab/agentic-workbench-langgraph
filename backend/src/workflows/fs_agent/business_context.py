@@ -1,7 +1,7 @@
 """Business context and domain knowledge for fs_agent workflow.
 
-This module contains the business rules and domain expertise specific to 
-the fs_agent workflow. These constants define the behavior and limits 
+This module contains the business rules and domain expertise specific to
+the fs_agent workflow. These constants define the behavior and limits
 for the file system agent operations.
 """
 

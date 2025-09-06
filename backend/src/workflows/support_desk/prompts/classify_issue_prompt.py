@@ -55,7 +55,8 @@ This is the full conversation history between the IT Support Desk agentic system
 Use the {tool_name} tool to provide your analysis.
 """
 
+
 # Format the prompt with escalation phrases
 def format_classification_prompt(**kwargs):
-    kwargs['escalation_phrases'] = ESCALATION_PHRASES
+    kwargs["escalation_phrases"] = ESCALATION_PHRASES
     return CLASSIFICATION_PROMPT.format(**kwargs)

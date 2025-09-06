@@ -9,7 +9,7 @@ COMPANY_INFO = {
     "support_hours": "24/7",
     "support_email": "support@company.com",
     "support_phone": "1-800-SUPPORT",
-    "ticket_portal": "https://support.company.com"
+    "ticket_portal": "https://support.company.com",
 }
 
 # Support team contact information (extends ontology-based team definitions)
@@ -22,19 +22,19 @@ COMPANY_SUPPORT_TEAMS = {
         "contact": {
             "email": "helpdesk@company.com",
             "phone": "1-800-HELP-001",
-            "portal": "https://support.company.com/helpdesk"
-        }
+            "portal": "https://support.company.com/helpdesk",
+        },
     },
     "L2": {
-        "name": "Level 2 Support", 
+        "name": "Level 2 Support",
         "description": "Technical support for complex issues",
         "response_time_hours": 4,
         "resolution_time_hours": 8,
         "contact": {
             "email": "technical@company.com",
             "phone": "1-800-TECH-002",
-            "portal": "https://support.company.com/technical"
-        }
+            "portal": "https://support.company.com/technical",
+        },
     },
     "escalation": {
         "name": "Escalation Team",
@@ -44,8 +44,8 @@ COMPANY_SUPPORT_TEAMS = {
         "contact": {
             "email": "escalations@company.com",
             "phone": "1-800-ESCL-003",
-            "portal": "https://support.company.com/escalations"
-        }
+            "portal": "https://support.company.com/escalations",
+        },
     },
     "specialist": {
         "name": "Specialist Team",
@@ -55,7 +55,7 @@ COMPANY_SUPPORT_TEAMS = {
         "contact": {
             "email": "specialists@company.com",
             "phone": "1-800-SPEC-004",
-            "portal": "https://support.company.com/specialists"
-        }
-    }
+            "portal": "https://support.company.com/specialists",
+        },
+    },
 }

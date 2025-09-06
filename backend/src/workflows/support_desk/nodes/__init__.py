@@ -19,5 +19,5 @@ __all__ = [
     "assess_info_node",
     "should_continue_to_send",
     "human_information_node",
-    "send_to_desk_node"
+    "send_to_desk_node",
 ]

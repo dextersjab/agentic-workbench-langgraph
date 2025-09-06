@@ -366,33 +366,37 @@ TICKET_HTML_TEMPLATE = """
 </html>
 """
 
+
 def generate_ticket_html(ticket_data: dict) -> str:
     """
     Generate HTML for a support ticket using the template.
-    
+
     Args:
         ticket_data: Dictionary containing ticket information
-        
+
     Returns:
         Formatted HTML string
     """
     # Map priority to CSS class
-    priority = ticket_data.get('priority', 'medium').lower()
-    priority_class = priority if priority in ['high', 'medium', 'low'] else 'medium'
-    
+    priority = ticket_data.get("priority", "medium").lower()
+    priority_class = priority if priority in ["high", "medium", "low"] else "medium"
+
     # Format the template with ticket data
     return TICKET_HTML_TEMPLATE.format(
-        ticket_id=ticket_data.get('ticket_id', 'TK-000000'),
-        ticket_status=ticket_data.get('ticket_status', 'CREATED'),
-        priority=ticket_data.get('priority', 'Medium').upper(),
+        ticket_id=ticket_data.get("ticket_id", "TK-000000"),
+        ticket_status=ticket_data.get("ticket_status", "CREATED"),
+        priority=ticket_data.get("priority", "Medium").upper(),
         priority_class=priority_class,
-        category=ticket_data.get('category', 'General').title(),
-        assigned_team=ticket_data.get('assigned_team', 'Support Team').capitalize(),
-        sla_commitment=ticket_data.get('sla_commitment', '24 hours'),
-        issue_summary=ticket_data.get('issue_summary', 'No summary provided'),
-        next_steps=ticket_data.get('next_steps', 'Your ticket has been received and will be processed according to the SLA.'),
-        support_email=ticket_data.get('support_email', 'support@company.com'),
-        support_phone=ticket_data.get('support_phone', '1-800-SUPPORT'),
-        ticket_portal=ticket_data.get('ticket_portal', 'https://support.company.com'),
-        created_timestamp=ticket_data.get('created_timestamp', 'Just now')
+        category=ticket_data.get("category", "General").title(),
+        assigned_team=ticket_data.get("assigned_team", "Support Team").capitalize(),
+        sla_commitment=ticket_data.get("sla_commitment", "24 hours"),
+        issue_summary=ticket_data.get("issue_summary", "No summary provided"),
+        next_steps=ticket_data.get(
+            "next_steps",
+            "Your ticket has been received and will be processed according to the SLA.",
+        ),
+        support_email=ticket_data.get("support_email", "support@company.com"),
+        support_phone=ticket_data.get("support_phone", "1-800-SUPPORT"),
+        ticket_portal=ticket_data.get("ticket_portal", "https://support.company.com"),
+        created_timestamp=ticket_data.get("created_timestamp", "Just now"),
     )

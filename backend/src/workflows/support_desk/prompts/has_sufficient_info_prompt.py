@@ -69,7 +69,8 @@ This is the full conversation history between the IT Support Desk agentic system
 Use the {tool_name} tool to provide your assessment.
 """
 
+
 # Format the prompt with escalation phrases
 def format_has_sufficient_info_prompt(**kwargs):
-    kwargs['escalation_phrases'] = ESCALATION_PHRASES
+    kwargs["escalation_phrases"] = ESCALATION_PHRASES
     return HAS_SUFFICIENT_INFO_PROMPT.format(**kwargs)

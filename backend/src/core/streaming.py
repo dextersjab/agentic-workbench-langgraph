@@ -1,4 +1,5 @@
 """Server-Sent Events (SSE) streaming utilities for Open WebUI compatibility."""
+
 import json
 import logging
 from typing import Dict, Any
@@ -14,10 +15,10 @@ def _sse(data: Dict[str, Any]) -> str:
 
 def _extract_text(message) -> str:
     """Extract text content from various message types."""
-    if hasattr(message, 'content'):
+    if hasattr(message, "content"):
         return message.content
-    elif isinstance(message, dict) and 'content' in message:
-        return message['content']
+    elif isinstance(message, dict) and "content" in message:
+        return message["content"]
     elif isinstance(message, str):
         return message
     else:
@@ -45,32 +46,28 @@ def create_sse_chunk(
     content: str = "",
     finish_reason: str = None,
     role: str = None,
-    thread_id: str = None
+    thread_id: str = None,
 ) -> str:
     """Create a properly formatted SSE chunk for streaming."""
     delta = {}
-    
+
     if content:
         delta["content"] = content
-    
+
     if role:
         delta["role"] = role
-        
+
     payload = {
         "id": completion_id,
         "object": "chat.completion.chunk",
         "created": created,
         "model": model,
-        "choices": [{
-            "index": 0,
-            "delta": delta,
-            "finish_reason": finish_reason
-        }]
+        "choices": [{"index": 0, "delta": delta, "finish_reason": finish_reason}],
     }
-    
+
     if thread_id:
         payload["thread_id"] = thread_id
-        
+
     return _sse(payload)
 
 
@@ -81,10 +78,5 @@ def create_done_chunk() -> str:
 
 def create_error_chunk(error_message: str) -> str:
     """Create an error SSE chunk."""
-    error_payload = {
-        "error": {
-            "message": error_message,
-            "type": "internal_error"
-        }
-    }
+    error_payload = {"error": {"message": error_message, "type": "internal_error"}}
     return _sse(error_payload)

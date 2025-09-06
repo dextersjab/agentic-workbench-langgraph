@@ -1,4 +1,5 @@
 """fs_agent workflow nodes."""
+
 from .observe import observe_node
 from .plan import plan_node, should_continue_planning
 from .preview import preview_node
@@ -15,5 +16,5 @@ __all__ = [
     "human_approve_node",
     "read_act_node",
     "write_act_node",
-    "is_finished"
+    "is_finished",
 ]

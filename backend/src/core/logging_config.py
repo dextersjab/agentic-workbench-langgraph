@@ -2,6 +2,7 @@
 Logging configuration for the application.
 This module sets up dual logging to console and file.
 """
+
 import logging
 import logging.handlers
 import os
@@ -25,8 +26,8 @@ console_handler.setFormatter(formatter)
 # File handler
 file_handler = logging.handlers.RotatingFileHandler(
     log_filename,
-    maxBytes=10*1024*1024,  # 10MB
-    backupCount=5
+    maxBytes=10 * 1024 * 1024,  # 10MB
+    backupCount=5,
 )
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(formatter)
@@ -36,7 +37,7 @@ logging.basicConfig(
     level=logging.DEBUG,
     format=log_format,
     handlers=[console_handler, file_handler],
-    force=True
+    force=True,
 )
 
 # Suppress noisy loggers
