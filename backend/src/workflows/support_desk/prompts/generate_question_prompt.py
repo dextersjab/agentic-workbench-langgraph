@@ -1,9 +1,11 @@
 """
 Prompt for generating clarifying questions in Support Desk workflow.
 
-This prompt is used when classification determines that more information is needed.
+This module contains both the original classification prompt and a new context-aware
+prompt for information completeness gathering.
 """
 
+# Original prompt for initial classification (kept for backwards compatibility)
 GENERATE_QUESTION_PROMPT = """
 # Objective
 
@@ -37,4 +39,48 @@ Based on the conversation history, generate ONE specific clarifying question to 
 \"\"\"
 
 Generate a single, specific clarifying question to help understand their IT support request.
+"""
+
+# New context-aware prompt for information completeness assessment
+GENERATE_INFO_COMPLETENESS_QUESTION_PROMPT = """
+# Objective
+
+You are an IT Support assistant. The user has provided an initial request that has been classified as a {issue_category} issue with {issue_priority} priority, assigned to the {assigned_team} team.
+
+However, to create a comprehensive support ticket, we need additional information in specific areas.
+
+# Missing Information
+
+Based on our assessment, we specifically need more information about:
+
+{missing_info_details}
+
+# Assessment Reasoning
+
+{reasoning}
+
+# Guidelines for Question Generation
+
+- Generate ONE specific question that targets the most critical missing information type
+- Be direct and professional, but friendly
+- Reference what they've already told us to show you're listening
+- Focus on gathering the specific missing information type, not general details
+- Ask for concrete, actionable details that will help the {assigned_team} team 
+  resolve the issue
+
+# Current Context
+
+- **Issue Category**: {issue_category}
+- **Issue Priority**: {issue_priority}
+- **Assigned Team**: {assigned_team}
+- **Gathering Round**: {gathering_round} of {max_gathering_rounds}
+
+# Conversation History
+
+\"\"\"
+{conversation_history}
+\"\"\"
+
+Generate a single, targeted question to gather the most important missing 
+information for creating a comprehensive {issue_category} support ticket.
 """

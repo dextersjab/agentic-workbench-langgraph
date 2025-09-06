@@ -38,7 +38,7 @@ async def route_issue_node(state: SupportDeskState) -> SupportDeskState:
     # Extract relevant information from nested state
     issue_category = state.get("classification", {}).get("issue_category", "other")
     issue_priority = state.get("classification", {}).get("issue_priority", "P2")
-    messages = state.get("conversation", {}).get("messages", [])
+    messages = state.get("messages", [])
 
     # Build conversation history for keyword analysis
     conversation_history = build_conversation_history(messages)

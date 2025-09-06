@@ -19,19 +19,23 @@ from ..business_context import (
     format_required_info_categories,
     format_category_specific_priorities,
 )
-from ..prompts.generate_question_prompt import GENERATE_QUESTION_PROMPT
+from ..prompts.generate_question_prompt import (
+    GENERATE_INFO_COMPLETENESS_QUESTION_PROMPT,
+)
 from src.core.llm_client import client
 from src.core.schema_utils import pydantic_to_openai_tool, extract_tool_call_args
 from langgraph.config import get_stream_writer
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 async def assess_info_node(state: SupportDeskState) -> SupportDeskState:
     """
     Assess if enough information has been gathered to create a comprehensive ticket.
 
-    This node uses tool calling for structured decision making and generates questions when needed (similar to classify_issue).
+    This node uses tool calling for structured decision making and generates
+    questions when needed (similar to classify_issue).
 
     Args:
         state: Current workflow state
@@ -55,7 +59,7 @@ async def assess_info_node(state: SupportDeskState) -> SupportDeskState:
     )
 
     # Extract relevant information from nested state
-    messages = state.get("conversation", {}).get("messages", [])
+    messages = state.get("messages", [])
     issue_category = state.get("classification", {}).get("issue_category", "other")
     issue_priority = state.get("classification", {}).get("issue_priority", "P2")
     assigned_team = state.get("classification", {}).get("assigned_team", "L1")
@@ -70,9 +74,13 @@ async def assess_info_node(state: SupportDeskState) -> SupportDeskState:
 
     # Set prompt components based on whether we need to force assessment
     if force_proceed:
-        task_instruction = "Call the {tool_name} tool to assess completeness with the information available."
+        task_instruction = (
+            "Call the {tool_name} tool to assess completeness with the "
+            "information available."
+        )
         additional_context = """
-You MUST assess the ticket with the information available as we've reached the maximum gathering rounds.
+You MUST assess the ticket with the information available as we've reached 
+the maximum gathering rounds.
 Set needs_more_info=False as we cannot ask more questions.
 """
     else:
@@ -126,8 +134,14 @@ As part of this agentic system, you have a maximum of {max_gathering_rounds} tot
             completeness_output = InfoCompletenessOutput(**output_data)
 
             logger.info(
-                f"→ info check: needs_more={completeness_output.needs_more_info} (conf: {completeness_output.confidence})"
+                f"→ info check: needs_more={completeness_output.needs_more_info} "
+                f"(conf: {completeness_output.confidence})"
             )
+            missing_types = [
+                info_type.value for info_type in completeness_output.missing_info_types
+            ]
+            logger.info(f"→ missing info types: {missing_types}")
+            logger.debug(f"→ LLM reasoning: {completeness_output.reasoning}")
 
             # Update state with assessment
             # Update gathering state
@@ -161,8 +175,27 @@ As part of this agentic system, you have a maximum of {max_gathering_rounds} tot
             ):
                 logger.info("→ needs more info, generating question")
 
-                # Generate targeted question with streaming (similar to classify_issue)
-                question_prompt = GENERATE_QUESTION_PROMPT.format(
+                # Format missing information details for the prompt
+                from ..business_context import REQUIRED_INFO_CATEGORIES
+                
+                missing_info_details = []
+                for missing_type in completeness_output.missing_info_types:
+                    if missing_type.value in REQUIRED_INFO_CATEGORIES:
+                        category = REQUIRED_INFO_CATEGORIES[missing_type.value]
+                        desc_items = ", ".join(category["description"])
+                        missing_info_details.append(f"- **{category['name']}**: {desc_items}")
+                
+                missing_info_text = "\n".join(missing_info_details) if missing_info_details else "Additional details needed for ticket creation"
+
+                # Generate targeted question with streaming using context-aware prompt
+                question_prompt = GENERATE_INFO_COMPLETENESS_QUESTION_PROMPT.format(
+                    issue_category=issue_category,
+                    issue_priority=issue_priority,
+                    assigned_team=assigned_team,
+                    missing_info_details=missing_info_text,
+                    reasoning=completeness_output.reasoning,
+                    gathering_round=gathering_round,
+                    max_gathering_rounds=max_rounds,
                     conversation_history=conversation_history
                 )
 

@@ -232,9 +232,9 @@ REQUIRED_INFO_CATEGORIES = {
     "device_system": {
         "name": "Device/System Details",
         "description": [
-            "Specific device make and model",
-            "Software/application name and version",
-            "Operating system version",
+            "System or application name (e.g., Salesforce, Printer, Portal)",
+            "Device type for hardware issues (e.g., laptop, desktop, printer)",
+            "Version information if relevant and available",
         ],
     },
     "timeline": {
@@ -248,17 +248,17 @@ REQUIRED_INFO_CATEGORIES = {
     "user_impact": {
         "name": "User Impact",
         "description": [
-            "Number of users affected",
-            "Business processes blocked",
-            "Severity of productivity impact",
+            "Who is affected (individual, team, department, or organization)",
+            "Business processes or workflows that are blocked or impaired",
+            "Productivity or business impact description",
         ],
     },
     "symptoms": {
         "name": "Symptoms",
         "description": [
-            "Exact error messages or codes",
-            "Observable behavior or symptoms",
-            "What happens when attempting the task",
+            "Error messages, codes, or observable behavior",
+            "What happens when the user attempts the task",
+            "Any specific symptoms or signs of the problem",
         ],
     },
     "context": {
@@ -272,9 +272,9 @@ REQUIRED_INFO_CATEGORIES = {
     "environment": {
         "name": "Environment",
         "description": [
-            "Physical location or office",
-            "Network connection type (office/VPN/home)",
-            "User's department and role",
+            "Location or connection context (office, home, VPN) if relevant",
+            "User's department or role if relevant to the issue",
+            "Any environmental factors that might impact the issue",
         ],
     },
 }

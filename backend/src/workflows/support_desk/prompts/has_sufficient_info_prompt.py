@@ -10,7 +10,8 @@ from .common import ESCALATION_PHRASES
 HAS_SUFFICIENT_INFO_PROMPT = """
 # Objective
 
-You are part of an agentic system for IT Support Desk tasked with assessing if enough information has been gathered to create a comprehensive support ticket.
+You are part of an agentic system for IT Support Desk tasked with assessing 
+if enough information has been gathered to create a comprehensive support ticket.
 
 {servicehub_support_ticket_policy}
 
@@ -33,11 +34,21 @@ This is gathering round #{gathering_round} of {max_gathering_rounds}
 
 {escalation_phrases}
 
-If escalation is detected, set `user_requested_escalation=True` and set needs_more_info=False.
+If escalation is detected, set `user_requested_escalation=True` and set 
+needs_more_info=False.
 
 ## Assessment Logic
 
-If NOT escalating, determine if you have enough information to create a comprehensive ticket.
+If NOT escalating, determine if you have enough information to create a 
+comprehensive ticket.
+
+## Information Assessment Guidelines
+
+For each required information category, ask yourself:
+1. **Is this information explicitly provided?** (Mark as available)
+2. **Can this information be reasonably inferred?** (Mark as available) 
+3. **Is this information critical for the assigned team to begin work?** (If not critical, don't require it)
+4. **Does the issue type make this information irrelevant?** (e.g., OS version for cloud services)
 
 {required_info_categories}
 
@@ -46,20 +57,30 @@ If NOT escalating, determine if you have enough information to create a comprehe
 Consider:
 - Whether critical information is missing for proper ticket creation
 - Issue priority and SLAs (P1 issues may need less detail to start resolution)
-- User location, department, role (if relevant to issue)
+- Different issue types have different information needs:
+  - Software issues: Application name is sufficient (version nice-to-have)
+  - Hardware issues: Device type is sufficient (exact model nice-to-have)
+  - Cloud/SaaS issues: Service name is sufficient (instance details nice-to-have)
+- Partial information can be sufficient if it enables the support team to begin work
 
 ## Examples of Sufficient Information
 
-- "Sales colleagues can't access Salesforce CRM - getting 'service unavailable' error. This is blocking our quarterly deal closure calls."
-  → Sufficient: specific system, error type, business impact
+- "Sales team can't access Salesforce CRM - getting 'service unavailable' error. This is blocking our quarterly deal closure calls."
+  → Sufficient: system (Salesforce CRM), symptoms (service unavailable error), user impact (blocking deals)
+  → Missing but nice-to-have: timeline, environment details
 
-- "I can't log in to the Portal" + "started this morning" + "error says password invalid" + "working from Manchester office"
+- "I can't log in to the Portal" + "started this morning" + "error says 
+  password invalid" + "working from Manchester office"
   → Sufficient: system, timeline, specific error, location
+
+- "Our printer is jammed" + "affects entire floor" + "won't print anything"
+  → Sufficient: device type, user impact, symptoms
 
 ## Examples Needing More Info
 
 - "Something is broken" → needs what system, what's happening
-- "The Portal is slow" → needs specific performance issue, when it started, which function
+- "The system is slow" → needs which system, what specific slowness
+- "I need help" → needs with what system and what problem
 
 This is the full conversation history between the IT Support Desk agentic system until now:
 \"\"\"
